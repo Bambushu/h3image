@@ -37,7 +37,7 @@ one into ComfyUI to load it, seed and prompt included. Prompts are in
 Seeds: can `58413360`, gable `123494846`, neon `1035877917`, book `583954935`, tattoo
 `733870745`. Each demo shown was produced in one or two attempts.
 
-### Where it fails, honestly
+### Not good at everything
 
 ![tattoo failure](demos/sheets/tattoo.png)
 
