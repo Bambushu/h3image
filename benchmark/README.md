@@ -58,6 +58,8 @@ Digit swaps are seed-dependent; the fix is a reroll, not a prompt change.
 `--detail` re-renders a box of the output as its own frame and pastes it back feathered. Run on the
 weakest seed's lower four lines (box = 29% of the frame width):
 
+![detail passes](out/sheet_detail.png)
+
 | pass | M | S | XS | XXS | seam SSIM | verdict |
 |---|---|---|---|---|---|---|
 | single pass, 4 MP | 1.00 | 1.00 | 0.96 | 1.00 | | |

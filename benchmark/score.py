@@ -177,6 +177,16 @@ def seam(comp, base, box):
     return round(float(smap[ring].mean()), 3)
 
 
+def timings_box(n):
+    """Union of the render's own --detail box and the widest one, padded, for the detail sheet."""
+    t = json.load(open(os.path.join(OUT, "timings.json")))
+    boxes = [t[k]["detail"] for k in t if "_detail" in k and "detail" in t[k]]
+    x0, y0 = min(b[0] for b in boxes), min(b[1] for b in boxes)
+    x1, y1 = max(b[2] for b in boxes), max(b[3] for b in boxes)
+    p = 60
+    return (max(0, x0 - p), max(0, y0 - p), x1 + p, y1 + p)
+
+
 def sheet(names, path, crops=None, label_fn=None, cols=4, w=640):
     tiles = []
     for n in names:
@@ -279,8 +289,16 @@ def report(s):
     # contact sheets: plate crops of the ladder + seeds, full frames of the rest
     plate = {n: s[n]["plate_box"] for n in s if "plate_box" in s[n]}
     if ladder:
-        sheet(sorted(ladder, key=lambda n: s[n]["mp"]) + det, os.path.join(OUT, "sheet_ladder.png"), plate,
-              lambda n: f"{n}  S={s[n]['ocr']['S']:.2f} XS={s[n]['ocr']['XS']:.2f} XXS={s[n]['ocr']['XXS']:.2f}", cols=2, w=900)
+        sheet(sorted(ladder, key=lambda n: s[n]["mp"]), os.path.join(OUT, "sheet_ladder.png"), plate,
+              lambda n: f"{s[n]['mp']:g} MP  S={s[n]['ocr']['S']:.2f} XS={s[n]['ocr']['XS']:.2f} XXS={s[n]['ocr']['XXS']:.2f}", cols=3, w=800)
+    if det:
+        # the detail box region of each pass, with the verdict in the label
+        base = det[0].split("_detail")[0]
+        bx = timings_box(det[-1])
+        crops = {n: bx for n in det}
+        verdict = {n: ("PASS" if n.endswith("edge") else "FAIL: plate hallucinated inside the crop") for n in det}
+        sheet(det, os.path.join(OUT, "sheet_detail.png"), crops,
+              lambda n: f"{'--detail (2 MP)' if n.endswith('_detail') else '--detail --mp 4' if n.endswith('4') else '--detail --mp 4, box incl. plate edge'}  {verdict[n]}", cols=3, w=800)
     if seeds:
         sheet(seeds, os.path.join(OUT, "sheet_seeds.png"), plate,
               lambda n: f"seed {s[n]['seed']}  S={s[n]['ocr']['S']:.2f} XS={s[n]['ocr']['XS']:.2f} XXS={s[n]['ocr']['XXS']:.2f}", cols=4, w=640)
