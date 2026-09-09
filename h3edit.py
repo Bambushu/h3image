@@ -191,8 +191,41 @@ def run(args):
                 shutil.copy(src, args.out)
                 src = args.out
             print(f"{src}  ({int(time.time() - t0)}s)")
-            return
+            return src
         time.sleep(10)
+
+
+def detail(args):
+    """Two-pass detail: re-render a crop of --source at full resolution, paste it back feathered.
+
+    H3's VAE is 16 px per latent cell, so lettering ~50 px tall in a full frame cannot resolve at
+    any reference quality. Rendering only the crop gives the same letters 3-4x the cells; the crop
+    goes in as <Picture 1> (geometry authority), your -r images follow as <Picture 2>.., and the
+    result is scaled back to the box and blended in with a feathered edge (measured 2026-09-09:
+    door plate, fleet number, phone and URL all legible, seam invisible, +6.5 min on the M5).
+    """
+    from PIL import Image, ImageFilter
+    x0, y0, x1, y1 = args.detail
+    full = Image.open(args.source).convert("RGB")
+    w, h = x1 - x0, y1 - y0
+    if w < 64 or h < 64 or x1 > full.width or y1 > full.height:
+        sys.exit(f"--detail box {args.detail} does not fit {args.source} ({full.width}x{full.height})")
+    crop_path = os.path.join(INPUT_DIR, f"{args.name}_crop.png")
+    full.crop((x0, y0, x1, y1)).save(crop_path)
+    args.refs = [crop_path] + args.refs
+    args.ar = min(ASPECTS, key=lambda k: abs(int(k.split(":")[0]) / int(k.split(":")[1]) - w / h))
+    out = args.out
+    args.out = None
+    args.wait = True
+    ren = Image.open(run(args)).convert("RGB").resize((w, h), Image.LANCZOS)
+    f = args.feather
+    mask = Image.new("L", (w, h), 0)
+    mask.paste(255, (f, f, w - f, h - f))
+    mask = mask.filter(ImageFilter.GaussianBlur(f / 2))
+    comp = full.copy()
+    comp.paste(ren, (x0, y0), mask)
+    comp.save(out)
+    print(f"{out}  (detail box {x0},{y0},{x1},{y1} at {args.ar}, feather {f}px)")
 
 
 def main():
@@ -205,8 +238,12 @@ def main():
     # With ref_size=match the references are scaled DOWN to the generation's pixel area (never up),
     # so megapixels caps the reference resolution too. At 1.0 a decal came back airbrushed; 2.0 was
     # clean for large marks but ~50-px lettering stayed mush; 4.0 resolves it (bench 2026-09-09).
-    p.add_argument("--mp", type=float, default=4.0, help="megapixels (also caps the refs); "
-                   "4.0 makes ~50-px lettering legible that 2.0 renders as mush (H3 = 16 px/latent cell)")
+    p.add_argument("--mp", type=float, default=None, help="megapixels (also caps the refs); default 4.0, "
+                   "2.0 with --detail. 4.0 makes ~50-px lettering legible that 2.0 renders as mush (16 px/latent cell)")
+    p.add_argument("--detail", metavar="X0,Y0,X1,Y1", type=lambda v: [int(x) for x in v.split(",")],
+                   help="two-pass detail: re-render this box of --source and paste it back (see README)")
+    p.add_argument("--source", help="full image the --detail box is cut from; becomes <Picture 1>")
+    p.add_argument("--feather", type=int, default=48, help="paste-back edge feather in px (--detail)")
     p.add_argument("--steps", type=int, default=8, help="8 with the turbo LoRA; 20 with --lora off")
     p.add_argument("--sampler", default="er_sde", help="KSamplerSelect sampler_name (euler with --lora off)")
     p.add_argument("--scheduler", default="beta57", help="BasicScheduler scheduler (simple with --lora off)")
@@ -229,12 +266,21 @@ def main():
     if args.export:
         from export_graph import export
         return export(args.export, GRAPH)
-    if not args.prompt or not args.refs:
+    if args.detail:
+        if not (args.prompt and args.source and args.out and len(args.detail) == 4):
+            p.error("--detail needs a prompt, --source, -o and a X0,Y0,X1,Y1 box")
+        if len(args.refs) > MAX_REFS - 1:
+            p.error(f"--detail: max {MAX_REFS - 1} extra references (the crop is <Picture 1>)")
+    elif not args.prompt or not args.refs:
         p.error("a prompt and at least one --ref are required")
     if len(args.refs) > MAX_REFS:
         p.error(f"max {MAX_REFS} references")
+    if args.mp is None:
+        args.mp = 2.0 if args.detail else 4.0
     if args.seed is None:
         args.seed = random.randrange(1, 2**31)
+    if args.detail:
+        return detail(args)
     run(args)
 
 

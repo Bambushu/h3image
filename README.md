@@ -154,6 +154,26 @@ city96's loader rejects (Abiray's files are tagged `wan`). More steps on the bas
 (20 → 50) and a dedicated close-up reference for the small text were also flat. Output pixels
 per detail is the lever.
 
+## Detail pass (`--detail`)
+
+Lettering that is only ~50 px tall in the full frame cannot resolve at any reference quality:
+H3's VAE is 16 px per latent cell, so the letters have three cells to exist in. `--detail`
+re-renders just a box of a finished image and pastes it back:
+
+```sh
+h3edit "$(cat prompts/detail_pass_example.txt)" \
+  --detail 1560,700,2320,1460 --source out.png -r door_closeup.png -o out_detailed.png
+```
+
+The box is cut from `--source` and goes in as `<Picture 1>` (geometry authority); your `-r`
+images follow as `<Picture 2>`…; the render (2 MP by default, aspect snapped to the box) is
+scaled back to the box and blended in with a 48-px feathered edge (`--feather`). Measured on a
+truck cab (760-px box of a 4 MP frame): door plate, fleet number, phone and URL all legible where
+the full frame had mush, seam invisible, +6.5 min on the M5. Write the prompt as
+`prompts/detail_pass_example.txt` does: `<Picture 1>` supplies everything, reproduce it exactly at
+higher sharpness, `<Picture 2>` is the authority for the lettering, "do not add, move or remove
+anything".
+
 ## Prompt grammar
 
 Cite images as `<Picture 1>` / `<Picture 2>`. The skeleton that works:

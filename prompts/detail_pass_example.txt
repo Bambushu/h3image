@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a close crop of a photograph of a dark-green Kestrel Mix mixer truck cab driving on a road, and supplies the entire image: the framing, the cab's geometry and every panel line, the wheel, the mirrors, the colours, the sunlight and the motion-blurred trees behind it. <Picture 2> is a sharp close-up photograph of the same truck's cab door and is the authority for the yellow door plate, its "KESTREL MIX" lettering, the fleet number KM07 painted on the door, and the white phone number and web address painted under the plate: copy that lettering exactly as it appears there.
+
+Reproduce <Picture 1> exactly, at higher sharpness: the same framing, the same cab in the same position, the same road and background, with the door plate, fleet number, phone number and web address copied from <Picture 2> so they are crisp and legible. Do not add, move, resize or remove anything. No other text anywhere.
+
+A single coherent photograph identical to <Picture 1> in composition.
