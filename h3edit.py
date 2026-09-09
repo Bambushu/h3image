@@ -28,6 +28,14 @@ N = {"prompt": ("138", "PrimitiveStringMultiline"), "res": ("115", "ResolutionSe
      "r2v": ("136", "MiniMaxH3ReferenceToVideo"), "sampler": ("123", "KSamplerSelect"),
      "save": ("664", "SaveImage")}
 REF_NODES = [("137", "ref_images.ref_image_0"), ("139", "ref_images.ref_image_1")]
+# Slots 2..4 are added at queue time by cloning the exported LoadImage entry (node 139) and
+# linking it under the next dotted key -- the same pattern the pod driver (H3_ADDNODES/H3_APISET) validated on a 5090. Nothing is typed by hand.
+MAX_REFS = 5
+# Default lane (bench 2026-09-09, truck-cab plate, seed 1001, 5 refs): PlagueKind Parasyte turbo at
+# 8 steps / er_sde / beta57 / strength 1.5 held the 20-step base model's detail at 4 MP in 13 min
+# on the M5 vs 28 min. The lightx2v 8-step LoRA it replaces is deprecated. beta57 is registered
+# by the comfyui-obvpm pack; --doctor checks for it.
+TURBO_LORA = "H3-PK-Parasyte-Turbo.safetensors"
 
 ASPECTS = {"1:1": "1:1 (Square)", "2:3": "2:3 (Portrait Photo)", "3:2": "3:2 (Photo)",
            "3:4": "3:4 (Portrait Standard)", "4:3": "4:3 (Standard)",
@@ -41,6 +49,12 @@ def api(path, payload=None):
                                  headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=60) as r:
         return json.loads(r.read().decode())
+
+
+def combo_options(node, widget):
+    """Options of a COMBO input: v[1]['options'] on the current schema, v[0] on the old one."""
+    v = api(f"/api/object_info/{node}")[node]["input"]["required"][widget]
+    return v[1]["options"] if isinstance(v[0], str) else v[0]
 
 
 def doctor():
@@ -73,6 +87,16 @@ def doctor():
             or g[N["r2v"][0]]["inputs"].get("length") != ["131", 0]:
         ok = False
         print("FAIL length is not linked from PrimitiveInt(1) -- the graph would render a clip")
+    if "beta57" in combo_options("BasicScheduler", "scheduler"):
+        print("ok   beta57 scheduler registered (comfyui-obvpm)")
+    else:
+        ok = False
+        print("FAIL beta57 scheduler missing -- install comfyui-obvpm, or run with --scheduler simple")
+    if TURBO_LORA in combo_options("LoraLoaderModelOnly", "lora_name"):
+        print("ok   turbo LoRA present:", TURBO_LORA)
+    else:
+        ok = False
+        print(f"FAIL {TURBO_LORA} not in models/loras -- download it (Plaguekind/H3-Lora) or run --lora off")
     refs = g[N["r2v"][0]]["inputs"]
     missing = [k for _, k in REF_NODES if k not in refs]
     if missing:
@@ -98,21 +122,51 @@ def build(args):
 
     g[N["prompt"][0]]["inputs"]["value"] = args.prompt
     g[N["res"][0]]["inputs"].update(aspect_ratio=ASPECTS[args.ar], megapixels=args.mp)
-    g[N["steps"][0]]["inputs"]["steps"] = args.steps
+    g[N["steps"][0]]["inputs"].update(steps=args.steps, scheduler=args.scheduler)
+    g[N["sampler"][0]]["inputs"]["sampler_name"] = args.sampler
     g[N["seed"][0]]["inputs"]["noise_seed"] = args.seed
     g[N["r2v"][0]]["inputs"]["ref_image_size"] = args.ref_size
     g[N["save"][0]]["inputs"]["filename_prefix"] = "h3_edit/" + args.name
-    for (nid, _), path in zip(REF_NODES, args.refs):
-        name = os.path.basename(path)
-        dst = os.path.join(INPUT_DIR, name)
-        if os.path.abspath(path) != os.path.abspath(dst):
-            shutil.copy(path, dst)
+    if args.dit:
+        g["665"]["inputs"]["unet_name"] = args.dit
+    if args.te:
+        # Swap the ClipProj encoder for the full GGUF text encoder. The entry mirrors MacMax's
+        # CLIPLoaderGGUF node 13 (widgets: clip_name, type=minimax); keeping id 661 keeps the
+        # R2V node's clip link intact.
+        g["661"] = {"class_type": "CLIPLoaderGGUF",
+                    "inputs": {"clip_name": args.te, "type": "minimax"},
+                    "_meta": {"title": "CLIPLoader (GGUF)"}}
+    if args.lora == "off":
+        # Bypass the LoRA loader the way the GUI's mode-4 does: both model consumers take the
+        # DiT loader's output directly, and the loader entry leaves the graph.
+        for nid in ("124", "126"):
+            g[nid]["inputs"]["model"] = ["665", 0]
+        del g["666"]
+    else:
+        g["666"]["inputs"].update(lora_name=args.lora, strength_model=args.lora_strength)
+    names = [stage_ref(p) for p in args.refs]
+    for i, name in enumerate(names):
+        if i < len(REF_NODES):
+            nid, key = REF_NODES[i]
+        else:
+            nid, key = f"91{i:02d}", f"ref_images.ref_image_{i}"
+            g[nid] = json.loads(json.dumps(g[REF_NODES[1][0]]))
+            r2v[key] = [nid, 0]
         g[nid]["inputs"]["image"] = name
-    if len(args.refs) == 1:
+    if len(names) == 1:
         # One ref: point both slots at it rather than unwiring a slot, which would need the
         # frontend to re-serialize the autogrow input.
-        g[REF_NODES[1][0]]["inputs"]["image"] = os.path.basename(args.refs[0])
+        g[REF_NODES[1][0]]["inputs"]["image"] = names[0]
     return g
+
+
+def stage_ref(path):
+    """Copy a reference into ComfyUI's input dir and return its basename."""
+    name = os.path.basename(path)
+    dst = os.path.join(INPUT_DIR, name)
+    if os.path.abspath(path) != os.path.abspath(dst):
+        shutil.copy(path, dst)
+    return name
 
 
 def run(args):
@@ -145,14 +199,21 @@ def main():
     p = argparse.ArgumentParser(description="Instruction-based image editing on MiniMax H3, local.")
     p.add_argument("prompt", nargs="?", help="edit instruction; see prompts/reference_prompts.txt")
     p.add_argument("-r", "--ref", dest="refs", action="append", default=[],
-                   help="reference image (repeatable, max 2)")
+                   help=f"reference image (repeatable, max {MAX_REFS})")
     p.add_argument("-o", "--out", help="copy the result here")
     p.add_argument("--ar", default="21:9", choices=sorted(ASPECTS), help="aspect ratio")
-    # 2.0 MP, not the 1.0 video cap: with ref_size=match the references are scaled to the
-    # GENERATION's pixel area, so megapixels is also the reference-resolution dial. At 1.0 the
-    # decal came back airbrushed with a halo; 2.0 is clean at 7:30 on the M5.
-    p.add_argument("--mp", type=float, default=2.0, help="megapixels (also sizes the refs)")
-    p.add_argument("--steps", type=int, default=8, help="8 is the floor that held; 6 duplicated")
+    # With ref_size=match the references are scaled DOWN to the generation's pixel area (never up),
+    # so megapixels caps the reference resolution too. At 1.0 a decal came back airbrushed; 2.0 was
+    # clean for large marks but ~50-px lettering stayed mush; 4.0 resolves it (bench 2026-09-09).
+    p.add_argument("--mp", type=float, default=4.0, help="megapixels (also caps the refs); "
+                   "4.0 makes ~50-px lettering legible that 2.0 renders as mush (H3 = 16 px/latent cell)")
+    p.add_argument("--steps", type=int, default=8, help="8 with the turbo LoRA; 20 with --lora off")
+    p.add_argument("--sampler", default="er_sde", help="KSamplerSelect sampler_name (euler with --lora off)")
+    p.add_argument("--scheduler", default="beta57", help="BasicScheduler scheduler (simple with --lora off)")
+    p.add_argument("--lora", default=TURBO_LORA, help="LoRA file in models/loras, or 'off' (base model, 20 steps)")
+    p.add_argument("--lora-strength", type=float, default=1.5)
+    p.add_argument("--dit", default=None, help="override the GGUF DiT (unet_name)")
+    p.add_argument("--te", default=None, help="GGUF text encoder file instead of ClipProj")
     p.add_argument("--ref-size", default="match", choices=["match", "max"],
                    help="'max' pins refs to a 2048px short edge: ~10x slower, no better")
     p.add_argument("--seed", type=int, default=None)
@@ -170,8 +231,8 @@ def main():
         return export(args.export, GRAPH)
     if not args.prompt or not args.refs:
         p.error("a prompt and at least one --ref are required")
-    if len(args.refs) > 2:
-        p.error("the exported graph wires 2 reference slots; add more in the GUI and --export")
+    if len(args.refs) > MAX_REFS:
+        p.error(f"max {MAX_REFS} references")
     if args.seed is None:
         args.seed = random.randrange(1, 2**31)
     run(args)

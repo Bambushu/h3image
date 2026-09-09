@@ -2,7 +2,7 @@
  "115": {
   "inputs": {
    "aspect_ratio": "21:9 (Ultrawide)",
-   "megapixels": 2,
+   "megapixels": 4,
    "multiple": 32
   },
   "class_type": "ResolutionSelector",
@@ -12,7 +12,7 @@
  },
  "119": {
   "inputs": {
-   "vae_name": "_h3/vae/minimax_h3_t1_image_vae_step1597.safetensors"
+   "vae_name": "_h3/vae/minimax_h3_video_vae_fp16.safetensors"
   },
   "class_type": "VAELoader",
   "_meta": {
@@ -62,7 +62,7 @@
  },
  "123": {
   "inputs": {
-   "sampler_name": "sa_solver"
+   "sampler_name": "er_sde"
   },
   "class_type": "KSamplerSelect",
   "_meta": {
@@ -71,7 +71,7 @@
  },
  "124": {
   "inputs": {
-   "scheduler": "simple",
+   "scheduler": "beta57",
    "steps": 8,
    "denoise": 1,
    "model": [
@@ -260,7 +260,7 @@
  },
  "665": {
   "inputs": {
-   "unet_name": "_h3/MiniMax-H3-Ref2VA-Pruned-Q5_K_M.gguf"
+   "unet_name": "_h3/MiniMax-H3-FL2VA-Pruned-Q5_K_M.gguf"
   },
   "class_type": "UnetLoaderGGUF",
   "_meta": {
@@ -269,8 +269,8 @@
  },
  "666": {
   "inputs": {
-   "lora_name": "minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors",
-   "strength_model": 1,
+   "lora_name": "H3-PK-Parasyte-Turbo.safetensors",
+   "strength_model": 1.5,
    "model": [
     "665",
     0

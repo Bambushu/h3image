@@ -61,21 +61,23 @@ Tested configuration: **M5 Mac, 48 GB unified memory**, ComfyUI 0.32. No minimum
 configuration has been established — do not assume smaller Macs work. Downloads total ~33 GB,
 and a run wants ~30 GB of unified memory free.
 
-Custom node packs required: **[ComfyUI-GGUF](https://github.com/city96/ComfyUI-GGUF)** and
-**[ComfyUI-ClipProj](https://github.com/nicolab28/ComfyUI-ClipProj)** — nothing else, for the
-CLI and the GUI workflow alike.
+Custom node packs required: **[ComfyUI-GGUF](https://github.com/city96/ComfyUI-GGUF)**,
+**[ComfyUI-ClipProj](https://github.com/nicolab28/ComfyUI-ClipProj)** and
+**[comfyui-obvpm](https://github.com/obvpm/comfyui-obvpm)** (registers the `beta57` scheduler the
+turbo lane uses; skip it and run `--scheduler simple`, untested) — for the CLI and the GUI workflow alike.
 
 **1. Models (~33 GB).** Review each model's license before commercial use. Paths are relative to
 ComfyUI's `models/` dir and must match exactly — the graph refers to these names:
 
 | file | put at | size | from |
 |---|---|---|---|
-| `MiniMax-H3-Ref2VA-Pruned-Q5_K_M.gguf` | `diffusion_models/_h3/` | 14.1 GB | [Abiray/MiniMax-H3-Pruned-GGUF](https://huggingface.co/Abiray/MiniMax-H3-Pruned-GGUF) |
+| `MiniMax-H3-FL2VA-Pruned-Q5_K_M.gguf` (the FL2VA checkpoint in the R2V node — see below) | `diffusion_models/_h3/` | 14.1 GB | [Abiray/MiniMax-H3-Pruned-GGUF](https://huggingface.co/Abiray/MiniMax-H3-Pruned-GGUF) |
 | `qwen3vl_8b_fp8_scaled.safetensors` | `text_encoders/_h3/` | 10.6 GB | [Comfy-Org/Qwen3-VL](https://huggingface.co/Comfy-Org/Qwen3-VL/tree/main/text_encoders) |
 | `mmh3-8b-ClipProj-celeb-mlp.safetensors` | `clip_projections/` | 0.4 GB | [NicoLab28/ClipProj-MiniMax-H3](https://huggingface.co/NicoLab28/ClipProj-MiniMax-H3) |
-| `minimax_h3_t1_image_vae_step1597.safetensors` | `vae/_h3/vae/` | 5.2 GB | [Mamad8/MiniMax-H3-Image-VAE](https://huggingface.co/Mamad8/MiniMax-H3-Image-VAE) |
+| `minimax_h3_video_vae_fp16.safetensors` (decode, preferred — see below) | `vae/_h3/vae/` | 3.2 GB | Comfy-Org/MiniMax-H3 |
+| `minimax_h3_t1_image_vae_step1597.safetensors` (optional, grid-prone) | `vae/_h3/vae/` | 5.2 GB | [Mamad8/MiniMax-H3-Image-VAE](https://huggingface.co/Mamad8/MiniMax-H3-Image-VAE) |
 | `minimax_h3_audio_vae_fp32.safetensors` | `vae/_h3/vae/` | 0.6 GB | [Comfy-Org/MiniMax-H3](https://huggingface.co/Comfy-Org/MiniMax-H3) |
-| `minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors` | `loras/` | 2.0 GB | [lightx2v/Minimax-h3-Turbo](https://huggingface.co/lightx2v/Minimax-h3-Turbo) |
+| `H3-PK-Parasyte-Turbo.safetensors` | `loras/` | 2.1 GB | [Plaguekind/H3-Lora](https://huggingface.co/Plaguekind/H3-Lora) |
 
 (The audio VAE is required even for stills — H3 generates audio and video jointly; the audio
 side of a single frame is decoded and discarded.)
@@ -94,6 +96,14 @@ It enables `length=1` without modifying ComfyUI itself, so ComfyUI updates canno
 **Restart ComfyUI after linking.** (Stock ComfyUI floors H3 at 5 frames in two places; taking
 frame 0 of a 5-frame render gives grid artifacts under the image VAE. Details in the node's
 docstring. The `H3SingleFrameEnabled` node it registers is a diagnostic marker, not an editor.)
+
+**Decode with the video VAE, not the single-image VAE (2026-09-02).** Measured with a 2-D FFT
+grid score on matched seeds: decoding through `minimax_h3_t1_image_vae_step1597` leaves a faint
+16-px grid (harmonic 33–84× background, visible as waxy skin; it is in the demo outputs in
+`demos/out/` too), while `minimax_h3_video_vae_fp16` on the same length-1 latent scores 3.6–12×,
+the same range as clean source images, with real skin texture. The bundled graphs now load the
+video VAE in node 119 (it feeds both the reference encode and the decode). Verified on a CUDA pod
+with the int8 stack and on Apple Silicon (the `can` demo, seed 58413360: 16-px harmonic 9.8 → 4.0).
 
 **3. The CLI:**
 
@@ -116,19 +126,33 @@ h3edit "Task: Reference-guided generation. ..." -r scene.png -r artwork.png \
 
 | flag | default | why |
 |---|---|---|
-| `--steps` | 8 | at 6 the model rendered the subject **twice** |
-| `--mp` | 2.0 | see below — this also sizes the references |
+| `--lora` | `H3-PK-Parasyte-Turbo.safetensors` @ 1.5 | the turbo lane; `--lora off` = base model, then use `--steps 20 --sampler euler --scheduler simple` |
+| `--steps` | 8 | with the turbo LoRA; 20 for the base model (14–50 measured flat on a pod) |
+| `--sampler` / `--scheduler` | `er_sde` / `beta57` | the LoRA author's recipe; measured equal to the 20-step base at 46 % of the time |
+| `--mp` | 4.0 | see below — this also caps the references |
+| `-r` | up to 5 | slots 3–5 are added at queue time by cloning the exported LoadImage entry, the pattern the pod driver validated |
 | `--ref-size` | `match` | `max`: 72:48 total (8:44 of it sampling, the rest reference encode); `match`: 7:30 total. No visible gain from `max` in this test |
 | `--ar` | `21:9` | output aspect; set it to match your scene (all included demos use `16:9`) |
 
-**Megapixels is secretly the reference-resolution dial.** With `match`, references are scaled to
-the *generation's* pixel area — at `--mp 1.0` a 1024px wordmark was squashed to ~650px before H3
-saw it and came back airbrushed with a halo. 2.0 is clean. Timing on the M5 (2 refs, ~2 MP):
-**7–10.5 min** per image, with real run-to-run variance.
+**Megapixels is secretly the reference-resolution dial — and the lettering dial.** With `match`,
+references are scaled *down* to the generation's pixel area (never up) — at `--mp 1.0` a 1024px
+wordmark was squashed to ~650px before H3 saw it and came back airbrushed with a halo. 2.0 is
+clean for large marks, but H3's VAE is **16 px per latent cell**: a ~50-px door plate spans three
+cells and comes back as mush at 2.0 whatever the references show (a 2x close-up of the plate as
+its own reference changed nothing, same seed). At **4.0** the same plate, fleet number and phone
+digits read (measured 2026-09-09, five references, seed-matched). Timing on the M5: **~13 min**
+at 4 MP / 8 turbo steps / 5 refs (28 min for the 20-step base model); ~7–10 min at 2 MP with 2 refs.
 
 **Judge results at 100%, never at thumbnail size.** A render that looks clean at feed size can
 have deformed letterforms and a soft halo. Crop the edited region and compare it against the
 reference before calling it good.
+
+**What did not help (same seed, 2026-09-09):** the fl2va/ref2va `b25-49` hybrid DiT
+(smhfacct's merge, the technique author's own checkpoint, GGUF via hoidhxd) rendered
+indistinguishably from plain FL2VA — and its GGUF carries the arch tag `minimax_h3`, which
+city96's loader rejects (Abiray's files are tagged `wan`). More steps on the base model
+(20 → 50) and a dedicated close-up reference for the small text were also flat. Output pixels
+per detail is the lever.
 
 ## Prompt grammar
 
@@ -167,8 +191,8 @@ wiring: load `h3_image_edit_mac.json` in the GUI, edit, then re-export with
 
 - **Technique** (one-frame R2V as an image editor): [Patient_Ratio4177](https://www.reddit.com/r/StableDiffusion/comments/1vo1ab3/h3_as_a_singleimage_edit_model/)
 - **Single-image VAE**: [Mamad8/MiniMax-H3-Image-VAE](https://huggingface.co/Mamad8/MiniMax-H3-Image-VAE)
-- **Turbo 8-step LoRA**: [lightx2v/Minimax-h3-Turbo](https://huggingface.co/lightx2v/Minimax-h3-Turbo)
-- **Pruned Ref2VA GGUF**: [Abiray/MiniMax-H3-Pruned-GGUF](https://huggingface.co/Abiray/MiniMax-H3-Pruned-GGUF)
+- **Parasyte turbo LoRA**: [Plaguekind/H3-Lora](https://huggingface.co/Plaguekind/H3-Lora)
+- **Pruned FL2VA GGUF**: [Abiray/MiniMax-H3-Pruned-GGUF](https://huggingface.co/Abiray/MiniMax-H3-Pruned-GGUF)
 - **ClipProj projection + loader node**: [NicoLab28/ClipProj-MiniMax-H3](https://huggingface.co/NicoLab28/ClipProj-MiniMax-H3), [nicolab28/ComfyUI-ClipProj](https://github.com/nicolab28/ComfyUI-ClipProj)
 - **Qwen3-VL text encoder**: [Comfy-Org/Qwen3-VL](https://huggingface.co/Comfy-Org/Qwen3-VL)
 - **MiniMax H3** itself: MiniMax, via the [Comfy-Org/MiniMax-H3](https://huggingface.co/Comfy-Org/MiniMax-H3) repack

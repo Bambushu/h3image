@@ -71,7 +71,7 @@
    },
    "widgets_values": [
     "16:9 (Widescreen)",
-    2,
+    4,
     32
    ]
   },
@@ -115,7 +115,7 @@
     "Node name for S&R": "VAELoader"
    },
    "widgets_values": [
-    "_h3/vae/minimax_h3_t1_image_vae_step1597.safetensors"
+    "_h3/vae/minimax_h3_video_vae_fp16.safetensors"
    ]
   },
   {
@@ -284,7 +284,7 @@
     "Node name for S&R": "KSamplerSelect"
    },
    "widgets_values": [
-    "sa_solver"
+    "er_sde"
    ]
   },
   {
@@ -351,7 +351,7 @@
     "Node name for S&R": "BasicScheduler"
    },
    "widgets_values": [
-    "simple",
+    "beta57",
     8,
     1
    ]
@@ -1139,7 +1139,7 @@
     "Node name for S&R": "UnetLoaderGGUF"
    },
    "widgets_values": [
-    "_h3/MiniMax-H3-Ref2VA-Pruned-Q5_K_M.gguf"
+    "_h3/MiniMax-H3-FL2VA-Pruned-Q5_K_M.gguf"
    ]
   },
   {
@@ -1198,8 +1198,8 @@
     "Node name for S&R": "LoraLoaderModelOnly"
    },
    "widgets_values": [
-    "minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors",
-    1
+    "H3-PK-Parasyte-Turbo.safetensors",
+    1.5
    ]
   }
  ],
