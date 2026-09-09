@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a tight crop from a photograph of a painted metal sign plate mounted on a red-brick wall. The crop shows only the middle of the plate: a dark navy painted surface with four lines of pale lettering, and the plate's edges, border and the brick wall all lie OUTSIDE the frame. <Picture 1> supplies the entire image: the framing, the navy paint, the position and size of every line of lettering, the colours and the sunlight. <Picture 2> is the flat artwork of the same sign plate and is the authority for the lettering only: copy the four lines exactly as they appear there, letter for letter and digit for digit.
+
+Reproduce <Picture 1> exactly, at higher sharpness: the same tight crop, the same navy surface filling the whole frame edge to edge, the same four lines of lettering in the same positions and sizes, with every character corrected to match <Picture 2>. Do not draw a plate border, a plate edge, screws, brick, or a wall. Do not add, move, resize or remove any line. No other text anywhere.
+
+A single coherent photograph identical to <Picture 1> in composition: navy painted metal filling the frame, four lines of lettering, nothing else.

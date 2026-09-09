@@ -1,0 +1,9 @@
+Task: Reference-guided generation.
+
+<Picture 1> supplies the entire scene: the brick shopfront, the doorway, the plate-glass window, the bare wooden signboard, the wet pavement, the dusk sky, the existing warm interior light and the photograph's look. <Picture 2> is the sign reference and supplies nothing else. It does not supply a scene, a building, a background, or a dark surround.
+
+Mount <Picture 2> onto the bare wooden signboard in <Picture 1> as exactly one neon sign that is switched off, sized to sit inside the board with a margin of bare timber around it. The sign is unpowered: its glass tubing is dark and unlit, it emits no light, it casts no glow onto the brickwork, adds no coloured spill to the doorway, and lays no coloured reflection into the wet pavement. The only light in the scene is the existing warm interior light and the dusk sky.
+
+Preserve from <Picture 1>: the camera position and framing; the brickwork, the doorway and its dark frame, the plate-glass window and the warm interior visible through it; the shape and position of the wooden signboard; the wet pavement and its existing warm reflection; the dusk sky and its colour; the exposure, white balance and photographic grain.
+
+A single coherent photograph shows the same shopfront at dusk, with the <Picture 2> sign mounted above its door and switched off.

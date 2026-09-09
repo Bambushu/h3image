@@ -106,6 +106,14 @@ h3edit "$(cat prompts/detail_pass_example.txt)" \
 
 The box is cut from `--source`, inserted as `<Picture 1>`; `-r` images follow as `<Picture 2>`…; the render (2 MP default, aspect snapped to the box) is scaled back and blended with a 48-px feathered edge (`--feather`). Truck cab test (760-px box of a 4 MP frame): all lettering legible, seam invisible, +6.5 min. Prompt as in `prompts/detail_pass_example.txt`: `<Picture 1>` supplies everything, `<Picture 2>` is the lettering authority, "do not add, move or remove anything".
 
+Two rules from the [benchmark](benchmark/README.md#3-detail-pass---detail--works-with-two-caveats): **the box must include a physical edge of the object** (a crop that is only flat panel and text gets a whole new plate hallucinated inside it), and **it sharpens, it does not correct** — a wrong digit in the base render survives the pass; reroll the base seed for that.
+
+## Benchmark
+
+Five scripted stress tests, pinned seeds, shipped inputs: [`benchmark/`](benchmark/README.md). On a 5090 at 4 MP, **8 of 8 seeds render every line of a five-tier plate down to 23-px caps at ≥0.96 character accuracy**; lettering holds to ~17 px caps and starts inventing characters at 12 px. The one miss in 40 lines is a single digit swap (reroll). Also measured: what survives outside the edit (large structure yes, brick texture no), and the neon sign's pavement reflection (ΔE 21, local) versus its glow on brick (barely measurable).
+
+![lettering ladder](benchmark/out/sheet_ladder.png)
+
 ## Prompt grammar
 
 Cite images as `<Picture 1>` / `<Picture 2>`:

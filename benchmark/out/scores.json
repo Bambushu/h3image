@@ -1,0 +1,1141 @@
+{
+ "sign_mp1_s1001": {
+  "size": [
+   1376,
+   768
+  ],
+  "wall_s": 139.3,
+  "mp": 1.0,
+  "seed": 1001,
+  "plate_box": [
+   232,
+   160,
+   1104,
+   644
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 1.0,
+   "XXS": 0.847
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1962NOPARKINGREF883105",
+    "EST1962NOPARKINGREF883105",
+    "VIVIVEHARBOURWORKSEXAMPLEOPEN0916",
+    "VIVIVEHARBOURWORKSEXAMPLEOPEN0916"
+   ]
+  },
+  "cap_px": {
+   "L": 116,
+   "M": 58,
+   "S": 31,
+   "XS": 18,
+   "XXS": 12
+  },
+  "preserve": {
+   "ssim_outside": 0.44,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.943,
+     "shift_px": 2
+    },
+    "window_sill": {
+     "ncc": 0.886,
+     "shift_px": 2
+    },
+    "coping_right": {
+     "ncc": 0.9,
+     "shift_px": 1
+    },
+    "coping_left": {
+     "ncc": 0.97,
+     "shift_px": 12
+    },
+    "plinth_left": {
+     "ncc": 0.431,
+     "shift_px": 5
+    },
+    "pavement": {
+     "ncc": 0.738,
+     "shift_px": 5
+    },
+    "sky": {
+     "ncc": 0.949,
+     "shift_px": 0
+    },
+    "wall_right": {
+     "ncc": 0.727,
+     "shift_px": 2
+    }
+   },
+   "fiducials_kept": 7
+  }
+ },
+ "sign_mp2_s1001": {
+  "size": [
+   1920,
+   1088
+  ],
+  "wall_s": 131.7,
+  "mp": 2.0,
+  "seed": 1001,
+  "plate_box": [
+   268,
+   228,
+   1492,
+   920
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 1.0,
+   "XXS": 0.933
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1962NOPARKINGREF883105",
+    "EST1962NOPARKINGREF883105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0516",
+    "WWWHARBOURWORKSEXAMPLEOPEN0516"
+   ]
+  },
+  "cap_px": {
+   "L": 166,
+   "M": 83,
+   "S": 45,
+   "XS": 26,
+   "XXS": 17
+  },
+  "preserve": {
+   "ssim_outside": 0.585,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.964,
+     "shift_px": 8
+    },
+    "window_sill": {
+     "ncc": 0.924,
+     "shift_px": 8
+    },
+    "coping_right": {
+     "ncc": 0.789,
+     "shift_px": 1
+    },
+    "coping_left": {
+     "ncc": 0.982,
+     "shift_px": 1
+    },
+    "plinth_left": {
+     "ncc": 0.74,
+     "shift_px": 1
+    },
+    "pavement": {
+     "ncc": 0.752,
+     "shift_px": 3
+    },
+    "sky": {
+     "ncc": 0.957,
+     "shift_px": 1
+    },
+    "wall_right": {
+     "ncc": 0.381,
+     "shift_px": 19
+    }
+   },
+   "fiducials_kept": 7
+  }
+ },
+ "sign_mp4_s1001": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 144.3,
+  "mp": 4.0,
+  "seed": 1001,
+  "plate_box": [
+   400,
+   324,
+   2112,
+   1288
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 0.96,
+   "XXS": 1.0
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1982NOPARKINGREF883105",
+    "EST1982NOPARKINGREF883105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 231,
+   "M": 116,
+   "S": 63,
+   "XS": 37,
+   "XXS": 23
+  },
+  "preserve": {
+   "ssim_outside": 0.581,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.97,
+     "shift_px": 2
+    },
+    "window_sill": {
+     "ncc": 0.939,
+     "shift_px": 2
+    },
+    "coping_right": {
+     "ncc": 0.9,
+     "shift_px": 2
+    },
+    "coping_left": {
+     "ncc": 0.985,
+     "shift_px": 2
+    },
+    "plinth_left": {
+     "ncc": 0.727,
+     "shift_px": 1
+    },
+    "pavement": {
+     "ncc": 0.74,
+     "shift_px": 0
+    },
+    "sky": {
+     "ncc": 0.958,
+     "shift_px": 1
+    },
+    "wall_right": {
+     "ncc": 0.693,
+     "shift_px": 2
+    }
+   },
+   "fiducials_kept": 8
+  }
+ },
+ "sign_mp4_s1002": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 149.3,
+  "mp": 4.0,
+  "seed": 1002,
+  "plate_box": [
+   348,
+   312,
+   2104,
+   1288
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 1.0,
+   "XXS": 1.0
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1962NOPARKINGREF883105",
+    "EST1962NOPARKINGREF883105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 234,
+   "M": 117,
+   "S": 63,
+   "XS": 37,
+   "XXS": 23
+  },
+  "preserve": {
+   "ssim_outside": 0.499,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.96,
+     "shift_px": 4
+    },
+    "window_sill": {
+     "ncc": 0.945,
+     "shift_px": 5
+    },
+    "coping_right": {
+     "ncc": 0.913,
+     "shift_px": 3
+    },
+    "coping_left": {
+     "ncc": 0.985,
+     "shift_px": 1
+    },
+    "plinth_left": {
+     "ncc": 0.732,
+     "shift_px": 2
+    },
+    "pavement": {
+     "ncc": 0.663,
+     "shift_px": 4
+    },
+    "sky": {
+     "ncc": 0.958,
+     "shift_px": 1
+    },
+    "wall_right": {
+     "ncc": 0.72,
+     "shift_px": 3
+    }
+   },
+   "fiducials_kept": 8
+  }
+ },
+ "sign_mp4_s1003": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 154.5,
+  "mp": 4.0,
+  "seed": 1003,
+  "plate_box": [
+   452,
+   320,
+   2180,
+   1292
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 1.0,
+   "XXS": 1.0
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1962NOPARKINGREF883105",
+    "EST1962NOPARKINGREF883105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 233,
+   "M": 117,
+   "S": 63,
+   "XS": 37,
+   "XXS": 23
+  },
+  "preserve": {
+   "ssim_outside": 0.496,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.973,
+     "shift_px": 5
+    },
+    "window_sill": {
+     "ncc": 0.952,
+     "shift_px": 1
+    },
+    "coping_right": {
+     "ncc": 0.908,
+     "shift_px": 5
+    },
+    "coping_left": {
+     "ncc": 0.982,
+     "shift_px": 5
+    },
+    "plinth_left": {
+     "ncc": 0.767,
+     "shift_px": 1
+    },
+    "pavement": {
+     "ncc": 0.752,
+     "shift_px": 1
+    },
+    "sky": {
+     "ncc": 0.96,
+     "shift_px": 4
+    },
+    "wall_right": {
+     "ncc": 0.713,
+     "shift_px": 3
+    }
+   },
+   "fiducials_kept": 8
+  }
+ },
+ "sign_mp4_s1004": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 155.3,
+  "mp": 4.0,
+  "seed": 1004,
+  "plate_box": [
+   480,
+   336,
+   2168,
+   1288
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 1.0,
+   "XXS": 1.0
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1962NOPARKINGREF883105",
+    "EST1962NOPARKINGREF883105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 228,
+   "M": 114,
+   "S": 62,
+   "XS": 36,
+   "XXS": 23
+  },
+  "preserve": {
+   "ssim_outside": 0.51,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.968,
+     "shift_px": 2
+    },
+    "window_sill": {
+     "ncc": 0.946,
+     "shift_px": 2
+    },
+    "coping_right": {
+     "ncc": 0.887,
+     "shift_px": 2
+    },
+    "coping_left": {
+     "ncc": 0.985,
+     "shift_px": 2
+    },
+    "plinth_left": {
+     "ncc": 0.752,
+     "shift_px": 2
+    },
+    "pavement": {
+     "ncc": 0.743,
+     "shift_px": 2
+    },
+    "sky": {
+     "ncc": 0.953,
+     "shift_px": 6
+    },
+    "wall_right": {
+     "ncc": 0.601,
+     "shift_px": 1
+    }
+   },
+   "fiducials_kept": 8
+  }
+ },
+ "sign_mp4_s1005": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 143.7,
+  "mp": 4.0,
+  "seed": 1005,
+  "plate_box": [
+   396,
+   304,
+   2180,
+   1288
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 1.0,
+   "XXS": 1.0
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1962NOPARKINGREF883105",
+    "EST1962NOPARKINGREF883105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 236,
+   "M": 118,
+   "S": 64,
+   "XS": 37,
+   "XXS": 24
+  },
+  "preserve": {
+   "ssim_outside": 0.547,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.971,
+     "shift_px": 2
+    },
+    "window_sill": {
+     "ncc": 0.95,
+     "shift_px": 2
+    },
+    "coping_right": {
+     "ncc": 0.863,
+     "shift_px": 2
+    },
+    "coping_left": {
+     "ncc": 0.98,
+     "shift_px": 2
+    },
+    "plinth_left": {
+     "ncc": 0.738,
+     "shift_px": 2
+    },
+    "pavement": {
+     "ncc": 0.759,
+     "shift_px": 1
+    },
+    "sky": {
+     "ncc": 0.962,
+     "shift_px": 3
+    },
+    "wall_right": {
+     "ncc": 0.491,
+     "shift_px": 1
+    }
+   },
+   "fiducials_kept": 7
+  }
+ },
+ "sign_mp4_s1006": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 143.6,
+  "mp": 4.0,
+  "seed": 1006,
+  "plate_box": [
+   420,
+   308,
+   2144,
+   1280
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 1.0,
+   "XXS": 1.0
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1962NOPARKINGREF883105",
+    "EST1962NOPARKINGREF883105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 233,
+   "M": 117,
+   "S": 63,
+   "XS": 37,
+   "XXS": 23
+  },
+  "preserve": {
+   "ssim_outside": 0.567,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.957,
+     "shift_px": 2
+    },
+    "window_sill": {
+     "ncc": 0.955,
+     "shift_px": 1
+    },
+    "coping_right": {
+     "ncc": 0.877,
+     "shift_px": 2
+    },
+    "coping_left": {
+     "ncc": 0.975,
+     "shift_px": 3
+    },
+    "plinth_left": {
+     "ncc": 0.752,
+     "shift_px": 2
+    },
+    "pavement": {
+     "ncc": 0.729,
+     "shift_px": 1
+    },
+    "sky": {
+     "ncc": 0.951,
+     "shift_px": 4
+    },
+    "wall_right": {
+     "ncc": 0.514,
+     "shift_px": 1
+    }
+   },
+   "fiducials_kept": 7
+  }
+ },
+ "sign_mp4_s1007": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 144.8,
+  "mp": 4.0,
+  "seed": 1007,
+  "plate_box": [
+   436,
+   332,
+   2060,
+   1220
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 1.0,
+   "XXS": 1.0
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "PSQIHARBOURMORKSEXAMPLEOPENOS8",
+    "KXT4821",
+    "UNIT701414960721",
+    "PSQIHARBOURORKSEXAMPLEOPENOG8",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1962NOPARKINGREF883105",
+    "EST1962NOPARKINGREF883105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 213,
+   "M": 107,
+   "S": 58,
+   "XS": 34,
+   "XXS": 21
+  },
+  "preserve": {
+   "ssim_outside": 0.498,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.954,
+     "shift_px": 2
+    },
+    "window_sill": {
+     "ncc": 0.959,
+     "shift_px": 2
+    },
+    "coping_right": {
+     "ncc": 0.86,
+     "shift_px": 2
+    },
+    "coping_left": {
+     "ncc": 0.974,
+     "shift_px": 1
+    },
+    "plinth_left": {
+     "ncc": 0.766,
+     "shift_px": 2
+    },
+    "pavement": {
+     "ncc": 0.75,
+     "shift_px": 2
+    },
+    "sky": {
+     "ncc": 0.966,
+     "shift_px": 5
+    },
+    "wall_right": {
+     "ncc": 0.51,
+     "shift_px": 0
+    }
+   },
+   "fiducials_kept": 7
+  }
+ },
+ "sign_mp4_s1008": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 150.4,
+  "mp": 4.0,
+  "seed": 1008,
+  "plate_box": [
+   400,
+   336,
+   2116,
+   1304
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 1.0,
+   "XXS": 1.0
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1962NOPARKINGREF883105",
+    "EST1962NOPARKINGREF883105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 232,
+   "M": 116,
+   "S": 63,
+   "XS": 37,
+   "XXS": 23
+  },
+  "preserve": {
+   "ssim_outside": 0.511,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.966,
+     "shift_px": 2
+    },
+    "window_sill": {
+     "ncc": 0.946,
+     "shift_px": 1
+    },
+    "coping_right": {
+     "ncc": 0.905,
+     "shift_px": 2
+    },
+    "coping_left": {
+     "ncc": 0.985,
+     "shift_px": 2
+    },
+    "plinth_left": {
+     "ncc": 0.751,
+     "shift_px": 1
+    },
+    "pavement": {
+     "ncc": 0.676,
+     "shift_px": 7
+    },
+    "sky": {
+     "ncc": 0.954,
+     "shift_px": 3
+    },
+    "wall_right": {
+     "ncc": 0.694,
+     "shift_px": 2
+    }
+   },
+   "fiducials_kept": 8
+  }
+ },
+ "neon_lit": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 144.8,
+  "mp": 4.0,
+  "seed": 1001,
+  "neon": {
+   "brick_left": {
+    "dE": 0.57,
+    "toward_pink": 0.25,
+    "dL": -0.65
+   },
+   "brick_right": {
+    "dE": 0.73,
+    "toward_pink": 0.59,
+    "dL": -0.45
+   },
+   "pavement": {
+    "dE": 20.76,
+    "toward_pink": 18.16,
+    "dL": 10.93
+   },
+   "far_control": {
+    "dE": 0.23,
+    "toward_pink": 0.04,
+    "dL": -0.35
+   }
+  }
+ },
+ "neon_unlit": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 146.1,
+  "mp": 4.0,
+  "seed": 1001
+ },
+ "sign_mp4_s1001_detail": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 136.3,
+  "mp": null,
+  "seed": 1001,
+  "plate_box": [
+   400,
+   324,
+   2112,
+   1288
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 0.462,
+   "S": 0.4,
+   "XS": 0.579,
+   "XXS": 1.0
+  },
+  "ocr_lines": {
+   "plate": [
+    "MARIAPUG",
+    "HARBOUR",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "MARIAAPUG",
+    "HARBOUR",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "HARBOUR",
+    "ESTBOANGEO105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "HARBOUR",
+    "ESTSOANGIMEO109",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "UNG2SB721",
+    "UNG2SB721",
+    "EST10EETA83105",
+    "EST10ERENTAOO3105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 231,
+   "M": 116,
+   "S": 63,
+   "XS": 37,
+   "XXS": 23
+  },
+  "seam_ssim": 0.93
+ },
+ "sign_mp4_s1001_detail4": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 141.6,
+  "mp": 4.0,
+  "seed": 1001,
+  "plate_box": [
+   400,
+   324,
+   2112,
+   1288
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 0.96,
+   "XXS": 1.0
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNEUNIT701414960721724",
+    "EST1982NOPARKINGREF883105",
+    "EST1EONSETTTEARS33105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "KXT4821",
+    "UNEUNIT701414960721724",
+    "EST1982NOPARKINGREF883105",
+    "EST1EOSINETITSEARS33105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "KXT4821",
+    "UNEUNIT701414960721724",
+    "EST1982NOPARKINGREF883105",
+    "EST1GREMYEELENINEA33105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "KXT4821",
+    "UNEUNIT701414960721724",
+    "EST1982NOPARKINGREF883105",
+    "EST1GREMYEELERINEA33105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "EST1982NOPARKINGREF883105",
+    "EST1982NOPARKINGREF883105",
+    "EST1EAA83105",
+    "EST1EA83105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 231,
+   "M": 116,
+   "S": 63,
+   "XS": 37,
+   "XXS": 23
+  },
+  "seam_ssim": 0.929
+ },
+ "sign_mp4_s1001_detail4edge": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 138.3,
+  "mp": 4.0,
+  "seed": 1001,
+  "plate_box": [
+   400,
+   324,
+   2112,
+   1288
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 0.96,
+   "XXS": 1.0
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1982NOPARKINGREF883105",
+    "EST1982NOPARKINGREF883105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 231,
+   "M": 116,
+   "S": 63,
+   "XS": 37,
+   "XXS": 23
+  },
+  "seam_ssim": 0.987
+ }
+}

@@ -1,0 +1,9 @@
+Task: Reference-guided generation.
+
+<Picture 1> supplies the entire scene: the building, the brickwork, the window, the pavement, the sky, the lighting and the photograph's look. <Picture 2> is a painted sign plate reference and supplies nothing else. It does not supply a location, a background, a sky, or lighting.
+
+Mount <Picture 2> onto the bare brick wall in <Picture 1> as exactly one flat rectangular painted metal sign plate, filling the brickwork between the stone plinth course at the base and the roof coping above, from near the left edge of the wall to the window reveal, so the plate is as large as the wall allows. The plate is a rigid flat panel screwed to the wall and lit by the same low sun, with a thin shadow along its lower and right edges. Copy every line of lettering from <Picture 2> exactly, letter for letter and digit for digit, in the same layout, the same typeface and the same sizes relative to the plate: the large word, the code beneath it, and the three smaller lines under that. Do not add, remove, reorder or respell any characters. No other text anywhere.
+
+Preserve from <Picture 1>: the camera position and framing; the wall's geometry, its corner edge and roof line; the tall window, its dark frame, its deep reveal and its stone sill; the stone plinth course and the pavement below; brick colour, mortar tone and surface wear around the plate; the sky; the direction and warmth of the sunlight and all cast shadows; the exposure and photographic grain.
+
+A single coherent photograph shows the same brick wall on the same street, with the <Picture 2> sign plate mounted on the brickwork.

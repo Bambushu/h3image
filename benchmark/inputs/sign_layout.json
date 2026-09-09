@@ -1,0 +1,60 @@
+{
+ "tiers": [
+  {
+   "tier": "L",
+   "text": "HARBOUR",
+   "cap_ratio": 0.24,
+   "band": [
+    0.07,
+    0.3173
+   ]
+  },
+  {
+   "tier": "M",
+   "text": "KXT-4821",
+   "cap_ratio": 0.12,
+   "band": [
+    0.4533,
+    0.5756
+   ]
+  },
+  {
+   "tier": "S",
+   "text": "UNIT 7 - 0141 496 0721",
+   "cap_ratio": 0.065,
+   "band": [
+    0.6428,
+    0.7094
+   ]
+  },
+  {
+   "tier": "XS",
+   "text": "EST 1962 - NO PARKING - REF 88-3105",
+   "cap_ratio": 0.038,
+   "band": [
+    0.746,
+    0.7841
+   ]
+  },
+  {
+   "tier": "XXS",
+   "text": "WWW.HARBOURWORKS.EXAMPLE - OPEN 08-18",
+   "cap_ratio": 0.024,
+   "band": [
+    0.805,
+    0.8294
+   ]
+  }
+ ],
+ "sign_box": [
+  130,
+  110,
+  1050,
+  640
+ ],
+ "plate": [
+  1280,
+  736
+ ],
+ "scene": "gable_scene-s77.png"
+}

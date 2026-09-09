@@ -1,0 +1,170 @@
+{
+ "sign_mp1_s1001": {
+  "backend": "pod",
+  "mp": 1.0,
+  "seed": 1001,
+  "wall_s": 139.3,
+  "size": [
+   1376,
+   768
+  ]
+ },
+ "sign_mp2_s1001": {
+  "backend": "pod",
+  "mp": 2.0,
+  "seed": 1001,
+  "wall_s": 131.7,
+  "size": [
+   1920,
+   1088
+  ]
+ },
+ "sign_mp4_s1001": {
+  "backend": "pod",
+  "mp": 4.0,
+  "seed": 1001,
+  "wall_s": 144.3,
+  "size": [
+   2720,
+   1536
+  ]
+ },
+ "sign_mp4_s1002": {
+  "backend": "pod",
+  "mp": 4.0,
+  "seed": 1002,
+  "wall_s": 149.3,
+  "size": [
+   2720,
+   1536
+  ]
+ },
+ "sign_mp4_s1003": {
+  "backend": "pod",
+  "mp": 4.0,
+  "seed": 1003,
+  "wall_s": 154.5,
+  "size": [
+   2720,
+   1536
+  ]
+ },
+ "sign_mp4_s1004": {
+  "backend": "pod",
+  "mp": 4.0,
+  "seed": 1004,
+  "wall_s": 155.3,
+  "size": [
+   2720,
+   1536
+  ]
+ },
+ "sign_mp4_s1005": {
+  "backend": "pod",
+  "mp": 4.0,
+  "seed": 1005,
+  "wall_s": 143.7,
+  "size": [
+   2720,
+   1536
+  ]
+ },
+ "sign_mp4_s1006": {
+  "backend": "pod",
+  "mp": 4.0,
+  "seed": 1006,
+  "wall_s": 143.6,
+  "size": [
+   2720,
+   1536
+  ]
+ },
+ "sign_mp4_s1007": {
+  "backend": "pod",
+  "mp": 4.0,
+  "seed": 1007,
+  "wall_s": 144.8,
+  "size": [
+   2720,
+   1536
+  ]
+ },
+ "sign_mp4_s1008": {
+  "backend": "pod",
+  "mp": 4.0,
+  "seed": 1008,
+  "wall_s": 150.4,
+  "size": [
+   2720,
+   1536
+  ]
+ },
+ "neon_lit": {
+  "backend": "pod",
+  "mp": 4.0,
+  "seed": 1001,
+  "wall_s": 144.8,
+  "size": [
+   2720,
+   1536
+  ]
+ },
+ "neon_unlit": {
+  "backend": "pod",
+  "mp": 4.0,
+  "seed": 1001,
+  "wall_s": 146.1,
+  "size": [
+   2720,
+   1536
+  ]
+ },
+ "sign_mp4_s1001_detail": {
+  "backend": "pod",
+  "mp": null,
+  "seed": 1001,
+  "wall_s": 136.3,
+  "size": [
+   2720,
+   1536
+  ],
+  "detail": [
+   865,
+   722,
+   1646,
+   1162
+  ]
+ },
+ "sign_mp4_s1001_detail4": {
+  "backend": "pod",
+  "mp": 4.0,
+  "seed": 1001,
+  "wall_s": 141.6,
+  "size": [
+   2720,
+   1536
+  ],
+  "detail": [
+   865,
+   722,
+   1646,
+   1162
+  ]
+ },
+ "sign_mp4_s1001_detail4edge": {
+  "backend": "pod",
+  "mp": 4.0,
+  "seed": 1001,
+  "wall_s": 138.3,
+  "size": [
+   2720,
+   1536
+  ],
+  "detail": [
+   684,
+   722,
+   1827,
+   1365
+  ]
+ }
+}

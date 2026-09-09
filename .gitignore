@@ -4,3 +4,6 @@ h3edit.egg-info/
 demos/refs/rejected/
 demos/out/rejected/
 bench/
+benchmark/out/*.png
+!benchmark/out/sheet_*.png
+benchmark/out/*.log
