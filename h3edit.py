@@ -87,6 +87,12 @@ def doctor():
             or g[N["r2v"][0]]["inputs"].get("length") != ["131", 0]:
         ok = False
         print("FAIL length is not linked from PrimitiveInt(1) -- the graph would render a clip")
+    try:
+        import PIL
+        print("ok   pillow", PIL.__version__, "(--detail needs it)")
+    except ImportError:
+        ok = False
+        print("FAIL pillow missing in this install -- run: uv tool install --force -e .  (stale tool venv)")
     if "beta57" in combo_options("BasicScheduler", "scheduler"):
         print("ok   beta57 scheduler registered (comfyui-obvpm)")
     else:
