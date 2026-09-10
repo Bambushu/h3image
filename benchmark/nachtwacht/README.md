@@ -2,7 +2,7 @@
 
 The stress test the plate benchmark could not be: an image no single prompt produces, on any
 tool. A 5440x3072 militia group portrait in the manner of the Night Watch, painted from a blank
-canvas by MiniMax H3 in 34 passes on one canvas. Every figure, prop and the lettered shield is its
+canvas by MiniMax H3 in 35 passes on one canvas. Every figure, prop and the lettered shield is its
 own `--inpaint` pass at full resolution; nothing outside a pass's box is ever regenerated.
 
 ![final](out/final_4k.jpg)
@@ -111,6 +111,14 @@ Two more rules from this round. **An empty box is a blank page**: at denoise 1.0
 new picture in it; to add props to bare wall use 0.8 so the wall itself survives. **Anything inside a
 box is fair game**, references or not; plan the sequence so that whatever a big box destroys gets
 its own pass afterwards, back to front.
+
+## Round 5: hands
+
+A 1:1 audit of every hand on the canvas found one with six fingers: the musketeer's flask hand,
+from the original pod pass. The same figure's weapon had a musket lock and stock at the bottom and
+a fork head at the top. One 752x672 box at denoise 1.0 over both hands and the muzzle fixed both
+(five fingers, plain muzzle, flask tipped over it); the bandolier that crossed the box went with it.
+Every other hand (ensign, captain, lieutenant, halberdier, drummer, girl) counted five.
 
 ## What it proved, and what it did not
 

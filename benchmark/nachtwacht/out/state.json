@@ -33,9 +33,10 @@
   "sergeant_body",
   "pikes2_revert",
   "pikes3",
-  "pikes4"
+  "pikes4",
+  "musk_hands"
  ],
- "canvas": "/Users/mikes/h3edit/benchmark/nachtwacht/out/pikes4.png",
+ "canvas": "/Users/mikes/h3edit/benchmark/nachtwacht/out/musk_hands.png",
  "log": [
   {
    "name": "canvas",
@@ -790,6 +791,32 @@
    ],
    "denoise": 0.8,
    "wall_s": 362,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "musk_hands",
+   "kind": "inpaint",
+   "box": [
+    256,
+    832,
+    1008,
+    1504
+   ],
+   "window": [
+    0,
+    416,
+    2656,
+    1888
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 392,
    "size": [
     5440,
     3072

@@ -71,6 +71,8 @@ PLAN = [
     ("sergeant_body","inpaint",(1600, 1000, 1904, 3072),  ["palette.png"],      1.0,  "sergeant_body.txt"), # the head pass ended in a straight cut with nothing in front
     ("pikes3",    "inpaint",   (3040, 0, 5216, 800),      ["palette.png"],      0.8,  "pikes3.txt"),     # pikes2 FAILED (composed a gallery of militia in the empty box); region reverted first, then 0.8 keeps the wall
     ("pikes4",    "inpaint",   (3440, 704, 3920, 1216),   ["palette.png"],      0.8,  "pikes4.txt"),     # the shafts stopped on the cornice at the box edge; carry them down
+    # --- round 5, local: hands and props ---
+    ("musk_hands","inpaint",   (256, 832, 1008, 1504),    ["palette.png"],      1.0,  "musk_hands.txt"), # six fingers on the flask hand; musket had a fork head on a musket body
 ]
 LOCAL_START = "halberdier"       # passes from here on were rendered locally in windows
 WINDOW_MP = 4.0

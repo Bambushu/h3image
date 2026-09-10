@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the two hands of the musketeer in the red doublet, seen from the side as he charges his musket, in an oil painting in the manner of a Dutch Golden Age militia group portrait: deep umber and black shadows, warm ochre and gold light falling from the upper left, visible brushwork, glazed highlights on metal and lace, a fine craquelure over the whole surface. He holds the musket upright by its barrel with his left hand, five fingers wrapped around the steel barrel, and with his right hand he tips a small black leather powder flask over the open muzzle at the top of the barrel. The barrel is a plain round steel tube that ends in a simple open muzzle; there is no fork, no spear point and no blade on it, and the barrel continues straight down out of the frame to the lock and wooden stock below. Both hands are anatomically correct, each with exactly five fingers, painted with the lace cuffs of the red sleeves. The wall behind stays as it is. The frame is a crop of a much larger finished painting: continue its light, palette, scale and brushwork exactly. Paint only inside the frame. No text.
+
+A single coherent passage of the same oil painting.

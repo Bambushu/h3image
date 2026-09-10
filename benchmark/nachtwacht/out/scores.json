@@ -829,5 +829,33 @@
   "backend": "local",
   "outside_ssim": 1.0,
   "seam_ssim": 0.991
+ },
+ {
+  "name": "musk_hands",
+  "kind": "inpaint",
+  "box": [
+   256,
+   832,
+   1008,
+   1504
+  ],
+  "window": [
+   0,
+   416,
+   2656,
+   1888
+  ],
+  "refs": [
+   "palette.png"
+  ],
+  "denoise": 1.0,
+  "wall_s": 392,
+  "size": [
+   5440,
+   3072
+  ],
+  "backend": "local",
+  "outside_ssim": 1.0,
+  "seam_ssim": 0.986
  }
 ]
