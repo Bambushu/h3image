@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+Paint a lean grey dog lying on the stone floor in front of the halberdier's feet, the whole animal visible from nose to tail: head raised and turned toward the drum at the right, mouth open, forelegs stretched out, hindquarters and tail resting on the floor, in an oil painting in the manner of a Dutch Golden Age militia group portrait: deep umber and black shadows, warm ochre and gold light falling from the upper left, visible brushwork, glazed highlights on metal and lace, a fine craquelure over the whole surface. The halberdier's white-hosed lower legs and buckled shoes stand at the upper left of the frame and continue his body above; keep them, and the lower rim of the drum at the right edge, exactly as they are. The frame is a crop of a much larger finished painting: continue its light, palette, scale and brushwork exactly. Paint only inside the frame. No text.
+
+A single coherent passage of the same oil painting, with the whole dog lying at the halberdier's feet painted into it.

@@ -19,9 +19,14 @@
   "gunner",
   "boy",
   "captain_head",
-  "dog_head"
+  "dog_head",
+  "girl_head",
+  "drummer2",
+  "dog_full",
+  "lieut_knee",
+  "shield2"
  ],
- "canvas": "out/dog_head.png",
+ "canvas": "/Users/mikes/h3edit/benchmark/nachtwacht/out/shield2.png",
  "log": [
   {
    "name": "canvas",
@@ -420,6 +425,136 @@
    ],
    "denoise": 1.0,
    "wall_s": 372,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "girl_head",
+   "kind": "inpaint",
+   "box": [
+    768,
+    928,
+    1680,
+    1840
+   ],
+   "window": [
+    0,
+    640,
+    2656,
+    2112
+   ],
+   "refs": [
+    "rosalie.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 682,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "drummer2",
+   "kind": "inpaint",
+   "box": [
+    4352,
+    800,
+    5440,
+    3072
+   ],
+   "window": [
+    3968,
+    416,
+    5440,
+    3072
+   ],
+   "refs": [
+    "speaker.jpg"
+   ],
+   "denoise": 1.0,
+   "wall_s": 422,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "dog_full",
+   "kind": "inpaint",
+   "box": [
+    3584,
+    2208,
+    4672,
+    3072
+   ],
+   "window": [
+    2784,
+    1600,
+    5440,
+    3072
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 382,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "lieut_knee",
+   "kind": "inpaint",
+   "box": [
+    3216,
+    2304,
+    3504,
+    2656
+   ],
+   "window": [
+    2016,
+    1600,
+    4672,
+    3072
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 382,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "shield2",
+   "kind": "inpaint",
+   "box": [
+    4352,
+    64,
+    5216,
+    672
+   ],
+   "window": [
+    2784,
+    0,
+    5440,
+    1472
+   ],
+   "refs": [
+    "shield_art.png"
+   ],
+   "denoise": 0.85,
+   "wall_s": 342,
    "size": [
     5440,
     3072

@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the lieutenant's right knee and thigh: pale cream silk breeches gathered at the knee with a gold-embroidered band and a small jewelled clasp, white silk hose below, the stone steps and the panelled wall behind, in an oil painting in the manner of a Dutch Golden Age militia group portrait: deep umber and black shadows, warm ochre and gold light falling from the upper left, visible brushwork, glazed highlights on metal and lace, a fine craquelure over the whole surface. Nothing hangs from the knee; the breeches and hose are clean and continuous with the leg above and below the frame. The frame is a crop of a much larger finished painting: continue its light, palette, scale and brushwork exactly. Paint only inside the frame. No text.
+
+A single coherent passage of the same oil painting.

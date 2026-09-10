@@ -2,7 +2,7 @@
 
 The stress test the plate benchmark could not be: an image no single prompt produces, on any
 tool. A 5440x3072 militia group portrait in the manner of the Night Watch, painted from a blank
-canvas by MiniMax H3 in 20 passes on one canvas. Every figure, prop and the lettered shield is its
+canvas by MiniMax H3 in 25 passes on one canvas. Every figure, prop and the lettered shield is its
 own `--inpaint` pass at full resolution; nothing outside a pass's box is ever regenerated.
 
 ![final](out/final_4k.jpg)
@@ -71,6 +71,27 @@ neighbour with it (the halberdier ate the dog's head; the gunner replaced the en
 on empty ground or repair afterwards. "A small boy" came out as another adult in a red coat: with
 no identity reference the model defaults to the figures already on the canvas. The local turbo lane
 leaves more chroma noise in the box than the pod's 20-step base lane.
+
+## Round 3: repairs, rendered locally
+
+Round 2 broke as much as it added. The "boy" box overlapped the girl's box and replaced her head and
+bodice with a red-coated youth; the halberdier box cut the dog off behind the hind legs; the drummer
+was cropped by the right frame edge; the lieutenant's scabbard tip had come out as a blob at his knee;
+the shield's last line read `H8EDIT`. Five more local passes (same M5 turbo lane, ~4 MP windows):
+
+| pass | box (px) | denoise | fixes | wall |
+|---|---|---|---|---|
+| girl_head | 912x912 | 1.0 | Rosalie's head and bodice back above the existing skirt; the youth now stands behind her | 682 s |
+| drummer2 | 1088x2272 | 1.0 | whole figure inside the frame, wall visible to his right | 422 s |
+| dog_full | 1088x864 | 1.0 | the whole dog in one box that includes the halberdier's shins | 382 s |
+| lieut_knee | 288x352 | 1.0 | knee band and hose, nothing hanging | 382 s |
+| shield2 | 864x608 | 0.85 | lettering corrected with the artwork as reference; the oval became a larger heraldic shield, so 0.85 did not pin the geometry here as it did on the plate | 342 s |
+
+The rule for box size, learned the hard way: a box must contain everything you are re-composing plus
+a strip of finished ground on every side. Too small and you clip a body or decapitate a neighbour;
+too big only costs you the neighbours inside it, which the model repaints in context (the dog box
+took the halberdier's shins with it and joined them cleanly). Repairs go bigger, not smaller, and
+back to front: the drummer was redone before the dog because the drummer's box covers the dog's head.
 
 ## What it proved, and what it did not
 

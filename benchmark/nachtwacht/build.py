@@ -56,6 +56,12 @@ PLAN = [
     ("boy",       "inpaint",   (0.17, 0.10, 0.30, 0.46),  ["palette.png"],      1.0,  "boy.txt"),
     ("captain_head","inpaint", (0.35, 0.20, 0.47, 0.40),  ["lakem_b.jpg"],      0.85, "captain_head.txt"),
     ("dog_head",  "inpaint",   (0.735, 0.76, 0.81, 0.93), ["palette.png"],      1.0,  "dog_head.txt"),   # the halberdier box clipped the dog
+    # --- round 3, local: repairs of what round 2 broke ---
+    ("girl_head", "inpaint",   (0.14, 0.30, 0.31, 0.60),  ["rosalie.png"],      1.0,  "girl_head.txt"),  # the boy box had replaced her head and bodice
+    ("drummer2",  "inpaint",   (0.80, 0.26, 1.00, 1.00),  ["speaker.jpg"],      1.0,  "drummer2.txt"),   # cropped by the right frame edge
+    ("dog_full",  "inpaint",   (0.66, 0.72, 0.86, 1.00),  ["palette.png"],      1.0,  "dog_full.txt"),   # hindquarters clipped; whole dog in one box
+    ("lieut_knee","inpaint",   (0.59, 0.75, 0.645, 0.865),["palette.png"],      1.0,  "lieut_knee.txt"), # scabbard tip painted as a blob at the knee
+    ("shield2",   "inpaint",   (0.80, 0.02, 0.96, 0.22),  ["shield_art.png"],   0.85, "shield.txt"),     # last line read H8EDIT; 0.85 + artwork ref = the correction recipe
 ]
 LOCAL_START = "halberdier"       # passes from here on were rendered locally in windows
 WINDOW_MP = 4.0
