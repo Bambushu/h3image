@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the cornice of the panelled stone wall with the top of an old sergeant's steel morion helmet at the bottom edge, in an oil painting in the manner of a Dutch Golden Age militia group portrait: deep umber and black shadows, warm ochre and gold light falling from the upper left, visible brushwork, glazed highlights on metal and lace, a fine craquelure over the whole surface, exactly as it already is. A single grey pigeon perches on the cornice above the helmet, seen from the side, lit from the left; only the pigeon is added, the cornice and the helmet stay unchanged. No people added. The frame is a crop of a much larger finished painting: continue its light, palette, scale and brushwork exactly. Paint only inside the frame. No text.
+
+A single coherent passage of the same oil painting.

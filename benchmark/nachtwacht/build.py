@@ -73,6 +73,15 @@ PLAN = [
     ("pikes4",    "inpaint",   (3440, 704, 3920, 1216),   ["palette.png"],      0.8,  "pikes4.txt"),     # the shafts stopped on the cornice at the box edge; carry them down
     # --- round 5, local: hands and props ---
     ("musk_hands","inpaint",   (256, 832, 1008, 1504),    ["palette.png"],      1.0,  "musk_hands.txt"), # six fingers on the flask hand; musket had a fork head on a musket body
+    # --- round 6, local: more characters, animals, objects (Mike's picks), back to front ---
+    ("lantern",   "inpaint",   (1120, 0, 1520, 464),      ["palette.png"],      0.85, "lantern.txt"),    # bare dark wall: 0.85, not 1.0 (blank-page rule)
+    ("pigeon",    "inpaint",   (1568, 288, 1904, 512),    ["palette.png"],      0.85, "pigeon.txt"),
+    ("door_face", "inpaint",   (4704, 96, 5376, 928),     ["palette.png"],      1.0,  "door_face.txt"),
+    ("trumpeter", "inpaint",   (3104, 96, 3712, 800),     ["palette.png"],      1.0,  "trumpeter.txt"),
+    ("spaniel",   "inpaint",   (960, 2240, 1456, 3072),   ["palette.png"],      1.0,  "spaniel.txt"),
+    ("powder_boy","inpaint",   (1456, 2528, 2016, 3072),  ["palette.png"],      1.0,  "powder_boy.txt"),
+    ("helmet",    "inpaint",   (0, 2688, 320, 3072),      ["palette.png"],      1.0,  "helmet.txt"),
+    ("cat",       "inpaint",   (4600, 2624, 5008, 3072),  ["palette.png"],      1.0,  "cat.txt"),
 ]
 LOCAL_START = "halberdier"       # passes from here on were rendered locally in windows
 WINDOW_MP = 4.0

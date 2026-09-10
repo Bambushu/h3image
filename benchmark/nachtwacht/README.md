@@ -2,7 +2,7 @@
 
 The stress test the plate benchmark could not be: an image no single prompt produces, on any
 tool. A 5440x3072 militia group portrait in the manner of the Night Watch, painted from a blank
-canvas by MiniMax H3 in 35 passes on one canvas. Every figure, prop and the lettered shield is its
+canvas by MiniMax H3 in 43 passes on one canvas. Every figure, prop and the lettered shield is its
 own `--inpaint` pass at full resolution; nothing outside a pass's box is ever regenerated.
 
 ![final](out/final_4k.jpg)
@@ -119,6 +119,24 @@ from the original pod pass. The same figure's weapon had a musket lock and stock
 a fork head at the top. One 752x672 box at denoise 1.0 over both hands and the muzzle fixed both
 (five fingers, plain muzzle, flask tipped over it); the bandolier that crossed the box went with it.
 Every other hand (ensign, captain, lieutenant, halberdier, drummer, girl) counted five.
+
+## Round 6: more characters, animals and objects
+
+Eight additions Mike picked from a list, all local, all first try, none reverted. Back to front:
+
+| pass | box (px) | denoise | result |
+|---|---|---|---|
+| lantern | 400x464, bare dark wall | 0.85 | a brass lantern on an iron bracket and chain above the arch, with a small flame |
+| pigeon | 336x224 | 0.85 | perched on the cornice above the sergeant's helmet; a touch large and glossy for the distance |
+| door_face | 672x832 | 1.0 | the door at the far right re-cut a hand's width open, a maid in a white cap peering in, hand on the edge |
+| trumpeter | 608x704 | 1.0 | red doublet, brass trumpet with a banner, behind the pikes; the rack inside the box thickened into a forest of pike heads |
+| spaniel | 496x832 | 1.0 | up on its hind legs against the girl's skirt, nose at the chicken |
+| powder_boy | 560x544 | 1.0 | the Night Watch homage: a small boy in an oversized helmet with a powder horn and bag, at the sergeant's feet; his shins run off the bottom edge of the painting, kept |
+| helmet | 320x384 | 1.0 | a burgonet on its side with a gauntlet under it, in the shadow at the wall base, bottom left |
+| cat | 408x448 | 1.0 | a tabby, back arched, hissing at the grey dog from under the drum |
+
+The 0.85 setting for props on bare wall held both times (lantern, pigeon); every 1.0 box here had
+existing content on at least two sides to anchor to, which is the difference from the pikes2 failure.
 
 ## What it proved, and what it did not
 

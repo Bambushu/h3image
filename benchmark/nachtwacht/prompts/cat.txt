@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the stone floor under the drummer's drum, between the grey dog's head at the left edge and the drummer's brown shoe at the right, in an oil painting in the manner of a Dutch Golden Age militia group portrait: deep umber and black shadows, warm ochre and gold light falling from the upper left, visible brushwork, glazed highlights on metal and lace, a fine craquelure over the whole surface. A striped tabby cat stands on the floor there with its back arched and tail up, hissing at the dog, lit from the left; the cat is whole inside the frame. The dog's head and paws, the drum above and the drummer's shoe stay exactly as they are. The frame is a crop of a much larger finished painting: continue its light, palette, scale and brushwork exactly. Paint only inside the frame. No text.
+
+A single coherent passage of the same oil painting.

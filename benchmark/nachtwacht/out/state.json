@@ -34,9 +34,17 @@
   "pikes2_revert",
   "pikes3",
   "pikes4",
-  "musk_hands"
+  "musk_hands",
+  "lantern",
+  "pigeon",
+  "door_face",
+  "trumpeter",
+  "spaniel",
+  "powder_boy",
+  "helmet",
+  "cat"
  ],
- "canvas": "/Users/mikes/h3edit/benchmark/nachtwacht/out/musk_hands.png",
+ "canvas": "/Users/mikes/h3edit/benchmark/nachtwacht/out/cat.png",
  "log": [
   {
    "name": "canvas",
@@ -817,6 +825,214 @@
    ],
    "denoise": 1.0,
    "wall_s": 392,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "lantern",
+   "kind": "inpaint",
+   "box": [
+    1120,
+    0,
+    1520,
+    464
+   ],
+   "window": [
+    0,
+    0,
+    2656,
+    1472
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 0.85,
+   "wall_s": 372,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "pigeon",
+   "kind": "inpaint",
+   "box": [
+    1568,
+    288,
+    1904,
+    512
+   ],
+   "window": [
+    384,
+    0,
+    3040,
+    1472
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 0.85,
+   "wall_s": 372,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "door_face",
+   "kind": "inpaint",
+   "box": [
+    4704,
+    96,
+    5376,
+    928
+   ],
+   "window": [
+    2784,
+    0,
+    5440,
+    1472
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 362,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "trumpeter",
+   "kind": "inpaint",
+   "box": [
+    3104,
+    96,
+    3712,
+    800
+   ],
+   "window": [
+    2080,
+    0,
+    4736,
+    1472
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 352,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "spaniel",
+   "kind": "inpaint",
+   "box": [
+    960,
+    2240,
+    1456,
+    3072
+   ],
+   "window": [
+    0,
+    1600,
+    2656,
+    3072
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 352,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "powder_boy",
+   "kind": "inpaint",
+   "box": [
+    1456,
+    2528,
+    2016,
+    3072
+   ],
+   "window": [
+    384,
+    1600,
+    3040,
+    3072
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 362,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "helmet",
+   "kind": "inpaint",
+   "box": [
+    0,
+    2688,
+    320,
+    3072
+   ],
+   "window": [
+    0,
+    1600,
+    2656,
+    3072
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 362,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "cat",
+   "kind": "inpaint",
+   "box": [
+    4600,
+    2624,
+    5008,
+    3072
+   ],
+   "window": [
+    2784,
+    1600,
+    5440,
+    3072
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 412,
    "size": [
     5440,
     3072
