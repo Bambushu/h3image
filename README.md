@@ -120,15 +120,18 @@ Two rules from the [benchmark](benchmark/README.md#3-detail-pass---detail--works
 ## Canvas builds and region repairs (`h3-inpaint`)
 
 For an image no single prompt can produce, or a finished image with a wrong region: keep ONE
-canvas and paint it in masked passes, one box at a time, back to front. Each pass is
-`h3edit --inpaint` on a ~4 MP window cut around the box; only the box goes back onto the canvas,
-in pixel space, so nothing outside a box ever moves (outside SSIM 1.000, pass after pass).
+canvas and paint it in masked passes, one box at a time, back to front. Locally each pass is
+`h3edit --inpaint` on a ~4 MP window cut around the box; with `--pod NAME` (a
+`~/renderpod/h3/podenv.NAME.sh`) the pass runs on the whole canvas through the pod kit's `drive.py`
+on the shipped edit graph. Either way only the box goes back onto the canvas, in pixel space, so
+nothing outside a box ever moves (outside SSIM 1.000, pass after pass).
 
 ```sh
 h3-inpaint init  nw --canvas start.png                       # start.png = any image, sides /32
 h3-inpaint add   nw dog  --box 3584,2208,4672,3072 --prompt dog.txt          # no -r: a palette card from the canvas
 h3-inpaint add   nw girl --box 768,928,1680,1840  --prompt girl.txt -r rosalie.png
-h3-inpaint run   nw                                          # every pass not yet done, in order
+h3-inpaint run   nw                                          # every pass not yet done, in order (local: ~4 MP window, 6-7 min/pass on an M5)
+h3-inpaint run   nw --pod nw                                 # same, on a pod: whole canvas per pass, base model 20 steps, ~65 s at 16 MP
 h3-inpaint show  nw dog                                      # 1:1 crop of that box: LOOK before the next pass
 h3-inpaint revert nw dog                                     # bad pass: pixel revert, then add it again under a new name
 h3-inpaint score nw                                          # outside/seam SSIM per pass + making-of sheet

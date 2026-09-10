@@ -7,17 +7,27 @@ Passes run back to front: a later box overwrites whatever it covers.
 
   h3-inpaint init  DIR --canvas start.png            # project: plan.json, refs/, prompts/, out/
   h3-inpaint add   DIR NAME --box X0,Y0,X1,Y1 --prompt FILE|TEXT [-r ref.png ...] [--denoise 1.0]
-  h3-inpaint run   DIR [--only NAME] [--redo NAME]   # every pass not yet done, in plan order
+  h3-inpaint run   DIR [--only NAME] [--redo NAME] [--pod NAME]   # every pass not yet done, in plan order
+                                                     # --pod NAME = podenv.NAME.sh, whole canvas per pass (~65 s at 16 MP)
   h3-inpaint show  DIR [NAME]                        # 1:1 crop of a pass's box (or 12 audit tiles)
   h3-inpaint revert DIR NAME [--to PASS]             # pixel-space revert of a bad pass, logged
   h3-inpaint score DIR                               # outside/seam SSIM per pass + making-of sheet
 
 The proof build (43 passes, 5440x3072) and every rule learned on it: benchmark/nachtwacht/README.md.
 """
-import argparse, json, os, subprocess, sys, time
+import argparse, json, mimetypes, os, re, subprocess, sys, time, urllib.request, uuid
 from PIL import Image, ImageDraw, ImageFilter
 
 WINDOW_MP = 4.0
+# --pod: the pass runs on the whole canvas at once through ~/renderpod/h3/drive.py on the shipped
+# single-image edit graph (extra nodes via H3_ADDNODES, the pattern the pod driver validated).
+H3_KIT = os.path.expanduser(os.environ.get("H3_KIT", "~/renderpod/h3"))
+POD_WF = f"{H3_KIT}/workflows/h3_single_image_edit_fullint8_linked.json"
+POD_PY = os.path.expanduser(os.environ.get("H3EDIT_POD_PY", "~/klipsmid-render-venv/bin/python"))
+POD_INT8 = {"10": {"unet_name": "minimax_h3_fl2va_int8_convrot.safetensors"},
+            "11": {"clip_name": "qwen3vl_32b_minimax_h3_int8_convrot.safetensors"},
+            "2": {"vae_name": "minimax_h3_video_vae_fp16.safetensors"}}
+UUID_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
 
 
 # ----------------------------------------------------------------------------- project state
@@ -87,17 +97,82 @@ def palette_card(canvas, out):
 
 
 # ----------------------------------------------------------------------------- one pass
-def run_pass(p, plan, state, e):
+# ----------------------------------------------------------------------------- pod backend
+def podenv(name):
+    env = {}
+    for line in open(f"{H3_KIT}/podenv.{name}.sh"):
+        m = re.match(r"export (\w+)=(.*)", line.strip())
+        if m:
+            env[m.group(1)] = m.group(2).strip('"')
+    return f"https://{env['POD_ID']}-{env['COMFY_PORT']}.proxy.runpod.net"
+
+
+def comfy(url, path, data=None, headers=None):
+    req = urllib.request.Request(url.rstrip("/") + path, data, {"User-Agent": "curl/8", **(headers or {})})
+    return json.loads(urllib.request.urlopen(req, timeout=120).read() or b"{}")
+
+
+def upload(url, path, tag):
+    ext = os.path.splitext(path)[1].lower()
+    bnd = uuid.uuid4().hex
+    fn = f"{tag}_{uuid.uuid4().hex[:8]}{ext}"
+    body = (f"--{bnd}\r\nContent-Disposition: form-data; name=\"image\"; filename=\"{fn}\"\r\n"
+            f"Content-Type: {mimetypes.guess_type(path)[0] or 'application/octet-stream'}\r\n\r\n").encode() \
+        + open(path, "rb").read() \
+        + (f"\r\n--{bnd}\r\nContent-Disposition: form-data; name=\"type\"\r\n\r\ninput\r\n--{bnd}\r\n"
+           f"Content-Disposition: form-data; name=\"overwrite\"\r\n\r\ntrue\r\n--{bnd}--\r\n").encode()
+    r = comfy(url, "/upload/image", body, {"Content-Type": f"multipart/form-data; boundary={bnd}"})
+    return r.get("name", fn)
+
+
+def pod_pass(url, p, plan, e, canvas, box, refs, prompt_path, seed, out_raw):
+    """One masked pass on the WHOLE canvas: VAEEncode(canvas) -> H3V2VInit(mask over the box) ->
+    sampler at `denoise`; refs are <Picture N>, the canvas only enters through the latent."""
+    W, H = Image.open(canvas).size
+    grow, feather = plan.get("grow", 32), plan.get("feather", 64)
+    src = upload(url, canvas, f"h3i_{e['name']}_src")
+    m = Image.new("L", (W, H), 0)
+    ImageDraw.Draw(m).rectangle((box[0] - grow, box[1] - grow, box[2] + grow, box[3] + grow), fill=255)
+    mp = os.path.join(p["out"], f"{e['name']}_mask.png"); m.save(mp)
+    nodeset = {**POD_INT8, "17": {"image": src}, "12": {"noise_seed": seed}, "16": {"filename_prefix": f"h3_edit/h3i_{e['name']}"},
+               "1": {"aspect_ratio": "16:9 (Widescreen)", "megapixels": plan.get("window_mp", WINDOW_MP)},
+               "7": {"steps": 20, "scheduler": "simple", "denoise": e.get("denoise", 1.0)}, "6": {"sampler_name": "euler"}}
+    addnodes = {"9300": {"class_type": "VAEEncode", "inputs": {"pixels": ["17", 0], "vae": ["2", 0]}},
+                "9302": {"class_type": "LoadImageMask", "inputs": {"image": upload(url, mp, f"h3i_{e['name']}_mask"), "channel": "red"}},
+                "9303": {"class_type": "H3V2VInit", "inputs": {"samples": ["9300", 0], "mask": ["9302", 0], "mask_feather": feather}}}
+    apiset = {"13": {"width": W, "height": H}, "8": {"latent_image": ["9303", 0]}}
+    for i, r in enumerate(refs):
+        addnodes[f"91{i:02d}"] = {"class_type": "LoadImage", "inputs": {"image": upload(url, r, f"h3i_ref_{os.path.splitext(os.path.basename(r))[0]}")}}
+        apiset["13"][f"ref_images.ref_image_{i}"] = [f"91{i:02d}", 0]
+    env = dict(os.environ, H3_URL=url, H3_NODESET=json.dumps(nodeset), H3_NODEMODES=json.dumps({"18": 4, "19": 4}),
+               H3_ADDNODES=json.dumps(addnodes), H3_APISET=json.dumps(apiset), H3_APIEXPECT=json.dumps(apiset))
+    r = subprocess.run([POD_PY, f"{H3_KIT}/drive.py", "run", POD_WF, prompt_path, "1", str(plan.get("window_mp", WINDOW_MP)), str(seed), f"h3i_{e['name']}"],
+                       env=env, capture_output=True, text=True, cwd=H3_KIT)
+    mm = UUID_RE.search(r.stdout)
+    if r.returncode != 0 or not mm:
+        sys.exit(f"{e['name']}: pod submit failed:\n" + (r.stdout + r.stderr)[-3000:])
+    pid = mm.group(0)
+    t0 = time.time()
+    while time.time() - t0 < 3600:
+        h = comfy(url, f"/history/{pid}")
+        if pid in h:
+            st = h[pid].get("status", {})
+            if st.get("status_str") == "error":
+                sys.exit(f"{e['name']}: pod render failed: " + json.dumps(st)[-3000:])
+            im = next((o for n in h[pid]["outputs"].values() for o in n.get("images", [])), None)
+            q = f"/view?filename={urllib.request.quote(im['filename'])}&subfolder={urllib.request.quote(im.get('subfolder', ''))}&type=output"
+            open(out_raw, "wb").write(urllib.request.urlopen(urllib.request.Request(url.rstrip("/") + q, headers={"User-Agent": "curl/8"}), timeout=600).read())
+            return
+        time.sleep(8)
+    sys.exit(f"{e['name']}: pod timeout")
+
+
+def run_pass(p, plan, state, e, pod_url=None):
     im = Image.open(state["canvas"]).convert("RGB")
     W, H = im.size
     box = e["box"]
     if not (0 <= box[0] < box[2] <= W and 0 <= box[1] < box[3] <= H):
         sys.exit(f"{e['name']}: box {box} is outside the {W}x{H} canvas")
-    win = window_for(box, W, H, plan.get("window_mp", WINDOW_MP))
-    wx0, wy0, wx1, wy1 = win
-    crop_p = os.path.join(p["out"], f"{e['name']}_window.png"); im.crop(win).save(crop_p)
-    rel = [box[0] - wx0, box[1] - wy0, box[2] - wx0, box[3] - wy0]
-    out_p = os.path.join(p["out"], f"{e['name']}_window_out.png")
     prompt = e["prompt"]
     pf = os.path.join(p["prompts"], prompt)
     if os.path.exists(pf):
@@ -106,23 +181,44 @@ def run_pass(p, plan, state, e):
     if not refs:
         refs = [palette_card(state["canvas"], os.path.join(p["refs"], "_palette.png"))]
     seed = e.get("seed") or (plan.get("seed", 4200) + sum(map(ord, e["name"])) * 7919) % (2**31)
+    t0 = time.time()
+    if pod_url:
+        if not os.path.exists(pf):
+            pf = os.path.join(p["out"], f"{e['name']}_prompt.txt"); open(pf, "w").write(prompt)
+        print(f"=== {e['name']}  box={box}  whole canvas {W}x{H} on the pod  denoise={e.get('denoise', 1.0)}  refs={[os.path.basename(r) for r in refs]}", flush=True)
+        raw = os.path.join(p["out"], f"{e['name']}_raw.png")
+        pod_pass(pod_url, p, plan, e, state["canvas"], box, refs, pf, seed, raw)
+        comp = paste_back(im, Image.open(raw).convert("RGB"), box, plan.get("grow", 32), plan.get("feather", 64))
+        win = None
+    else:
+        comp, win = local_pass(p, plan, e, im, box, refs, prompt, seed)
+    out = os.path.join(p["out"], f"{e['name']}.png"); comp.save(out)
+    wall = round(time.time() - t0)
+    state["done"].append(e["name"]); state["canvas"] = out
+    state["log"].append({"name": e["name"], "kind": "inpaint", "box": box, "window": win, "refs": e.get("refs") or [],
+                         "denoise": e.get("denoise", 1.0), "seed": seed, "wall_s": wall, "size": [W, H], "backend": "pod" if pod_url else "local"})
+    print(f"    -> {out}  ({wall}s)", flush=True)
+
+
+def local_pass(p, plan, e, im, box, refs, prompt, seed):
+    """Cut a ~4 MP window around the box, `h3edit --inpaint` on it, put the window back whole."""
+    W, H = im.size
+    win = window_for(box, W, H, plan.get("window_mp", WINDOW_MP))
+    wx0, wy0, wx1, wy1 = win
+    crop_p = os.path.join(p["out"], f"{e['name']}_window.png"); im.crop(win).save(crop_p)
+    rel = [box[0] - wx0, box[1] - wy0, box[2] - wx0, box[3] - wy0]
+    out_p = os.path.join(p["out"], f"{e['name']}_window_out.png")
     c = ["h3edit", prompt, "--inpaint", ",".join(map(str, rel)), "--source", crop_p,
          "--denoise", str(e.get("denoise", 1.0)), "--grow", str(plan.get("grow", 32)), "--feather", str(plan.get("feather", 64)),
          "--seed", str(seed), "--name", f"inpaint_{e['name']}", "-o", out_p, "--wait"]
     for r in refs:
         c += ["-r", r]
     print(f"=== {e['name']}  box={box}  window={win} ({wx1-wx0}x{wy1-wy0})  denoise={e.get('denoise', 1.0)}  refs={[os.path.basename(r) for r in refs]}", flush=True)
-    t0 = time.time()
     r = subprocess.run(c, capture_output=True, text=True)
     if r.returncode != 0 or not os.path.exists(out_p):
         sys.exit(f"{e['name']}: h3edit failed:\n" + (r.stdout + r.stderr)[-2000:])
     comp = im.copy(); comp.paste(Image.open(out_p).convert("RGB"), (wx0, wy0))
-    out = os.path.join(p["out"], f"{e['name']}.png"); comp.save(out)
-    wall = round(time.time() - t0)
-    state["done"].append(e["name"]); state["canvas"] = out
-    state["log"].append({"name": e["name"], "kind": "inpaint", "box": box, "window": win, "refs": e.get("refs") or [],
-                         "denoise": e.get("denoise", 1.0), "seed": seed, "wall_s": wall, "size": [W, H]})
-    print(f"    -> {out}  ({wall}s)", flush=True)
+    return comp, win
 
 
 # ----------------------------------------------------------------------------- commands
@@ -157,6 +253,7 @@ def cmd_add(a):
 
 def cmd_run(a):
     p, plan, state = load(a.dir)
+    pod_url = podenv(a.pod) if a.pod else None
     names = [e["name"] for e in plan["passes"]]
     if a.redo:
         keep = names[:names.index(a.redo)]
@@ -167,7 +264,7 @@ def cmd_run(a):
     for e in plan["passes"]:
         if e["name"] in state["done"] or (a.only and a.only != e["name"]):
             continue
-        run_pass(p, plan, state, e)
+        run_pass(p, plan, state, e, pod_url)
         save(p, state=state)
     print(f"canvas: {state['canvas']}")
 
@@ -261,7 +358,8 @@ def main():
     s.add_argument("-r", "--ref", dest="refs", action="append", default=[], help="reference image (copied into DIR/refs/); none = a palette card from the canvas")
     s.add_argument("--denoise", type=float, default=1.0, help="1.0 composes a new thing in the box; 0.8-0.85 adds a prop to bare ground or corrects lettering")
     s.set_defaults(f=cmd_add)
-    s = sp.add_parser("run", help="run every pass not yet done"); s.add_argument("dir"); s.add_argument("--only"); s.add_argument("--redo", help="drop this pass and everything after it, then run"); s.set_defaults(f=cmd_run)
+    s = sp.add_parser("run", help="run every pass not yet done"); s.add_argument("dir"); s.add_argument("--only"); s.add_argument("--redo", help="drop this pass and everything after it, then run")
+    s.add_argument("--pod", metavar="NAME", help="render on the pod in ~/renderpod/h3/podenv.NAME.sh: whole canvas per pass, base model 20 steps (default: local h3edit on a ~4 MP window)"); s.set_defaults(f=cmd_run)
     s = sp.add_parser("show", help="1:1 crop of a pass's box, or 12 audit tiles"); s.add_argument("dir"); s.add_argument("name", nargs="?"); s.set_defaults(f=cmd_show)
     s = sp.add_parser("revert", help="pixel-space revert of a bad pass"); s.add_argument("dir"); s.add_argument("name"); s.add_argument("--to", help="pass whose canvas to restore the box from (default: the one before)"); s.set_defaults(f=cmd_revert)
     s = sp.add_parser("score", help="outside/seam SSIM per pass + making-of sheet (needs numpy, scikit-image)"); s.add_argument("dir"); s.set_defaults(f=cmd_score)
