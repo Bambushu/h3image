@@ -24,9 +24,10 @@
   "child",
   "moto_taxi",
   "puddle",
-  "street_sign"
+  "street_sign",
+  "degrid1"
  ],
- "canvas": "./out/street_sign.png",
+ "canvas": "./out/degrid1.png",
  "log": [
   {
    "name": "canvas",
@@ -654,6 +655,22 @@
     3072
    ],
    "backend": "local"
+  },
+  {
+   "name": "degrid1",
+   "kind": "filter",
+   "box": null,
+   "refs": [],
+   "denoise": null,
+   "wall_s": 0,
+   "size": [
+    5440,
+    3072
+   ],
+   "cells": [
+    32,
+    16
+   ]
   }
  ]
 }

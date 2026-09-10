@@ -285,6 +285,23 @@ def notch_grid(im, periods=(16, 8), width=1):
     return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
 
 
+def deblock_cells(im, cell=16, T=10.0, r=3):
+    """Smooth across every latent-cell boundary where the step is small (< T levels) and both sides
+    are flat: the decoder's per-cell tone steps in skies, walls and paint (a 1-3 level mosaic) go,
+    real edges stay. r px each side become a linear ramp. Use cell=32 on a 2x-upscaled canvas."""
+    import numpy as np
+    from PIL import Image
+    a = np.asarray(im, np.float32).copy()
+    for axis in (0, 1):
+        v = a if axis == 0 else a.transpose(1, 0, 2)
+        for b in range(cell, v.shape[0] - r, cell):
+            lo, hi = v[b - r - 1], v[b + r]
+            flat = (np.abs(v[b - 1] - lo) < T) & (np.abs(hi - v[b]) < T) & (np.abs(v[b] - v[b - 1]) < T)
+            for k in range(2 * r):
+                v[b - r + k] = np.where(flat, lo + (hi - lo) * (k + 1) / (2 * r + 1), v[b - r + k])
+    return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
+
+
 def inpaint_run(args):
     """--inpaint: render, then paste only the (grown, feathered) box back onto --source. The model
     saw the frozen latent for context; the pixels outside the box never take a VAE round-trip
@@ -300,7 +317,7 @@ def inpaint_run(args):
     if ren.size != src.size:
         ren = ren.resize(src.size, Image.LANCZOS)
     if not args.no_notch:
-        ren = notch_grid(ren)
+        ren = deblock_cells(notch_grid(ren))
     x0, y0, x1, y1 = args.inpaint
     m = Image.new("L", src.size, 0)
     ImageDraw.Draw(m).rectangle((x0 - args.grow, y0 - args.grow, x1 + args.grow, y1 + args.grow), fill=255)
@@ -375,7 +392,7 @@ def main():
     p.add_argument("--encode-vae", default=None, help="diagnostic: VAE file for the --inpaint encode side only")
     p.add_argument("--encode-tiled", action="store_true", help="diagnostic: VAEEncodeTiled for the --inpaint encode")
     p.add_argument("--save-latent", action="store_true", help="diagnostic: SaveLatent of the encoded and sampled latents (output/latents/)")
-    p.add_argument("--no-notch", action="store_true", help="--inpaint: keep the decoder's 16 px cell grid (default: notched out of the render before the paste)")
+    p.add_argument("--no-notch", action="store_true", help="--inpaint: skip the cell-grid filter (default: the 16/8 px harmonics are notched and the cell boundaries deblocked in the render before the paste)")
     p.add_argument("--decode-crop", action="store_true", help="--inpaint: decode only the box (+grow+feather+32 px) instead of the whole frame")
     p.add_argument("--te", default=None, help="GGUF text encoder file instead of ClipProj")
     p.add_argument("--ref-size", default="match", choices=["match", "max"],

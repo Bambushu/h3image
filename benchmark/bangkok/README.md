@@ -79,10 +79,16 @@ much as in the frozen area, pod base lane and local turbo lane alike. The plain 
 | five-frame encode | not testable on the M5: the encode alone claims ~30 GB of MPS memory |
 
 So the decoder lays the grid over any latent that carries encoded context, generated cells
-included. The fix is pixel-space and now the default in `h3edit --inpaint`: the exact 16 px and
-8 px row and column harmonics are zeroed in the render before the box is pasted (`--no-notch`
-disables). Mean pixel change ~2 levels; inside-box harmonic 30–230x → 0–14x on every round-1 box,
-untouched pixels bit-identical. Round 1 was notched retroactively per box; round 2 came out notched.
+included. And there is a second, broader artifact the harmonic score misses: a per-cell tone
+mosaic of 1–3 levels in smooth areas (cell-boundary step ratio: sky of the 2x-upscaled base 2.65,
+inside local boxes 1.4–1.8, a 1 MP R2V frame 1.0–1.2, the pod's Nachtwacht 1.0–1.26). fp32 VAE
+changes nothing. Both are fixed in pixel space: `h3edit --inpaint` notches the exact 16/8 px
+harmonics and deblocks the cell boundaries of every render before the paste (box step ratio
+1.41 → 1.08, harmonic 56× → 1×), and `h3-inpaint degrid` deblocks a whole canvas at 32 and 16 px
+(sky 2.65 → 0.74; mean change under one level). A whole-canvas notch is NOT applied: it rings in
+smooth skies. This canvas: round 1 notched per box after the fact, round 2 notched at render
+time, then one `degrid` over everything. What is left under 4x contrast is within-cell mottle,
+not a grid; the pod's decoder shows a third of it.
 
 ## Rules this build added
 

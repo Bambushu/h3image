@@ -221,6 +221,21 @@ def local_pass(p, plan, e, im, box, refs, prompt, seed):
     return comp, win
 
 
+def cmd_degrid(a):
+    """Whole-canvas cell-grid filter: deblock at each --cell (no notch: on a whole canvas it rings). For a
+    canvas that was 2x-upscaled from a 4 MP render the cells sit at 32 px; boxes painted since sit at 16."""
+    import h3edit
+    p, plan, state = load(a.dir)
+    im = Image.open(state["canvas"]).convert("RGB")
+    for c in a.cells:                      # deblock only: a whole-canvas notch rings in smooth skies
+        im = h3edit.deblock_cells(im, cell=c)
+    n = sum(1 for e in state["log"] if e["name"].startswith("degrid")) + 1
+    name = f"degrid{n}"; out = os.path.join(p["out"], f"{name}.png"); im.save(out)
+    state["done"].append(name); state["canvas"] = out
+    state["log"].append({"name": name, "kind": "filter", "box": None, "refs": [], "denoise": None, "wall_s": 0, "size": list(im.size), "cells": a.cells})
+    save(p, state=state); print(f"{out}  (deblock cells {a.cells})")
+
+
 # ----------------------------------------------------------------------------- commands
 def cmd_init(a):
     p = paths(a.dir)
@@ -362,6 +377,8 @@ def main():
     s.add_argument("--pod", metavar="NAME", help="render on the pod in ~/renderpod/h3/podenv.NAME.sh: whole canvas per pass, base model 20 steps (default: local h3edit on a ~4 MP window)"); s.set_defaults(f=cmd_run)
     s = sp.add_parser("show", help="1:1 crop of a pass's box, or 12 audit tiles"); s.add_argument("dir"); s.add_argument("name", nargs="?"); s.set_defaults(f=cmd_show)
     s = sp.add_parser("revert", help="pixel-space revert of a bad pass"); s.add_argument("dir"); s.add_argument("name"); s.add_argument("--to", help="pass whose canvas to restore the box from (default: the one before)"); s.set_defaults(f=cmd_revert)
+    s = sp.add_parser("degrid", help="whole-canvas cell-grid deblock, logged as a pass"); s.add_argument("dir")
+    s.add_argument("--cells", type=lambda v: [int(x) for x in v.split(",")], default=[32, 16], help="cell sizes to deblock, e.g. 32,16 for a 2x-upscaled base with 16 px boxes (default)"); s.set_defaults(f=cmd_degrid)
     s = sp.add_parser("score", help="outside/seam SSIM per pass + making-of sheet (needs numpy, scikit-image)"); s.add_argument("dir"); s.set_defaults(f=cmd_score)
     a = ap.parse_args()
     a.f(a)
