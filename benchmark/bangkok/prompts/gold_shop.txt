@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows two shuttered shopfronts under the arcade on the left side of the street, with a whitewashed column between them and the wet pavement in front. Replace the shutters with one open, brightly lit gold shop: a wide red fascia with gold Chinese characters, glass counters full of gold chain and bangles under fluorescent light, a red carpet inside, two staff in red polo shirts behind the counter, exactly five fingers on every visible hand. Its light spills onto the wet pavement.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, wet asphalt reflecting the lights, deep blue-violet sky.
+The frame is a crop of a much larger finished photograph: continue its light, colour, perspective, scale and sharpness exactly. Paint only inside the frame. No text.

@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the wet road in the right lane of the street in the foreground, arcade columns and shopfronts behind on the right. Keep the buildings. Add a pink Toyota Corolla taxi driving away from the camera in the right lane, red tail lights on, its TAXI-METER roof sign lit, the pink paint and tail lights reflected in the wet road, correctly scaled for the foreground.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, wet asphalt reflecting the lights, deep blue-violet sky.
+The frame is a crop of a much larger finished photograph: continue its light, colour, perspective, scale and sharpness exactly. Paint only inside the frame. No text.

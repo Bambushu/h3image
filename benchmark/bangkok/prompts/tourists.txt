@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the wet pavement and the front of the arcade on the left side in the foreground, a lit shopfront with a steel shutter behind. Keep the buildings. Add a tourist couple standing on the pavement facing away from the camera toward the street, a man in a linen shirt with a backpack and a woman in a sundress and sunhat holding up a phone to photograph the street, exactly five fingers on every visible hand, lit by the shop light.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, wet asphalt reflecting the lights, deep blue-violet sky.
+The frame is a crop of a much larger finished photograph: continue its light, colour, perspective, scale and sharpness exactly. Paint only inside the frame. No text.

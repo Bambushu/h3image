@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the wet road at the left edge of the street in the foreground with the pavement, a noodle cart and a scooter behind. Keep the buildings and the cart. Add two motorbike-taxi riders waiting at the road edge in the foreground: two men in orange numbered vests sitting sideways on their parked scooters, one looking at his phone, one smoking, helmets on the handlebars, their bikes reflected in the wet road, cut by the bottom edge of the frame.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, wet asphalt reflecting the lights, deep blue-violet sky.
+The frame is a crop of a much larger finished photograph: continue its light, colour, perspective, scale and sharpness exactly. Paint only inside the frame. No text.

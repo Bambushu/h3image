@@ -1,0 +1,299 @@
+{
+ "canvas": "./out/canvas.png",
+ "grow": 32,
+ "feather": 64,
+ "window_mp": 4.0,
+ "seed": 4200,
+ "passes": [
+  {
+   "name": "neon_left",
+   "box": [
+    688,
+    1088,
+    2496,
+    2448
+   ],
+   "refs": [],
+   "denoise": 0.9,
+   "prompt": "neon_left.txt"
+  },
+  {
+   "name": "neon_right",
+   "box": [
+    3072,
+    1088,
+    4840,
+    2448
+   ],
+   "refs": [],
+   "denoise": 0.9,
+   "prompt": "neon_right.txt"
+  },
+  {
+   "name": "far_street",
+   "box": [
+    2288,
+    1856,
+    3200,
+    2448
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "far_street.txt"
+  },
+  {
+   "name": "lanterns",
+   "box": [
+    1520,
+    688,
+    3920,
+    1680
+   ],
+   "refs": [],
+   "denoise": 0.85,
+   "prompt": "lanterns.txt"
+  },
+  {
+   "name": "gold_shop",
+   "box": [
+    1056,
+    1744,
+    1984,
+    2720
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "gold_shop.txt"
+  },
+  {
+   "name": "seafood_stall",
+   "box": [
+    2944,
+    2256,
+    4128,
+    2992
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "seafood_stall.txt"
+  },
+  {
+   "name": "noodle_cart",
+   "box": [
+    1584,
+    2256,
+    2496,
+    2960
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "noodle_cart.txt"
+  },
+  {
+   "name": "tuk_tuk",
+   "box": [
+    2448,
+    2256,
+    3216,
+    2864
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "tuk_tuk.txt"
+  },
+  {
+   "name": "cat",
+   "box": [
+    3000,
+    2240,
+    3376,
+    2512
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "cat.txt"
+  },
+  {
+   "name": "taxi",
+   "box": [
+    3376,
+    2400,
+    4784,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "taxi.txt"
+  },
+  {
+   "name": "scooter",
+   "box": [
+    1856,
+    2448,
+    2672,
+    3024
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "scooter.txt"
+  },
+  {
+   "name": "crowd_right",
+   "box": [
+    4576,
+    2016,
+    5440,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "crowd_right.txt"
+  },
+  {
+   "name": "tourists",
+   "box": [
+    160,
+    1952,
+    1168,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "tourists.txt"
+  },
+  {
+   "name": "monk",
+   "box": [
+    4032,
+    2176,
+    4576,
+    2944
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "monk.txt"
+  },
+  {
+   "name": "soi_dog",
+   "box": [
+    1200,
+    2672,
+    1744,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "soi_dog.txt"
+  },
+  {
+   "name": "paifang",
+   "box": [
+    2400,
+    1632,
+    3072,
+    2256
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "paifang.txt"
+  },
+  {
+   "name": "balcony_right",
+   "box": [
+    3136,
+    160,
+    4352,
+    1216
+   ],
+   "refs": [],
+   "denoise": 0.9,
+   "prompt": "balcony_right.txt"
+  },
+  {
+   "name": "balcony_left",
+   "box": [
+    880,
+    160,
+    2064,
+    1248
+   ],
+   "refs": [],
+   "denoise": 0.9,
+   "prompt": "balcony_left.txt"
+  },
+  {
+   "name": "stall_fix",
+   "box": [
+    2992,
+    2176,
+    3424,
+    2720
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "stall_fix.txt"
+  },
+  {
+   "name": "shrine",
+   "box": [
+    1200,
+    1900,
+    1616,
+    2656
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "shrine.txt"
+  },
+  {
+   "name": "child",
+   "box": [
+    4592,
+    2448,
+    4880,
+    3000
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "child.txt"
+  },
+  {
+   "name": "moto_taxi",
+   "box": [
+    1750,
+    2720,
+    2600,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "moto_taxi.txt"
+  },
+  {
+   "name": "puddle",
+   "box": [
+    2600,
+    2848,
+    3400,
+    3072
+   ],
+   "refs": [],
+   "denoise": 0.85,
+   "prompt": "puddle.txt"
+  },
+  {
+   "name": "street_sign",
+   "box": [
+    2832,
+    1200,
+    3264,
+    1680
+   ],
+   "refs": [
+    "sign_art.png"
+   ],
+   "denoise": 0.85,
+   "prompt": "street_sign.txt"
+  }
+ ]
+}

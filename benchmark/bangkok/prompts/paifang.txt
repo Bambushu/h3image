@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the far end of the street at the vanishing point: distant traffic, an orange bus, lit signs on both sides and the orange dusk glow. Keep all of it. Add a Chinese paifang gate spanning the road in the distance: red lacquered pillars on both pavements, a green tiled roof with upturned eaves and gold trim, lit by spotlights, the traffic passing under it, correctly small for the distance.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, wet asphalt reflecting the lights, deep blue-violet sky.
+The frame is a crop of a much larger finished photograph: continue its light, colour, perspective, scale and sharpness exactly. Paint only inside the frame. No text.

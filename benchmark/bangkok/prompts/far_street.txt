@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the far end of the street where the road narrows to the vanishing point under an orange dusk glow, shophouses on both sides. Keep the buildings and sky. Fill the distant road with evening traffic: a queue of red tail lights, a few white headlights coming toward the camera, an orange Bangkok city bus, small distant tuk-tuks and motorbikes, and a haze of lit signs on both sides, all tiny and correctly scaled for the distance, reflected in the wet road.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, wet asphalt reflecting the lights, deep blue-violet sky.
+The frame is a crop of a much larger finished photograph: continue its light, colour, perspective, scale and sharpness exactly. Paint only inside the frame. No text.

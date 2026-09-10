@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the wet pavement and arcade columns on the left side of the street with a shuttered shop behind. Keep the buildings. Add a noodle cart at the pavement edge: a glass-sided steel cart with a steaming stock pot, hanging roast duck and pork in the glass case, a fluorescent tube above, bowls stacked, and a woman vendor in a white apron ladling broth, exactly five fingers on each hand, steam rising into the dusk.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, wet asphalt reflecting the lights, deep blue-violet sky.
+The frame is a crop of a much larger finished photograph: continue its light, colour, perspective, scale and sharpness exactly. Paint only inside the frame. No text.

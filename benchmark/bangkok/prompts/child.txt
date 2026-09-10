@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the wet pavement under the arcade on the right side of the street with a woman in a floral dress walking toward the camera carrying a shopping bag. Keep her. Add a small girl of about four in a yellow T-shirt and shorts walking beside her holding her free hand, the girl's other hand holding the string of a red helium balloon floating above her head, exactly five fingers on every visible hand, lit by the shop light.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, wet asphalt reflecting the lights, deep blue-violet sky.
+The frame is a crop of a much larger finished photograph: continue its light, colour, perspective, scale and sharpness exactly. Paint only inside the frame. No text.

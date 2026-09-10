@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the wet road in the middle of the street with shophouses and lit shops on both sides. Keep the road markings and buildings. Add one tuk-tuk in the middle of the road driving toward the camera, three-wheeled, blue and yellow body, chrome bars, headlight on, a driver in a dark shirt at the handlebars and two tourists in the back seat, reflected in the wet asphalt, correctly scaled for a vehicle at that distance.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, wet asphalt reflecting the lights, deep blue-violet sky.
+The frame is a crop of a much larger finished photograph: continue its light, colour, perspective, scale and sharpness exactly. Paint only inside the frame. No text.

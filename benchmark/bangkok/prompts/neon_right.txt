@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the upper floors and arcade columns of old shophouses on the right side of the street, receding toward the vanishing point, with black cables overhead. Keep every building exactly as it is. Add, projecting from the facades over the pavement, a row of tall vertical neon signs on steel brackets, one per shophouse, lit: a red neon sign with gold Chinese characters, a blue-white neon lightbox with Thai script, a yellow gold-shop sign edged in red, each smaller as they recede. Their glow lands softly on the columns beside them.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, wet asphalt reflecting the lights, deep blue-violet sky.
+The frame is a crop of a much larger finished photograph: continue its light, colour, perspective, scale and sharpness exactly. Paint only inside the frame. No text.

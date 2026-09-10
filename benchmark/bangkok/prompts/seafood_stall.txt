@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the wet pavement and the front of the arcade on the right side of the street, the lit gold shop fascia behind. Keep the buildings. Add a street seafood stall on the pavement edge: a steel cart with a bed of crushed ice piled with river prawns, crabs and whole fish, a charcoal grill smoking, strings of light bulbs, red plastic stools and a folding table, and one cook in an apron and cap turning skewers, exactly five fingers on each hand, seen from the side.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, wet asphalt reflecting the lights, deep blue-violet sky.
+The frame is a crop of a much larger finished photograph: continue its light, colour, perspective, scale and sharpness exactly. Paint only inside the frame. No text.

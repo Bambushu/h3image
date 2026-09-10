@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows a shuttered shopfront under the arcade on the left side of the street with a whitewashed column beside it and the wet pavement in front. Keep the column and the shutter. Add a small Chinese shrine against the shutter: a red and gold wooden altar cabinet with a golden Buddha figure inside, red candles, a brass incense pot with three burning joss sticks and thin smoke, a plate of oranges and a glass of tea in front, a string of small red lights around it.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, wet asphalt reflecting the lights, deep blue-violet sky.
+The frame is a crop of a much larger finished photograph: continue its light, colour, perspective, scale and sharpness exactly. Paint only inside the frame. No text.

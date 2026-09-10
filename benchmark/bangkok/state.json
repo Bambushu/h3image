@@ -1,0 +1,659 @@
+{
+ "done": [
+  "neon_left",
+  "neon_right",
+  "far_street",
+  "lanterns",
+  "gold_shop",
+  "seafood_stall",
+  "noodle_cart",
+  "tuk_tuk",
+  "cat",
+  "taxi",
+  "scooter",
+  "crowd_right",
+  "tourists",
+  "monk",
+  "soi_dog",
+  "notch_round1",
+  "paifang",
+  "balcony_right",
+  "balcony_left",
+  "stall_fix",
+  "shrine",
+  "child",
+  "moto_taxi",
+  "puddle",
+  "street_sign"
+ ],
+ "canvas": "./out/street_sign.png",
+ "log": [
+  {
+   "name": "canvas",
+   "kind": "canvas",
+   "box": null,
+   "refs": [],
+   "denoise": null,
+   "wall_s": 0,
+   "size": [
+    5440,
+    3072
+   ]
+  },
+  {
+   "name": "neon_left",
+   "kind": "inpaint",
+   "box": [
+    688,
+    1088,
+    2496,
+    2448
+   ],
+   "window": [
+    352,
+    928,
+    2784,
+    2560
+   ],
+   "refs": [],
+   "denoise": 0.9,
+   "seed": 7558926,
+   "wall_s": 322,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "neon_right",
+   "kind": "inpaint",
+   "box": [
+    3072,
+    1088,
+    4840,
+    2448
+   ],
+   "window": [
+    2720,
+    928,
+    5152,
+    2560
+   ],
+   "refs": [],
+   "denoise": 0.9,
+   "seed": 8469611,
+   "wall_s": 332,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "far_street",
+   "kind": "inpaint",
+   "box": [
+    2288,
+    1856,
+    3200,
+    2448
+   ],
+   "window": [
+    1408,
+    1408,
+    4064,
+    2880
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "seed": 8485449,
+   "wall_s": 324,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "lanterns",
+   "kind": "inpaint",
+   "box": [
+    1520,
+    688,
+    3920,
+    1680
+   ],
+   "window": [
+    1376,
+    448,
+    4032,
+    1920
+   ],
+   "refs": [],
+   "denoise": 0.85,
+   "seed": 6901649,
+   "wall_s": 322,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "gold_shop",
+   "kind": "inpaint",
+   "box": [
+    1056,
+    1744,
+    1984,
+    2720
+   ],
+   "window": [
+    192,
+    1472,
+    2848,
+    2944
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "seed": 7598521,
+   "wall_s": 322,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "seafood_stall",
+   "kind": "inpaint",
+   "box": [
+    2944,
+    2256,
+    4128,
+    2992
+   ],
+   "window": [
+    2208,
+    1600,
+    4864,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "seed": 10900744,
+   "wall_s": 322,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "noodle_cart",
+   "kind": "inpaint",
+   "box": [
+    1584,
+    2256,
+    2496,
+    2960
+   ],
+   "window": [
+    704,
+    1600,
+    3360,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "seed": 9206078,
+   "wall_s": 312,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "tuk_tuk",
+   "kind": "inpaint",
+   "box": [
+    2448,
+    2256,
+    3216,
+    2864
+   ],
+   "window": [
+    1504,
+    1600,
+    4160,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "seed": 6141425,
+   "wall_s": 322,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "cat",
+   "kind": "inpaint",
+   "box": [
+    3000,
+    2240,
+    3376,
+    2512
+   ],
+   "window": [
+    1856,
+    1600,
+    4512,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "seed": 2474928,
+   "wall_s": 312,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "taxi",
+   "kind": "inpaint",
+   "box": [
+    3376,
+    2400,
+    4784,
+    3072
+   ],
+   "window": [
+    2752,
+    1600,
+    5408,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "seed": 3472722,
+   "wall_s": 332,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "scooter",
+   "kind": "inpaint",
+   "box": [
+    1856,
+    2448,
+    2672,
+    3024
+   ],
+   "window": [
+    928,
+    1600,
+    3584,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "seed": 6078073,
+   "wall_s": 332,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "crowd_right",
+   "kind": "inpaint",
+   "box": [
+    4576,
+    2016,
+    5440,
+    3072
+   ],
+   "window": [
+    2784,
+    1600,
+    5440,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "seed": 9348620,
+   "wall_s": 553,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "tourists",
+   "kind": "inpaint",
+   "box": [
+    160,
+    1952,
+    1168,
+    3072
+   ],
+   "window": [
+    0,
+    1600,
+    2656,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "seed": 7202571,
+   "wall_s": 332,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "monk",
+   "kind": "inpaint",
+   "box": [
+    4032,
+    2176,
+    4576,
+    2944
+   ],
+   "window": [
+    2784,
+    1600,
+    5440,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "seed": 3464803,
+   "wall_s": 504,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "soi_dog",
+   "kind": "inpaint",
+   "box": [
+    1200,
+    2672,
+    1744,
+    3072
+   ],
+   "window": [
+    128,
+    1600,
+    2784,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "seed": 5864260,
+   "wall_s": 692,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "notch_round1",
+   "kind": "filter",
+   "box": null,
+   "refs": [],
+   "denoise": null,
+   "wall_s": 0,
+   "size": [
+    5440,
+    3072
+   ],
+   "note": "16/8 px cell-grid notch inside every round-1 box"
+  },
+  {
+   "name": "paifang",
+   "kind": "inpaint",
+   "box": [
+    2400,
+    1632,
+    3072,
+    2256
+   ],
+   "window": [
+    1408,
+    1184,
+    4064,
+    2656
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "seed": 5753394,
+   "wall_s": 13,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "balcony_right",
+   "kind": "inpaint",
+   "box": [
+    3136,
+    160,
+    4352,
+    1216
+   ],
+   "window": [
+    2400,
+    0,
+    5056,
+    1472
+   ],
+   "refs": [],
+   "denoise": 0.9,
+   "seed": 10940339,
+   "wall_s": 312,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "balcony_left",
+   "kind": "inpaint",
+   "box": [
+    880,
+    160,
+    2064,
+    1248
+   ],
+   "window": [
+    128,
+    0,
+    2784,
+    1472
+   ],
+   "refs": [],
+   "denoise": 0.9,
+   "seed": 10029654,
+   "wall_s": 312,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "stall_fix",
+   "kind": "inpaint",
+   "box": [
+    2992,
+    2176,
+    3424,
+    2720
+   ],
+   "window": [
+    1856,
+    1600,
+    4512,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "seed": 7653954,
+   "wall_s": 312,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "shrine",
+   "kind": "inpaint",
+   "box": [
+    1200,
+    1900,
+    1616,
+    2656
+   ],
+   "window": [
+    64,
+    1536,
+    2720,
+    3008
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "seed": 5143631,
+   "wall_s": 312,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "child",
+   "kind": "inpaint",
+   "box": [
+    4592,
+    2448,
+    4880,
+    3000
+   ],
+   "window": [
+    2784,
+    1600,
+    5440,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "seed": 4090404,
+   "wall_s": 322,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "moto_taxi",
+   "kind": "inpaint",
+   "box": [
+    1750,
+    2720,
+    2600,
+    3072
+   ],
+   "window": [
+    832,
+    1600,
+    3488,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "seed": 7764820,
+   "wall_s": 312,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "puddle",
+   "kind": "inpaint",
+   "box": [
+    2600,
+    2848,
+    3400,
+    3072
+   ],
+   "window": [
+    1664,
+    1600,
+    4320,
+    3072
+   ],
+   "refs": [],
+   "denoise": 0.85,
+   "seed": 5056522,
+   "wall_s": 322,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "street_sign",
+   "kind": "inpaint",
+   "box": [
+    2832,
+    1200,
+    3264,
+    1680
+   ],
+   "window": [
+    1696,
+    704,
+    4352,
+    2176
+   ],
+   "refs": [
+    "sign_art.png"
+   ],
+   "denoise": 0.85,
+   "seed": 9435729,
+   "wall_s": 322,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  }
+ ]
+}

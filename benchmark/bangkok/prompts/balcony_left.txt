@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the upper floors of old shophouses on the left side of the street: arched green-shuttered windows, a wooden balcony, black cables. Keep every building line exactly. Add life: an old man in a white singlet leaning on the balcony rail smoking a cigarette, a bamboo bird cage hanging beside him, a potted bougainvillea in the corner, a folding chair, lit from the room behind.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, wet asphalt reflecting the lights, deep blue-violet sky.
+The frame is a crop of a much larger finished photograph: continue its light, colour, perspective, scale and sharpness exactly. Paint only inside the frame. No text.

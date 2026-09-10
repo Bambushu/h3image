@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the wet pavement under the arcade on the right side of the street, a column and shopfront behind. Keep the buildings. Add a Buddhist monk in saffron robes walking away from the camera along the pavement, barefoot, an alms bowl in a cloth sling over his shoulder, exactly five fingers on each hand.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, wet asphalt reflecting the lights, deep blue-violet sky.
+The frame is a crop of a much larger finished photograph: continue its light, colour, perspective, scale and sharpness exactly. Paint only inside the frame. No text.

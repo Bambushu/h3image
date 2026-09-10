@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+<Picture 1> is the artwork of a street sign and supplies its lettering exactly, nothing else. The frame shows a lamp post and the upper part of the street on the right with buildings and cables behind. Keep the buildings and the post. Add, mounted on the lamp post, a blue rectangular Bangkok street sign with a white border and white lettering reading exactly what <Picture 1> reads, two lines, Thai above and Latin below, slightly weathered, lit by the street light.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, wet asphalt reflecting the lights, deep blue-violet sky.
+The frame is a crop of a much larger finished photograph: continue its light, colour, perspective, scale and sharpness exactly. Paint only inside the frame. No text.

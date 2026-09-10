@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the wet asphalt road in the foreground at the bottom centre of the street with lane markings and the reflections of lanterns and neon. Keep the road. Make the wet patch a real puddle: a sheet of standing rainwater across the asphalt reflecting the red lanterns and the neon signs above as a clear mirror, ripples from a drip, a crushed plastic cup at its edge.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, wet asphalt reflecting the lights, deep blue-violet sky.
+The frame is a crop of a much larger finished photograph: continue its light, colour, perspective, scale and sharpness exactly. Paint only inside the frame. No text.
