@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is the painting itself and supplies everything: every figure, face, object, the architecture, the composition and the light.
+
+Reproduce <Picture 1> exactly, with the brushwork, varnish, craquelure and warm light made consistent across the whole surface so every passage reads as one hand and one canvas. Do not add, move, resize or remove anything. Every face stays the same person. No text other than what is already painted.
+
+A single coherent oil painting identical to <Picture 1>.

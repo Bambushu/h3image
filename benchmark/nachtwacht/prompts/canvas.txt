@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours: near-black, umber, ochre, gold, bone white, a deep red. It does not supply a scene, an object, a layout or a format.
+
+The image is the painted surface itself, seen flat and square-on, filling the entire wide frame from edge to edge: there is no picture frame, no border, no wall, no gallery and no blurred margin, only paint out to every edge. Paint an oil painting in the manner of a Dutch Golden Age militia group portrait: deep umber and black shadows, warm ochre and gold light falling from the upper left, visible brushwork, glazed highlights on metal and lace, a fine craquelure over the whole surface, before any figures were added: the empty setting only, a wide dark courtyard. A broad stone gateway spans the middle of the width with a wide round archway at the centre, its keystone catching the light; a low flight of stone steps comes forward out of the arch across the full width of the bottom edge; a heavy wooden door stands in shadow at the far right; a bare wall with a high small window at the far left; a dark space above the arch. The light falls from the upper left and rakes across the steps and wall. Nobody is present. No text.
+
+A single coherent wide oil painting of the empty courtyard gateway, paint to every edge of the frame.

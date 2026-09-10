@@ -1,0 +1,74 @@
+# Nachtwacht: a 16 MP group painting built by H3 alone, one masked pass at a time
+
+The stress test the plate benchmark could not be: an image no single prompt produces, on any
+tool. A 5440x3072 militia group portrait in the manner of the Night Watch, painted from a blank
+canvas by MiniMax H3 in 15 passes on one canvas. Every figure, prop and the lettered shield is its
+own `--inpaint` pass at full resolution; nothing outside a pass's box is ever regenerated.
+
+![final](out/final_4k.jpg)
+
+**Numbers (RTX PRO 6000, base model, 20 steps, 2026-09-10):** 15 passes, 21 minutes 40 seconds
+of wall time end to end, ~65 s per masked pass at 16.7 MP. Outside every box the canvas stayed at
+SSIM 1.000 pass after pass; seam SSIM 0.96–0.98. Total render cost roughly $1.
+
+![making of](out/sheet_makingof.png)
+
+## How it is built
+
+```sh
+python3 benchmark/nachtwacht/build.py --pod <podenv>   # runs the PLAN in build.py, resumable
+python3 benchmark/nachtwacht/score.py                  # SSIM per pass, sheets, final_4k.jpg
+```
+
+1. **Canvas**: one R2V sample at 4 MP with a palette card as the only reference (colours, no
+   scene), then the quality-lane refine (LBH 2x latent upscale + 4-step er_sde): 5440x3072 in 288 s.
+2. **Fourteen masked passes, back to front**: banner, steps, pikes, shield, ensign, the ranks
+   behind the arch, the girl in gold, musketeer, drummer, lieutenant, captain, dog. Each pass
+   encodes the current canvas, wraps it with `H3V2VInit` and a mask over the box, samples at full
+   denoise with the reference still (a Krea persona render) as `<Picture 1>`, and pastes only the
+   box back onto the canvas through a feathered mask in pixel space.
+3. **Harmonize** (full-frame latent pass at denoise 0.35): kept for the record as a FAIL, see below.
+
+| pass | box (px) | outside SSIM | seam SSIM | wall |
+|---|---|---|---|---|
+| canvas | full frame | | | 288 s |
+| banner | 1536x928 | 1.000 | 0.980 | 65 s |
+| steps | 5440x928 | 1.000 | 0.981 | 72 s |
+| pikes | 1312x1040 | 1.000 | 0.978 | 64 s |
+| shield | 864x608 | 1.000 | 0.984 | 64 s |
+| ensign | 1088x1376 | 1.000 | 0.979 | 72 s |
+| ranks right | 1088x1840 | 1.000 | 0.979 | 65 s |
+| ranks left | 1088x1296 | 1.000 | 0.984 | 65 s |
+| girl in gold | 912x1728 | 1.000 | 0.982 | 80 s |
+| musketeer | 864x2464 | 1.000 | 0.981 | 72 s |
+| drummer | 1088x2272 | 1.000 | 0.979 | 64 s |
+| lieutenant | 864x2272 | 1.000 | 0.964 | 72 s |
+| captain | 1088x2400 | 1.000 | 0.983 | 63 s |
+| dog | 992x864 | 1.000 | 0.983 | 72 s |
+| harmonize | full frame | 0.877 | | 122 s |
+
+## What it proved, and what it did not
+
+- **The latent path holds a canvas indefinitely, if you paste back in pixel space.** The first
+  build did not: every masked pass re-decoded the whole latent, the frozen area took a VAE
+  round-trip each time, and by pass 7 the painting had gone dark and muddy. Pasting only the box
+  back fixed it completely (outside SSIM 1.000 for 13 consecutive passes). The harmonize pass shows
+  the same drift in one step: one full-frame round-trip at denoise 0.35 darkened the whole image.
+  Full-frame passes on a finished canvas are the wrong tool; the pass-14 canvas is the final.
+- **Composition by inpainting works.** A box at denoise 1.0 invents a figure that stands on the
+  canvas's steps, in its light, at the right scale, with the surroundings as context through the
+  frozen latent. Paint back to front: a later box overwrites an earlier one.
+- **Identity is the weak score.** The faces read as "a painted person", not as the persona in the
+  reference; the white streak in Ray's hair, for instance, did not survive. A face that is ~150 px
+  in a 16 MP frame gets little of the reference's detail, and the painted style pulls the rest
+  toward generic. Bigger boxes with the face larger, or a second pass on the head alone, are the
+  obvious next test. The shield names are legible by eye at 1:1 (tesseract scores them low because
+  they are small and gold on dark).
+- **The build is reproducible**: fixed seeds per pass, prompts in `prompts/`, the plan in
+  `build.py`. Reference stills are not committed (persona renders); drop your own in `refs/`.
+
+## Cost of the alternative
+
+No cloud image editor accepts a 16 MP canvas and returns it with the untouched 90% pixel-identical;
+they regenerate at 1–4 MP. A one-shot prompt for this scene is left as an exercise; it will not
+place six specific people, a named shield and a chicken.

@@ -239,6 +239,29 @@ def run(args):
         time.sleep(10)
 
 
+def inpaint_run(args):
+    """--inpaint: render, then paste only the (grown, feathered) box back onto --source. The model
+    saw the frozen latent for context; the pixels outside the box never take a VAE round-trip
+    (chaining masked passes without this drifted a 16 MP canvas dark by the 7th pass)."""
+    from PIL import Image, ImageDraw, ImageFilter
+    out = args.out
+    args.out = None
+    args.wait = True
+    ren = Image.open(run(args)).convert("RGB")
+    src = Image.open(args.source).convert("RGB")
+    if ren.size != src.size:
+        ren = ren.resize(src.size, Image.LANCZOS)
+    x0, y0, x1, y1 = args.inpaint
+    m = Image.new("L", src.size, 0)
+    ImageDraw.Draw(m).rectangle((x0 - args.grow, y0 - args.grow, x1 + args.grow, y1 + args.grow), fill=255)
+    m = m.filter(ImageFilter.GaussianBlur(args.feather / 2))
+    comp = src.copy(); comp.paste(ren, (0, 0), m)
+    if out:
+        comp.save(out)
+        print(f"{out}  (inpaint box {x0},{y0},{x1},{y1}, denoise {args.denoise}, pasted back)")
+    return out
+
+
 def detail(args):
     """Two-pass detail: re-render a crop of --source at full resolution, paste it back feathered.
 
@@ -334,6 +357,8 @@ def main():
         args.seed = random.randrange(1, 2**31)
     if args.detail:
         return detail(args)
+    if args.inpaint:
+        return inpaint_run(args)
     run(args)
 
 

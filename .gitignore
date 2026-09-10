@@ -7,3 +7,9 @@ bench/
 benchmark/out/*.png
 !benchmark/out/sheet_*.png
 benchmark/out/*.log
+benchmark/nachtwacht/refs/
+benchmark/nachtwacht/out/*
+!benchmark/nachtwacht/out/sheet_makingof.png
+!benchmark/nachtwacht/out/final_4k.jpg
+!benchmark/nachtwacht/out/scores.json
+!benchmark/nachtwacht/out/state.json

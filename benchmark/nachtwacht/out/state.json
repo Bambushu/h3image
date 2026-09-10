@@ -1,0 +1,295 @@
+{
+ "done": [
+  "canvas",
+  "banner",
+  "steps",
+  "pikes",
+  "shield",
+  "ensign",
+  "ranks_r",
+  "ranks_l",
+  "girl",
+  "musketeer",
+  "drummer",
+  "lieutenant",
+  "captain",
+  "dog",
+  "harmonize"
+ ],
+ "canvas": "out/harmonize.png",
+ "log": [
+  {
+   "name": "canvas",
+   "kind": "canvas",
+   "box": null,
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": null,
+   "wall_s": 288,
+   "size": [
+    5440,
+    3072
+   ]
+  },
+  {
+   "name": "banner",
+   "kind": "inpaint",
+   "box": [
+    1952,
+    0,
+    3488,
+    928
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 65,
+   "size": [
+    5440,
+    3072
+   ]
+  },
+  {
+   "name": "steps",
+   "kind": "inpaint",
+   "box": [
+    0,
+    2144,
+    5440,
+    3072
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 72,
+   "size": [
+    5440,
+    3072
+   ]
+  },
+  {
+   "name": "pikes",
+   "kind": "inpaint",
+   "box": [
+    3040,
+    0,
+    4352,
+    1040
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 64,
+   "size": [
+    5440,
+    3072
+   ]
+  },
+  {
+   "name": "shield",
+   "kind": "inpaint",
+   "box": [
+    4352,
+    64,
+    5216,
+    672
+   ],
+   "refs": [
+    "shield_art.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 64,
+   "size": [
+    5440,
+    3072
+   ]
+  },
+  {
+   "name": "ensign",
+   "kind": "inpaint",
+   "box": [
+    2064,
+    96,
+    3152,
+    1472
+   ],
+   "refs": [
+    "ray_b.jpg"
+   ],
+   "denoise": 1.0,
+   "wall_s": 72,
+   "size": [
+    5440,
+    3072
+   ]
+  },
+  {
+   "name": "ranks_r",
+   "kind": "inpaint",
+   "box": [
+    3376,
+    368,
+    4464,
+    2208
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 65,
+   "size": [
+    5440,
+    3072
+   ]
+  },
+  {
+   "name": "ranks_l",
+   "kind": "inpaint",
+   "box": [
+    864,
+    240,
+    1952,
+    1536
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 65,
+   "size": [
+    5440,
+    3072
+   ]
+  },
+  {
+   "name": "girl",
+   "kind": "inpaint",
+   "box": [
+    768,
+    976,
+    1680,
+    2704
+   ],
+   "refs": [
+    "rosalie.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 80,
+   "size": [
+    5440,
+    3072
+   ]
+  },
+  {
+   "name": "musketeer",
+   "kind": "inpaint",
+   "box": [
+    0,
+    608,
+    864,
+    3072
+   ],
+   "refs": [
+    "lakem_a.jpg"
+   ],
+   "denoise": 1.0,
+   "wall_s": 72,
+   "size": [
+    5440,
+    3072
+   ]
+  },
+  {
+   "name": "drummer",
+   "kind": "inpaint",
+   "box": [
+    4352,
+    800,
+    5440,
+    3072
+   ],
+   "refs": [
+    "speaker.jpg"
+   ],
+   "denoise": 1.0,
+   "wall_s": 64,
+   "size": [
+    5440,
+    3072
+   ]
+  },
+  {
+   "name": "lieutenant",
+   "kind": "inpaint",
+   "box": [
+    2720,
+    800,
+    3584,
+    3072
+   ],
+   "refs": [
+    "ray_a.jpg"
+   ],
+   "denoise": 1.0,
+   "wall_s": 72,
+   "size": [
+    5440,
+    3072
+   ]
+  },
+  {
+   "name": "captain",
+   "kind": "inpaint",
+   "box": [
+    1632,
+    672,
+    2720,
+    3072
+   ],
+   "refs": [
+    "lakem_b.jpg"
+   ],
+   "denoise": 1.0,
+   "wall_s": 63,
+   "size": [
+    5440,
+    3072
+   ]
+  },
+  {
+   "name": "dog",
+   "kind": "inpaint",
+   "box": [
+    3584,
+    2208,
+    4576,
+    3072
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 72,
+   "size": [
+    5440,
+    3072
+   ]
+  },
+  {
+   "name": "harmonize",
+   "kind": "harmonize",
+   "box": null,
+   "refs": [],
+   "denoise": 0.35,
+   "wall_s": 122,
+   "size": [
+    5440,
+    3072
+   ]
+  }
+ ]
+}

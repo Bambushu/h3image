@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a photograph of a person and supplies only their identity: face, features, hair colour and skin tone. It does not supply a background, a costume, a lighting setup or a photographic look.
+
+Paint this person as the lieutenant, beside and half a step behind the captain in an oil painting in the manner of a Dutch Golden Age militia group portrait: deep umber and black shadows, warm ochre and gold light falling from the upper left, visible brushwork, glazed highlights on metal and lace, a fine craquelure over the whole surface. They walk beside the captain carrying a long partisan spear upright, head turned to listen to the order. Wardrobe: a pale yellow buff-leather coat with gold embroidery, a white sash, a high white collar, a plumed hat. Their face is clearly recognisable as the person in <Picture 1>, rendered as paint, lit by the same warm light from the upper left as the rest of the canvas. The frame is a crop of a much larger painting whose surroundings are already finished: continue their light, palette, scale and brushwork exactly, and let the new figure stand in the same space as the figures and architecture around the crop. Paint only inside the frame. No modern objects, no photograph, no text.
+
+A single coherent passage of the same oil painting, with the lieutenant, beside and half a step behind the captain painted into it.

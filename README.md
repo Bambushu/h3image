@@ -121,6 +121,10 @@ Two rules from the [benchmark](benchmark/README.md#3-detail-pass---detail--works
 
 Six scripted stress tests, pinned seeds, shipped inputs: [`benchmark/`](benchmark/README.md). On a 5090 at 4 MP, **8 of 8 seeds render every line of a five-tier plate down to 23-px caps at ≥0.96 character accuracy**; lettering holds to ~17 px caps and starts inventing characters at 12 px. The one miss in 40 lines is a single digit swap (reroll). Also measured: what survives outside the edit (large structure yes, brick texture no), the neon sign's pavement reflection (ΔE 21, local) versus its glow on brick (barely measurable), and seven second-pass candidates against one wrong digit — tiling fails, `--inpaint` and a latent-upscale refine fix it.
 
+**Stress test:** a 16 MP group painting built from a blank canvas by H3 alone in 15 masked passes, every pass leaving the rest of the canvas at SSIM 1.000: [`benchmark/nachtwacht/`](benchmark/nachtwacht/README.md).
+
+![nachtwacht](benchmark/nachtwacht/out/final_4k.jpg)
+
 ![lettering ladder](benchmark/out/sheet_ladder.png)
 
 ## Prompt grammar
