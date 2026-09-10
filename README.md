@@ -65,6 +65,8 @@ Enables `length=1` without modifying ComfyUI. **Restart ComfyUI after linking.**
 
 **Decode with the video VAE.** 2-D FFT grid score on matched seeds: the image VAE leaves a faint 16-px grid (harmonic 33–84× background); the video VAE scores 3.6–12× — clean range. Verified on CUDA and Apple Silicon (can demo: 16-px harmonic 9.8 → 4.0). Bundled graphs load the video VAE in node 119.
 
+**`--inpaint` output is notched by default** (`--no-notch` keeps it raw). The clean range above holds for plain R2V frames only. Any frame sampled with encoded context (`--inpaint`, the V2V init) decodes with a faint horizontal cell grid, 50–200× background at the 16-px harmonic, pod base lane and local turbo lane alike, inside the regenerated box as much as in the frozen area (measured 2026-09-10, `benchmark/bangkok/out/grid/`). Ruled out: the VAE file (both files share the encoder, tensor for tensor), the frame count, the scheduler (sigma starts at 1.0), the lane, decoding only the box. The encoded latent itself has no one-cell pattern, so it is the decoder reacting to encoded-like latent statistics. A 5-frame encode could not be tested on Apple Silicon (MPS cap). The fix in the CLI is pixel-space: the exact 16-px and 8-px row and column harmonics are zeroed in the render before the box is pasted (`notch_grid`), mean change ~2 levels, harmonic back to 0–5×; untouched pixels are never filtered.
+
 **3. The CLI:**
 
 ```sh

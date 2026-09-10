@@ -140,6 +140,11 @@ def build(args):
     g[N["save"][0]]["inputs"]["filename_prefix"] = "h3_edit/" + args.name
     if args.dit:
         g["665"]["inputs"]["unet_name"] = args.dit
+    if args.vae:
+        g[N["vae"][0]]["inputs"]["vae_name"] = args.vae
+    if args.frames != 1:                        # grid diagnostics: render N frames, keep the middle one
+        g["131"]["inputs"]["value"] = args.frames
+        g["663"]["inputs"]["batch_index"] = args.frames // 2
     if args.te:
         # Swap the ClipProj encoder for the full GGUF text encoder. The entry mirrors MacMax's
         # CLIPLoaderGGUF node 13 (widgets: clip_name, type=minimax); keeping id 661 keeps the
@@ -196,12 +201,35 @@ def inpaint_wire(g, args):
     mask.save(mask_path)
     src_name = stage_ref(args.source)
     g["9300"] = {"class_type": "LoadImage", "inputs": {"image": src_name}}
-    g["9301"] = {"class_type": "VAEEncode", "inputs": {"pixels": ["9300", 0], "vae": [N["vae"][0], 0]}}
+    enc_vae = [N["vae"][0], 0]
+    if args.encode_vae:                          # grid diagnostics: a different VAE for the encode side only
+        g["9304"] = {"class_type": "VAELoader", "inputs": {"vae_name": args.encode_vae}}
+        enc_vae = ["9304", 0]
+    pixels = ["9300", 0]
+    if args.frames != 1:                         # grid diagnostics: encode the source as an N-frame still clip
+        g["9305"] = {"class_type": "RepeatImageBatch", "inputs": {"image": ["9300", 0], "amount": args.frames}}
+        pixels = ["9305", 0]
+    g["9301"] = {"class_type": "VAEEncode", "inputs": {"pixels": pixels, "vae": enc_vae}}
+    if args.encode_tiled:                        # grid diagnostics: tiled encode (less memory)
+        g["9301"] = {"class_type": "VAEEncodeTiled", "inputs": {"pixels": pixels, "vae": enc_vae, "tile_size": 512, "overlap": 64,
+                                                                "temporal_size": 64, "temporal_overlap": 8}}
     g["9302"] = {"class_type": "LoadImageMask", "inputs": {"image": os.path.basename(mask_path), "channel": "red"}}
     g["9303"] = {"class_type": "H3V2VInit", "inputs": {"samples": ["9301", 0], "mask": ["9302", 0], "mask_feather": args.feather}}
     g[N["ksampler"][0]]["inputs"]["latent_image"] = ["9303", 0]
+    if args.save_latent:                          # grid diagnostics: dump the encoded and the sampled latent
+        g["9306"] = {"class_type": "SaveLatent", "inputs": {"samples": ["9301", 0], "filename_prefix": f"latents/{args.name}_enc"}}
+        g["9307"] = {"class_type": "SaveLatent", "inputs": {"samples": [N["ksampler"][0], 0], "filename_prefix": f"latents/{args.name}_out"}}
     g[N["r2v"][0]]["inputs"].update(width=W, height=H)      # the latent fixes the size
     g[N["steps"][0]]["inputs"]["denoise"] = args.denoise
+    if args.decode_crop:                          # decode only the box + margin (latent cells of 16 px)
+        m = args.grow + args.feather + 32
+        cx0, cy0 = max(0, x0 - m) // 16, max(0, y0 - m) // 16
+        cx1, cy1 = min(W, x1 + m + 15) // 16, min(H, y1 + m + 15) // 16
+        args.decode_crop = (cx0 * 16, cy0 * 16)
+        g["9308"] = {"class_type": "LTXVSeparateAVLatent", "inputs": {"av_latent": [N["ksampler"][0], 0]}}
+        g["9309"] = {"class_type": "LatentCut", "inputs": {"samples": ["9308", 0], "dim": "y", "index": cy0, "amount": cy1 - cy0}}
+        g["9310"] = {"class_type": "LatentCut", "inputs": {"samples": ["9309", 0], "dim": "x", "index": cx0, "amount": cx1 - cx0}}
+        g["122"]["inputs"]["samples"] = ["9310", 0]
 
 
 def stage_ref(path):
@@ -239,6 +267,23 @@ def run(args):
         time.sleep(10)
 
 
+def notch_grid(im, periods=(16, 8), width=1):
+    """Remove the exact latent-cell harmonics (16 px and 8 px, rows and columns) from an image. The H3
+    decoder lays a faint cell grid over any frame sampled with encoded (V2V) context; a plain R2V
+    frame is clean (16-px harmonic ~1-5x background vs 50-200x on inpaint output, 2026-09-10)."""
+    import numpy as np
+    a = np.asarray(im, np.float32); H, W = a.shape[:2]
+    for c in range(a.shape[2]):
+        F = np.fft.fft2(a[..., c])
+        for p in periods:
+            ky, kx = int(round(H / p)), int(round(W / p))
+            for d in range(-width, width + 1):
+                F[(ky + d) % H, :] = 0; F[(-ky - d) % H, :] = 0
+                F[:, (kx + d) % W] = 0; F[:, (-kx - d) % W] = 0
+        a[..., c] = np.real(np.fft.ifft2(F))
+    return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
+
+
 def inpaint_run(args):
     """--inpaint: render, then paste only the (grown, feathered) box back onto --source. The model
     saw the frozen latent for context; the pixels outside the box never take a VAE round-trip
@@ -249,8 +294,12 @@ def inpaint_run(args):
     args.wait = True
     ren = Image.open(run(args)).convert("RGB")
     src = Image.open(args.source).convert("RGB")
+    if args.decode_crop:                          # the render is the decoded crop: put it in place
+        full = src.copy(); full.paste(ren, args.decode_crop); ren = full
     if ren.size != src.size:
         ren = ren.resize(src.size, Image.LANCZOS)
+    if not args.no_notch:
+        ren = notch_grid(ren)
     x0, y0, x1, y1 = args.inpaint
     m = Image.new("L", src.size, 0)
     ImageDraw.Draw(m).rectangle((x0 - args.grow, y0 - args.grow, x1 + args.grow, y1 + args.grow), fill=255)
@@ -320,6 +369,13 @@ def main():
     p.add_argument("--lora", default=TURBO_LORA, help="LoRA file in models/loras, or 'off' (base model, 20 steps)")
     p.add_argument("--lora-strength", type=float, default=1.5)
     p.add_argument("--dit", default=None, help="override the GGUF DiT (unet_name)")
+    p.add_argument("--vae", default=None, help="override the VAE file (node 119); default = the graph's video VAE")
+    p.add_argument("--frames", type=int, default=1, help="diagnostic: render N frames and keep the middle one (default 1)")
+    p.add_argument("--encode-vae", default=None, help="diagnostic: VAE file for the --inpaint encode side only")
+    p.add_argument("--encode-tiled", action="store_true", help="diagnostic: VAEEncodeTiled for the --inpaint encode")
+    p.add_argument("--save-latent", action="store_true", help="diagnostic: SaveLatent of the encoded and sampled latents (output/latents/)")
+    p.add_argument("--no-notch", action="store_true", help="--inpaint: keep the decoder's 16 px cell grid (default: notched out of the render before the paste)")
+    p.add_argument("--decode-crop", action="store_true", help="--inpaint: decode only the box (+grow+feather+32 px) instead of the whole frame")
     p.add_argument("--te", default=None, help="GGUF text encoder file instead of ClipProj")
     p.add_argument("--ref-size", default="match", choices=["match", "max"],
                    help="'max' pins refs to a 2048px short edge: ~10x slower, no better")
