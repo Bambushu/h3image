@@ -11,6 +11,7 @@ python3 benchmark/make_inputs.py                      # regenerate inputs (optio
 python3 benchmark/run.py --backend local              # 12 renders, ~4 MP each
 python3 benchmark/score.py                            # -> out/scores.json, out/report.md, out/sheet_*.png
 python3 benchmark/run.py --backend local --stage detail && python3 benchmark/score.py
+python3 benchmark/passes.py inpaint --artref --denoise 0.85 --pod <podenv>   # second-pass candidates (pod)
 ```
 
 Scoring needs Pillow, numpy, scikit-image and the `tesseract` binary.
@@ -93,7 +94,36 @@ plinth and the strip of wall beside the window are re-imagined. Low SSIM here is
 of a generative edit, not noise: if you need pixel-exact surroundings, composite the plate region
 back onto the original yourself.
 
-## 5. Light as a source (neon)
+## 5. Second-pass candidates: what actually fixes lettering
+
+All on the same base render (seed 1001, the one with the wrong digit), 5090, base model. Scored
+on the plate plus SSIM against the base render outside the plate (1.0 = untouched).
+
+![second passes](out/sheet_passes.png)
+
+| pass | output | XS | XXS | outside SSIM | wall | verdict |
+|---|---|---|---|---|---|---|
+| base single pass, 4 MP | 2720x1536 | 0.96 | 1.00 | 1.000 | 144 s | wrong digit (`1982`) |
+| `--refine`: LBH 2x latent upscale + 4-step refine, 2 MP base | 3840x2176 | 1.00 | 1.00 | 0.546 | 237 s | corrected, whole frame re-imagined at 2x |
+| `--refine`, 4 MP base | 5440x3072 | 1.00 | 1.00 | 0.693 | 90 s | corrected, sharpest lettering of the set |
+| masked inpaint, source as `<Picture 1>`, denoise 0.6 / 0.85 / 1.0 | 2720x1536 | 0.96 | 1.00 | 0.76 | 52 s | **keeps the wrong digit at every denoise** — the model copies its own reference |
+| `--inpaint`: source only as latent, artwork as `<Picture 1>`, denoise 1.0 | 2720x1536 | 1.00 | 0.97 | 0.639 | 27 s | corrected, but the plate shrank (box re-composed) |
+| **`--inpaint`, denoise 0.85** | 2720x1536 | **1.00** | **1.00** | 0.680 | **27 s** | **corrected, geometry kept, outside frozen** |
+| 2x2 overlapping `--detail` tiles | 2720x1536 | 0.35 | 0.38 | 0.620 | 294 s | **FAIL** — one tile re-composed as a different house |
+
+Outside-SSIM for the inpaints is a VAE round-trip plus the grown mask, not drift: the wall,
+window and sky are pixel-frozen (see the sheet). What this settles:
+
+- **Splitting the frame into tiles does not work.** Every H3 edit is a fresh reference-guided
+  generation; a tile with enough context re-composes, a tile without context hallucinates.
+- **The source must not be a reference when you want a correction.** As `<Picture 1>` it is copied
+  faithfully, mistakes included, at any denoise. Feed it through the latent instead
+  (`VAEEncode` → `H3V2VInit` mask, ComfyUI-MAINodes) and let the artwork be the reference.
+- **Two production passes came out of it.** `--inpaint` (masked, 0.85, 27 s) for a wrong or soft
+  region; `--refine` (latent 2x + 4-step refine, pod) when the whole frame should go up a size.
+  `--detail` stays for a crop that needs its own composition, with an edge in the box.
+
+## 6. Light as a source (neon)
 
 ![neon](out/sheet_neon.png)
 
@@ -134,6 +164,6 @@ Wall time is dominated by model load/offload on a 32 GB card, so 4 MP costs almo
 - SSIM/NCC reward pixel fidelity, which a generative editor never has; read task 4 as "what kind
   of thing survives", not a quality score.
 - The neon ΔE thresholds are descriptive, not pass/fail.
-- 15 renders on one card, one seed set. Rerun before quoting to a decimal.
+- 24 renders on one card, one seed set. Rerun before quoting to a decimal.
 
 Full per-render numbers: [`out/report.md`](out/report.md), [`out/scores.json`](out/scores.json).

@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a crop from a photograph of a painted metal sign plate mounted on a red-brick gable wall, and supplies the entire image: the framing, whatever part of the plate, the brick, the window, the sky or the pavement falls inside the crop, the colours and the sunlight. <Picture 2> is the flat artwork of the same sign plate and is the authority for any lettering visible in the crop: copy those characters exactly as they appear there, letter for letter and digit for digit.
+
+Reproduce <Picture 1> exactly, at higher sharpness: the same crop, every element in the same position and at the same size, with any visible lettering crisp and legible. Do not add a plate, a border, a sign or any object that is not already in <Picture 1>. Do not add, move, resize or remove anything. No other text anywhere.
+
+A single coherent photograph identical to <Picture 1> in composition.

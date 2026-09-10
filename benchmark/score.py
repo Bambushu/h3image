@@ -149,6 +149,21 @@ def preservation(im, box):
             "fiducials_kept": sum(1 for v in fid.values() if v["ncc"] >= 0.6)}
 
 
+BASE_NAME = "sign_mp4_s1001"
+
+
+def vs_base(im, base, box):
+    """SSIM against the base render outside the plate box (both resized to the base size)."""
+    g1 = np.asarray(ImageOps.grayscale(im.resize(base.size, Image.LANCZOS)), dtype=np.float32) / 255
+    g2 = np.asarray(ImageOps.grayscale(base), dtype=np.float32) / 255
+    _, smap = ssim(g1, g2, data_range=1.0, full=True)
+    W, H = base.size
+    x0, y0, x1, y1 = [int(v * (W / im.width if i % 2 == 0 else H / im.height)) for i, v in enumerate(box)]
+    mask = np.ones_like(smap, bool); m = 32
+    mask[max(0, y0 - m):y1 + m, max(0, x0 - m):x1 + m] = False
+    return round(float(smap[mask].mean()), 3)
+
+
 def region_lab(im, box):
     x0, y0, x1, y1 = box
     return rgb2lab(np.asarray(to_src(im).crop((x0, y0, x1, y1)))).reshape(-1, 3).mean(0)
@@ -225,6 +240,9 @@ def main():
                 s["seam_ssim"] = seam(im, load(base), timings[n]["detail"])
             else:
                 s["preserve"] = preservation(im, box)
+        if timings[n].get("pass"):
+            s["pass"] = timings[n]["pass"]
+            s["vs_base_outside"] = vs_base(im, load(BASE_NAME), box)
         scores[n] = s
         print(n, s.get("ocr"), flush=True)
     if "neon_lit" in scores and "neon_unlit" in scores:
@@ -282,6 +300,16 @@ def report(s):
               "| region | ΔE00 | toward pink | ΔL |", "|---|---|---|---|"]
         for k, v in nn.items():
             L.append(f"| {k} | {v['dE']:.1f} | {v['toward_pink']:+.1f} | {v['dL']:+.1f} |")
+    passes = [n for n in s if s[n].get("pass")]
+    if passes:
+        L += ["", "## 6. Second-pass candidates (all on sign_mp4_s1001)", "",
+              "| pass | output | " + " | ".join(tiers) + " | SSIM vs base outside plate | wall s |", "|---|---|" + "---|" * len(tiers) + "---|---|"]
+        b = s[BASE_NAME]
+        L.append(f"| base single pass | {b['size'][0]}x{b['size'][1]} | " + " | ".join(f"{b['ocr'][t]:.2f}" for t in tiers) + " | 1.000 | " + f"{b['wall_s']:.0f} |")
+        for n in passes:
+            r = s[n]
+            L.append(f"| {n.replace(BASE_NAME + '_', '')} | {r['size'][0]}x{r['size'][1]} | " + " | ".join(f"{r['ocr'][t]:.2f}" for t in tiers) +
+                     f" | {r['vs_base_outside']:.3f} | {r['wall_s']:.0f} |")
     L += ["", "## Speed", "", "| render | MP | size | wall s |", "|---|---|---|---|"]
     for n in s:
         L.append(f"| {n} | {s[n]['mp']} | {s[n]['size'][0]}x{s[n]['size'][1]} | {s[n]['wall_s']:.0f} |")
@@ -302,6 +330,14 @@ def report(s):
     if seeds:
         sheet(seeds, os.path.join(OUT, "sheet_seeds.png"), plate,
               lambda n: f"seed {s[n]['seed']}  S={s[n]['ocr']['S']:.2f} XS={s[n]['ocr']['XS']:.2f} XXS={s[n]['ocr']['XXS']:.2f}", cols=4, w=640)
+    passes = [n for n in s if s[n].get("pass")]
+    if passes:
+        bx = plate[BASE_NAME]; pad = 80
+        crop = (max(0, bx[0] - pad), max(0, bx[1] - pad), bx[2] + pad, bx[3] + pad)
+        names = [BASE_NAME] + passes
+        crops = {n: tuple(int(v * (s[n]["size"][i % 2] / s[BASE_NAME]["size"][i % 2])) for i, v in enumerate(crop)) for n in names}
+        sheet(names, os.path.join(OUT, "sheet_passes.png"), crops,
+              lambda n: f"{n.replace(BASE_NAME + '_', '') if n != BASE_NAME else 'base'}  XS={s[n]['ocr']['XS']:.2f} XXS={s[n]['ocr']['XXS']:.2f} outside-SSIM={s[n].get('vs_base_outside', 1):.2f}", cols=3, w=800)
     if "neon_lit" in s and "neon_unlit" in s:
         sheet(["neon_lit", "neon_unlit"], os.path.join(OUT, "sheet_neon.png"), cols=2, w=900)
     print("\n".join(L))

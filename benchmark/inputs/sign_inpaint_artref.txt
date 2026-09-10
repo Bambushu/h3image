@@ -1,0 +1,5 @@
+Task: Reference-guided generation.
+
+<Picture 1> is the flat artwork of a painted metal sign plate: a dark navy panel with five lines of pale lettering. The image to produce is a photograph of that sign plate mounted on a red-brick gable wall in low afternoon sun, with the plate's lettering copied from <Picture 1> exactly, letter for letter and digit for digit, in the same layout and sizes. Do not add, remove, reorder or respell any characters. No other text anywhere.
+
+A single coherent photograph of the brick wall with the <Picture 1> sign plate mounted on it, every line of lettering crisp and legible.

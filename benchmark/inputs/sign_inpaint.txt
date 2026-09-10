@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a photograph of a painted metal sign plate mounted on a red-brick gable wall and supplies the entire image: the framing, the wall, the window, the sky, the plate's position and size, the colours and the sunlight. <Picture 2> is the flat artwork of the same sign plate and is the authority for every line of lettering on it: copy that lettering exactly as it appears there, letter for letter and digit for digit, in the same layout.
+
+Reproduce <Picture 1> exactly, at higher sharpness, with all five lines of lettering on the plate crisp, legible and corrected to match <Picture 2>. Do not add, move, resize or remove anything. No other text anywhere.
+
+A single coherent photograph identical to <Picture 1> in composition.

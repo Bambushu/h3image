@@ -26,7 +26,8 @@ OUTPUT_DIR = os.path.expanduser(os.environ.get("H3EDIT_OUTPUT", "~/ComfyUI-h3/ou
 N = {"prompt": ("138", "PrimitiveStringMultiline"), "res": ("115", "ResolutionSelector"),
      "steps": ("124", "BasicScheduler"), "seed": ("129", "RandomNoise"),
      "r2v": ("136", "MiniMaxH3ReferenceToVideo"), "sampler": ("123", "KSamplerSelect"),
-     "save": ("664", "SaveImage")}
+     "save": ("664", "SaveImage"), "ksampler": ("125", "SamplerCustomAdvanced"),
+     "vae": ("119", "VAELoader")}
 REF_NODES = [("137", "ref_images.ref_image_0"), ("139", "ref_images.ref_image_1")]
 # Slots 2..4 are added at queue time by cloning the exported LoadImage entry (node 139) and
 # linking it under the next dotted key -- the same pattern the pod driver (H3_ADDNODES/H3_APISET) validated on a 5090. Nothing is typed by hand.
@@ -93,6 +94,10 @@ def doctor():
     except ImportError:
         ok = False
         print("FAIL pillow missing in this install -- run: uv tool install --force -e .  (stale tool venv)")
+    if "H3V2VInit" in api("/api/object_info/H3V2VInit"):
+        print("ok   H3V2VInit registered (ComfyUI-MAINodes; --inpaint)")
+    else:
+        print("warn --inpaint unavailable: install ComfyUI-MAINodes (H3V2VInit) and restart")
     if "beta57" in combo_options("BasicScheduler", "scheduler"):
         print("ok   beta57 scheduler registered (comfyui-obvpm)")
     else:
@@ -163,7 +168,40 @@ def build(args):
         # One ref: point both slots at it rather than unwiring a slot, which would need the
         # frontend to re-serialize the autogrow input.
         g[REF_NODES[1][0]]["inputs"]["image"] = names[0]
+    if args.inpaint:
+        inpaint_wire(g, args)
     return g
+
+
+def inpaint_wire(g, args):
+    """Masked partial denoise (benchmark 2026-09-10, 5090): the source enters ONLY as an encoded
+    latent through H3V2VInit (ComfyUI-MAINodes), whose noise mask freezes every latent cell
+    outside the box; the sampler starts at --denoise of the schedule. The -r images are the
+    references (<Picture 1>..) -- the source is deliberately NOT a reference, because with the
+    source as <Picture 1> the model reproduces its mistakes verbatim (a wrong digit survived
+    denoise 0.6, 0.85 and 1.0). Artwork-only at 0.85 corrected the digit, kept the plate's size
+    and position, and left the rest of the frame pixel-frozen, in 27 s.
+    """
+    from PIL import Image, ImageDraw
+    x0, y0, x1, y1 = args.inpaint
+    src = Image.open(args.source).convert("RGB")
+    W, H = src.size
+    if W % 32 or H % 32:
+        sys.exit(f"--inpaint source must be a multiple of 32 px per side (an h3edit render is); got {W}x{H}")
+    if x1 - x0 < 32 or y1 - y0 < 32 or x1 > W or y1 > H:
+        sys.exit(f"--inpaint box {args.inpaint} does not fit {args.source} ({W}x{H})")
+    mask = Image.new("L", (W, H), 0)
+    ImageDraw.Draw(mask).rectangle((x0 - args.grow, y0 - args.grow, x1 + args.grow, y1 + args.grow), fill=255)
+    mask_path = os.path.join(INPUT_DIR, f"{args.name}_mask.png")
+    mask.save(mask_path)
+    src_name = stage_ref(args.source)
+    g["9300"] = {"class_type": "LoadImage", "inputs": {"image": src_name}}
+    g["9301"] = {"class_type": "VAEEncode", "inputs": {"pixels": ["9300", 0], "vae": [N["vae"][0], 0]}}
+    g["9302"] = {"class_type": "LoadImageMask", "inputs": {"image": os.path.basename(mask_path), "channel": "red"}}
+    g["9303"] = {"class_type": "H3V2VInit", "inputs": {"samples": ["9301", 0], "mask": ["9302", 0], "mask_feather": args.feather}}
+    g[N["ksampler"][0]]["inputs"]["latent_image"] = ["9303", 0]
+    g[N["r2v"][0]]["inputs"].update(width=W, height=H)      # the latent fixes the size
+    g[N["steps"][0]]["inputs"]["denoise"] = args.denoise
 
 
 def stage_ref(path):
@@ -249,7 +287,11 @@ def main():
     p.add_argument("--detail", metavar="X0,Y0,X1,Y1", type=lambda v: [int(x) for x in v.split(",")],
                    help="two-pass detail: re-render this box of --source and paste it back (see README)")
     p.add_argument("--source", help="full image the --detail box is cut from; becomes <Picture 1>")
-    p.add_argument("--feather", type=int, default=48, help="paste-back edge feather in px (--detail)")
+    p.add_argument("--feather", type=int, default=48, help="edge feather in px (--detail paste-back, --inpaint mask)")
+    p.add_argument("--inpaint", metavar="X0,Y0,X1,Y1", type=lambda v: [int(x) for x in v.split(",")],
+                   help="masked re-denoise of this box of --source; -r images are the references, the rest of the frame is frozen")
+    p.add_argument("--denoise", type=float, default=0.85, help="--inpaint: fraction of the schedule to run (0.85 corrects lettering and keeps geometry; 1.0 re-composes the box)")
+    p.add_argument("--grow", type=int, default=32, help="--inpaint: dilate the box by this many px")
     p.add_argument("--steps", type=int, default=8, help="8 with the turbo LoRA; 20 with --lora off")
     p.add_argument("--sampler", default="er_sde", help="KSamplerSelect sampler_name (euler with --lora off)")
     p.add_argument("--scheduler", default="beta57", help="BasicScheduler scheduler (simple with --lora off)")
@@ -277,6 +319,11 @@ def main():
             p.error("--detail needs a prompt, --source, -o and a X0,Y0,X1,Y1 box")
         if len(args.refs) > MAX_REFS - 1:
             p.error(f"--detail: max {MAX_REFS - 1} extra references (the crop is <Picture 1>)")
+    elif args.inpaint:
+        if not (args.prompt and args.source and args.refs and len(args.inpaint) == 4):
+            p.error("--inpaint needs a prompt, --source, at least one -r (the artwork) and a X0,Y0,X1,Y1 box")
+        if args.detail:
+            p.error("--inpaint and --detail are different passes; run one at a time")
     elif not args.prompt or not args.refs:
         p.error("a prompt and at least one --ref are required")
     if len(args.refs) > MAX_REFS:

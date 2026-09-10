@@ -1137,5 +1137,763 @@
    "XXS": 23
   },
   "seam_ssim": 0.987
+ },
+ "sign_mp4_s1001_latup2": {
+  "size": [
+   3840,
+   2176
+  ],
+  "wall_s": 236.7,
+  "mp": 2.0,
+  "seed": 1001,
+  "plate_box": [
+   536,
+   456,
+   2988,
+   1836
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 1.0,
+   "XXS": 1.0
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1962NOPARKINGREF883105",
+    "EST1962NOPARKINGREF883105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 331,
+   "M": 166,
+   "S": 90,
+   "XS": 52,
+   "XXS": 33
+  },
+  "preserve": {
+   "ssim_outside": 0.584,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.947,
+     "shift_px": 9
+    },
+    "window_sill": {
+     "ncc": 0.943,
+     "shift_px": 8
+    },
+    "coping_right": {
+     "ncc": 0.795,
+     "shift_px": 1
+    },
+    "coping_left": {
+     "ncc": 0.977,
+     "shift_px": 1
+    },
+    "plinth_left": {
+     "ncc": 0.734,
+     "shift_px": 1
+    },
+    "pavement": {
+     "ncc": 0.718,
+     "shift_px": 3
+    },
+    "sky": {
+     "ncc": 0.936,
+     "shift_px": 27
+    },
+    "wall_right": {
+     "ncc": 0.391,
+     "shift_px": 20
+    }
+   },
+   "fiducials_kept": 7
+  },
+  "pass": "latup",
+  "vs_base_outside": 0.546
+ },
+ "sign_mp4_s1001_inpaint0.6": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 52.1,
+  "mp": 4.0,
+  "seed": 1001,
+  "plate_box": [
+   400,
+   320,
+   2112,
+   1288
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 0.96,
+   "XXS": 1.0
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1982NOPARKINGREF883105",
+    "EST1982NOPARKINGREF883105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 232,
+   "M": 116,
+   "S": 63,
+   "XS": 37,
+   "XXS": 23
+  },
+  "preserve": {
+   "ssim_outside": 0.561,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.963,
+     "shift_px": 2
+    },
+    "window_sill": {
+     "ncc": 0.948,
+     "shift_px": 1
+    },
+    "coping_right": {
+     "ncc": 0.891,
+     "shift_px": 2
+    },
+    "coping_left": {
+     "ncc": 0.977,
+     "shift_px": 1
+    },
+    "plinth_left": {
+     "ncc": 0.753,
+     "shift_px": 0
+    },
+    "pavement": {
+     "ncc": 0.737,
+     "shift_px": 1
+    },
+    "sky": {
+     "ncc": 0.891,
+     "shift_px": 2
+    },
+    "wall_right": {
+     "ncc": 0.689,
+     "shift_px": 1
+    }
+   },
+   "fiducials_kept": 8
+  },
+  "pass": "inpaint",
+  "vs_base_outside": 0.763
+ },
+ "sign_mp4_s1001_inpaint0.85": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 51.9,
+  "mp": 4.0,
+  "seed": 1001,
+  "plate_box": [
+   400,
+   320,
+   2112,
+   1288
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 0.96,
+   "XXS": 1.0
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1982NOPARKINGREF883105",
+    "EST1982NOPARKINGREF883105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 232,
+   "M": 116,
+   "S": 63,
+   "XS": 37,
+   "XXS": 23
+  },
+  "preserve": {
+   "ssim_outside": 0.561,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.963,
+     "shift_px": 2
+    },
+    "window_sill": {
+     "ncc": 0.948,
+     "shift_px": 1
+    },
+    "coping_right": {
+     "ncc": 0.891,
+     "shift_px": 2
+    },
+    "coping_left": {
+     "ncc": 0.977,
+     "shift_px": 1
+    },
+    "plinth_left": {
+     "ncc": 0.753,
+     "shift_px": 0
+    },
+    "pavement": {
+     "ncc": 0.735,
+     "shift_px": 1
+    },
+    "sky": {
+     "ncc": 0.892,
+     "shift_px": 2
+    },
+    "wall_right": {
+     "ncc": 0.689,
+     "shift_px": 1
+    }
+   },
+   "fiducials_kept": 8
+  },
+  "pass": "inpaint",
+  "vs_base_outside": 0.762
+ },
+ "sign_mp4_s1001_latup4": {
+  "size": [
+   5440,
+   3072
+  ],
+  "wall_s": 89.6,
+  "mp": 4.0,
+  "seed": 1001,
+  "plate_box": [
+   804,
+   644,
+   4224,
+   2576
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 1.0,
+   "XXS": 1.0
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1962NOPARKINGREF883105",
+    "EST1962NOPARKINGREF883105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 464,
+   "M": 232,
+   "S": 126,
+   "XS": 73,
+   "XXS": 46
+  },
+  "preserve": {
+   "ssim_outside": 0.597,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.956,
+     "shift_px": 2
+    },
+    "window_sill": {
+     "ncc": 0.942,
+     "shift_px": 1
+    },
+    "coping_right": {
+     "ncc": 0.899,
+     "shift_px": 2
+    },
+    "coping_left": {
+     "ncc": 0.978,
+     "shift_px": 2
+    },
+    "plinth_left": {
+     "ncc": 0.742,
+     "shift_px": 0
+    },
+    "pavement": {
+     "ncc": 0.717,
+     "shift_px": 1
+    },
+    "sky": {
+     "ncc": 0.926,
+     "shift_px": 41
+    },
+    "wall_right": {
+     "ncc": 0.698,
+     "shift_px": 1
+    }
+   },
+   "fiducials_kept": 8
+  },
+  "pass": "latup",
+  "vs_base_outside": 0.693
+ },
+ "sign_mp4_s1001_tiles2": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 294.5,
+  "mp": 4.0,
+  "seed": 1001,
+  "plate_box": [
+   400,
+   324,
+   2108,
+   1292
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 0.353,
+   "XXS": 0.378
+  },
+  "ocr_lines": {
+   "plate": [
+    "HARBOUR",
+    "I",
+    "ARBOURAGG",
+    "KXT4821A",
+    "HARBOUR",
+    "I",
+    "ARBOURAGG",
+    "KXT4821",
+    "1WE",
+    "KXT4821AE",
+    "UNIT701414960721SEEE",
+    "1WE",
+    "KXT4821A",
+    "UNIT701414960721SEEE"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "FECT",
+    "FECT",
+    "REETB3105",
+    "SEESB3105",
+    "KXT4821E",
+    "KXT4821ERE",
+    "UNIT701414960721OE",
+    "UNIT701414960721OE"
+   ]
+  },
+  "cap_px": {
+   "L": 232,
+   "M": 116,
+   "S": 63,
+   "XS": 37,
+   "XXS": 23
+  },
+  "preserve": {
+   "ssim_outside": 0.428,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.957,
+     "shift_px": 4
+    },
+    "window_sill": {
+     "ncc": 0.944,
+     "shift_px": 2
+    },
+    "coping_right": {
+     "ncc": 0.885,
+     "shift_px": 2
+    },
+    "coping_left": {
+     "ncc": 0.972,
+     "shift_px": 3
+    },
+    "plinth_left": {
+     "ncc": 0.187,
+     "shift_px": 35
+    },
+    "pavement": {
+     "ncc": 0.71,
+     "shift_px": 0
+    },
+    "sky": {
+     "ncc": 0.95,
+     "shift_px": 7
+    },
+    "wall_right": {
+     "ncc": 0.596,
+     "shift_px": 5
+    }
+   },
+   "fiducials_kept": 6
+  },
+  "pass": "tiles",
+  "vs_base_outside": 0.62
+ },
+ "sign_mp4_s1001_inpaint1": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 52.0,
+  "mp": 4.0,
+  "seed": 1001,
+  "plate_box": [
+   400,
+   320,
+   2112,
+   1288
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 0.96,
+   "XXS": 1.0
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1982NOPARKINGREF883105",
+    "EST1982NOPARKINGREF883105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 232,
+   "M": 116,
+   "S": 63,
+   "XS": 37,
+   "XXS": 23
+  },
+  "preserve": {
+   "ssim_outside": 0.561,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.963,
+     "shift_px": 2
+    },
+    "window_sill": {
+     "ncc": 0.948,
+     "shift_px": 1
+    },
+    "coping_right": {
+     "ncc": 0.891,
+     "shift_px": 2
+    },
+    "coping_left": {
+     "ncc": 0.977,
+     "shift_px": 1
+    },
+    "plinth_left": {
+     "ncc": 0.753,
+     "shift_px": 0
+    },
+    "pavement": {
+     "ncc": 0.735,
+     "shift_px": 1
+    },
+    "sky": {
+     "ncc": 0.891,
+     "shift_px": 2
+    },
+    "wall_right": {
+     "ncc": 0.689,
+     "shift_px": 1
+    }
+   },
+   "fiducials_kept": 8
+  },
+  "pass": "inpaint",
+  "vs_base_outside": 0.762
+ },
+ "sign_mp4_s1001_inpaint1_artref": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 27.3,
+  "mp": 4.0,
+  "seed": 1001,
+  "plate_box": [
+   672,
+   424,
+   1864,
+   1080
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 1.0,
+   "XXS": 0.967
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1962NOPARKINGREF883105",
+    "EST1962NOPARKINGREF883105",
+    "WWWHARGOURWORKSEXAMPLEOPEN0818",
+    "WWWHARGOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 157,
+   "M": 79,
+   "S": 43,
+   "XS": 25,
+   "XXS": 16
+  },
+  "preserve": {
+   "ssim_outside": 0.452,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.963,
+     "shift_px": 2
+    },
+    "window_sill": {
+     "ncc": 0.947,
+     "shift_px": 1
+    },
+    "coping_right": {
+     "ncc": 0.891,
+     "shift_px": 2
+    },
+    "coping_left": {
+     "ncc": 0.977,
+     "shift_px": 1
+    },
+    "plinth_left": {
+     "ncc": 0.752,
+     "shift_px": 0
+    },
+    "pavement": {
+     "ncc": 0.736,
+     "shift_px": 0
+    },
+    "sky": {
+     "ncc": 0.892,
+     "shift_px": 2
+    },
+    "wall_right": {
+     "ncc": 0.689,
+     "shift_px": 1
+    }
+   },
+   "fiducials_kept": 8
+  },
+  "pass": "inpaint",
+  "vs_base_outside": 0.639
+ },
+ "sign_mp4_s1001_inpaint0.85_artref": {
+  "size": [
+   2720,
+   1536
+  ],
+  "wall_s": 26.9,
+  "mp": 4.0,
+  "seed": 1001,
+  "plate_box": [
+   452,
+   344,
+   1912,
+   1176
+  ],
+  "plate_found": true,
+  "ocr": {
+   "L": 1.0,
+   "M": 1.0,
+   "S": 1.0,
+   "XS": 1.0,
+   "XXS": 1.0
+  },
+  "ocr_lines": {
+   "plate": [
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721",
+    "KXT4821",
+    "UNIT701414960721"
+   ],
+   "rows": [
+    "HARBOUR",
+    "HARBOUR",
+    "KXT4821",
+    "KXT4821",
+    "UNIT701414960721",
+    "UNIT701414960721",
+    "EST1962NOPARKINGREF883105",
+    "EST1962NOPARKINGREF883105",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818",
+    "WWWHARBOURWORKSEXAMPLEOPEN0818"
+   ]
+  },
+  "cap_px": {
+   "L": 200,
+   "M": 100,
+   "S": 54,
+   "XS": 32,
+   "XXS": 20
+  },
+  "preserve": {
+   "ssim_outside": 0.489,
+   "fiducials": {
+    "window_top": {
+     "ncc": 0.963,
+     "shift_px": 2
+    },
+    "window_sill": {
+     "ncc": 0.946,
+     "shift_px": 1
+    },
+    "coping_right": {
+     "ncc": 0.891,
+     "shift_px": 2
+    },
+    "coping_left": {
+     "ncc": 0.977,
+     "shift_px": 1
+    },
+    "plinth_left": {
+     "ncc": 0.752,
+     "shift_px": 0
+    },
+    "pavement": {
+     "ncc": 0.737,
+     "shift_px": 0
+    },
+    "sky": {
+     "ncc": 0.891,
+     "shift_px": 2
+    },
+    "wall_right": {
+     "ncc": 0.689,
+     "shift_px": 1
+    }
+   },
+   "fiducials_kept": 8
+  },
+  "pass": "inpaint",
+  "vs_base_outside": 0.68
  }
 }

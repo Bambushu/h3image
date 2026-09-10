@@ -106,11 +106,20 @@ h3edit "$(cat prompts/detail_pass_example.txt)" \
 
 The box is cut from `--source`, inserted as `<Picture 1>`; `-r` images follow as `<Picture 2>`…; the render (2 MP default, aspect snapped to the box) is scaled back and blended with a 48-px feathered edge (`--feather`). Truck cab test (760-px box of a 4 MP frame): all lettering legible, seam invisible, +6.5 min. Prompt as in `prompts/detail_pass_example.txt`: `<Picture 1>` supplies everything, `<Picture 2>` is the lettering authority, "do not add, move or remove anything".
 
+**Prefer `--inpaint` when a region is wrong rather than soft.** It re-denoises a box of `--source` from an encoded latent with everything outside the box frozen, and your `-r` artwork is the only reference:
+
+```sh
+h3edit "$(cat benchmark/inputs/sign_inpaint_artref.txt)" \
+  --inpaint 400,324,2112,1288 --source out.png -r plate.png --denoise 0.85 -o out_fixed.png --wait
+```
+
+On the [benchmark](benchmark/README.md#5-second-pass-candidates-what-actually-fixes-lettering) it corrected a wrong digit, kept the plate's size and position, and left the wall pixel-identical, in 27 s on a 5090 (base model, 20 steps). `--denoise 1.0` re-composes the box instead. Needs ComfyUI-MAINodes (`H3V2VInit`; `--doctor` checks). Do not pass the source as `-r`: as a reference the model copies its own mistakes at any denoise. Local turbo-LoRA lane untested for this pass; measured on the pod's base lane.
+
 Two rules from the [benchmark](benchmark/README.md#3-detail-pass---detail--works-with-two-caveats): **the box must include a physical edge of the object** (a crop that is only flat panel and text gets a whole new plate hallucinated inside it), and **it sharpens, it does not correct** — a wrong digit in the base render survives the pass; reroll the base seed for that.
 
 ## Benchmark
 
-Five scripted stress tests, pinned seeds, shipped inputs: [`benchmark/`](benchmark/README.md). On a 5090 at 4 MP, **8 of 8 seeds render every line of a five-tier plate down to 23-px caps at ≥0.96 character accuracy**; lettering holds to ~17 px caps and starts inventing characters at 12 px. The one miss in 40 lines is a single digit swap (reroll). Also measured: what survives outside the edit (large structure yes, brick texture no), and the neon sign's pavement reflection (ΔE 21, local) versus its glow on brick (barely measurable).
+Six scripted stress tests, pinned seeds, shipped inputs: [`benchmark/`](benchmark/README.md). On a 5090 at 4 MP, **8 of 8 seeds render every line of a five-tier plate down to 23-px caps at ≥0.96 character accuracy**; lettering holds to ~17 px caps and starts inventing characters at 12 px. The one miss in 40 lines is a single digit swap (reroll). Also measured: what survives outside the edit (large structure yes, brick texture no), the neon sign's pavement reflection (ΔE 21, local) versus its glow on brick (barely measurable), and seven second-pass candidates against one wrong digit — tiling fails, `--inpaint` and a latent-upscale refine fix it.
 
 ![lettering ladder](benchmark/out/sheet_ladder.png)
 
