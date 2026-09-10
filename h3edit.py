@@ -272,6 +272,7 @@ def notch_grid(im, periods=(16, 8), width=1):
     decoder lays a faint cell grid over any frame sampled with encoded (V2V) context; a plain R2V
     frame is clean (16-px harmonic ~1-5x background vs 50-200x on inpaint output, 2026-09-10)."""
     import numpy as np
+    from PIL import Image
     a = np.asarray(im, np.float32); H, W = a.shape[:2]
     for c in range(a.shape[2]):
         F = np.fft.fft2(a[..., c])
