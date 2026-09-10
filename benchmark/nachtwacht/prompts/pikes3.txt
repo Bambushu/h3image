@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the dark upper wall of the hall, the cornice of the panelled stone wall and the top of the tall wooden door at the right, in an oil painting in the manner of a Dutch Golden Age militia group portrait: deep umber and black shadows, warm ochre and gold light falling from the upper left, visible brushwork, glazed highlights on metal and lace, a fine craquelure over the whole surface, exactly as it already is: the same deep umber darkness, the same cornice, nothing added to the wall. Painted over that darkness, five long pike shafts and one halberd lean at steep angles across the frame, entering from below the bottom edge and rising toward the upper left, their steel heads catching small highlights from the light at the upper left. Only the weapons are added; the wall, the cornice and the door stay bare and unchanged. No people, no gallery, no balcony, no parapet, no shield. The frame is a crop of a much larger finished painting: continue its light, palette, scale and brushwork exactly. Paint only inside the frame. No text.
+
+A single coherent passage of the same oil painting, with pike shafts leaning across the dark upper wall painted into it.

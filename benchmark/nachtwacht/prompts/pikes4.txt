@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the cornice of the panelled stone wall and the lit stone panel below it, between the plume of the lieutenant's hat at the left and the halberdier's hat at the right, with a halberd blade in the middle, in an oil painting in the manner of a Dutch Golden Age militia group portrait: deep umber and black shadows, warm ochre and gold light falling from the upper left, visible brushwork, glazed highlights on metal and lace, a fine craquelure over the whole surface, all exactly as they already are. The wooden pike shafts that lean across the dark wall above the frame continue straight down through the frame, passing in front of the cornice and the stone panel, down toward the shoulders of the men below the bottom edge, so that no shaft ends on the cornice. Only the shafts are added; the cornice, the wall, the halberd and the hats stay unchanged. No people added, no text.
+
+A single coherent passage of the same oil painting.

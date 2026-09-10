@@ -2,7 +2,7 @@
 
 The stress test the plate benchmark could not be: an image no single prompt produces, on any
 tool. A 5440x3072 militia group portrait in the manner of the Night Watch, painted from a blank
-canvas by MiniMax H3 in 25 passes on one canvas. Every figure, prop and the lettered shield is its
+canvas by MiniMax H3 in 34 passes on one canvas. Every figure, prop and the lettered shield is its
 own `--inpaint` pass at full resolution; nothing outside a pass's box is ever regenerated.
 
 ![final](out/final_4k.jpg)
@@ -92,6 +92,25 @@ a strip of finished ground on every side. Too small and you clip a body or decap
 too big only costs you the neighbours inside it, which the model repaints in context (the dog box
 took the halberdier's shins with it and joined them cleanly). Repairs go bigger, not smaller, and
 back to front: the drummer was redone before the dog because the drummer's box covers the dog's head.
+
+## Round 4: filling the empty wall, giving the flag a bearer
+
+Nine more local passes (one a pixel-space revert), boxes now given in pixels. The interesting ones:
+
+| pass | box (px) | denoise | result |
+|---|---|---|---|
+| pikes2 | 2176x800, empty dark wall | 1.0 | **FAIL**: the model composed a whole gallery of militiamen behind a parapet inside the box, cut hard at the box edge, with a tone shift at the left edge. An empty box has nothing to anchor to, so it becomes a fresh picture (the plate-in-plate failure again). Region reverted in pixel space. |
+| pikes3 | same box | 0.8 | wall stays dark, a rack of pike shafts and a halberd added; the shield is gone from the wall as a side effect of the box |
+| pikes4 | 480x512 | 0.8 | tried to carry the shafts down past the cornice: **no visible change**, at 0.8 the lit stone panel wins and nothing is added; the rack stays resting on the cornice |
+| sergeant | 384x544 | 1.0 | a bearded old sergeant in a morion, head and shoulders in the gap between the youth and the flag |
+| sergeant_body | 304x2072 | 1.0 | his body continued down the narrow slot to the steps; without it the head floated over bare wall |
+| ensign2 | 1424x1408 | 1.0 | Ray as the flag bearer, both hands on the pole, banner furled beside him. The box had to cover the captain's and the lieutenant's heads, and both came out as new people, so: |
+| captain_head2, lieut_head | 656x848, 544x448 | 1.0 | both heads repainted in front with their references |
+
+Two more rules from this round. **An empty box is a blank page**: at denoise 1.0 the model composes a
+new picture in it; to add props to bare wall use 0.8 so the wall itself survives. **Anything inside a
+box is fair game**, references or not; plan the sequence so that whatever a big box destroys gets
+its own pass afterwards, back to front.
 
 ## What it proved, and what it did not
 

@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a photograph of a person and supplies only their identity: face, features, hair colour, eyes and skin tone. It does not supply a background, a costume, a lighting setup or a photographic look.
+
+The frame shows the head, hat and collar of the lieutenant of a militia company, whose pale cream doublet with a lilac sash continues out of the frame at the bottom, in an oil painting in the manner of a Dutch Golden Age militia group portrait: deep umber and black shadows, warm ochre and gold light falling from the upper left, visible brushwork, glazed highlights on metal and lace, a fine craquelure over the whole surface. Repaint the face so it is unmistakably the person in <Picture 1>, rendered as paint: a man looking at the viewer, wearing a black hat with a red plume and a wide white lace collar, lit by the warm light from the upper left. The head joins the collar and shoulders below the frame exactly; the partisan shaft he holds and the wall behind stay as they are. The frame is a crop of a much larger finished painting: continue its light, palette, scale and brushwork exactly. Paint only inside the frame. No text.
+
+A single coherent passage of the same oil painting.

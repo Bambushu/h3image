@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame is a narrow slot between the captain's dark doublet at the right edge and the girl's gold silk skirt at the lower left, in an oil painting in the manner of a Dutch Golden Age militia group portrait: deep umber and black shadows, warm ochre and gold light falling from the upper left, visible brushwork, glazed highlights on metal and lace, a fine craquelure over the whole surface. At the top of the frame the old sergeant's white collar and buff leather coat are already painted; continue his body straight down from it: the buff leather coat with its belt and a sword hilt at the hip, plain brown breeches, grey hose and buckled shoes standing on the stone steps, in shadow behind the front figures, partly hidden by the captain at the right and by the girl's skirt at the left. The frame is a crop of a much larger finished painting: continue its light, palette, scale and brushwork exactly. Paint only inside the frame. No text.
+
+A single coherent passage of the same oil painting, with the sergeant's body continued down to the steps painted into it.

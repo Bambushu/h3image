@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+Paint an old sergeant seen head and shoulders behind the front figures, standing on the steps in front of the panelled wall, in an oil painting in the manner of a Dutch Golden Age militia group portrait: deep umber and black shadows, warm ochre and gold light falling from the upper left, visible brushwork, glazed highlights on metal and lace, a fine craquelure over the whole surface. He is a grey-bearded man of sixty with a lined face, wearing a dented steel morion helmet and a buff leather coat with a plain white collar, looking out toward the viewer over the shoulders of the men in front, half in shadow, only his head and shoulders visible above the figures in front. The frame is a crop of a much larger painting whose surroundings are already finished: continue their light, palette, scale and brushwork exactly, and let the new figure stand in the same space as the figures and architecture around the crop. Paint only inside the frame. No modern objects, no photograph, no text.
+
+A single coherent passage of the same oil painting, with an old sergeant in a morion seen head and shoulders behind the front figures painted into it.

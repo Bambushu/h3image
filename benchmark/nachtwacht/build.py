@@ -62,6 +62,15 @@ PLAN = [
     ("dog_full",  "inpaint",   (0.66, 0.72, 0.86, 1.00),  ["palette.png"],      1.0,  "dog_full.txt"),   # hindquarters clipped; whole dog in one box
     ("lieut_knee","inpaint",   (0.59, 0.75, 0.645, 0.865),["palette.png"],      1.0,  "lieut_knee.txt"), # scabbard tip painted as a blob at the knee
     ("shield2",   "inpaint",   (0.80, 0.02, 0.96, 0.22),  ["shield_art.png"],   0.85, "shield.txt"),     # last line read H8EDIT; 0.85 + artwork ref = the correction recipe
+    # --- round 4, local: fill the empty upper wall, give the flag a bearer (boxes in px) ---
+    ("pikes2",    "inpaint",   (3040, 0, 5216, 800),      ["palette.png"],      1.0,  "pikes2.txt"),     # pikes across the upper right, shield removed
+    ("sergeant",  "inpaint",   (1520, 480, 1904, 1024),   ["palette.png"],      1.0,  "sergeant.txt"),   # head in the gap between the youth and the flag
+    ("ensign2",   "inpaint",   (1952, 0, 3376, 1408),     ["ray_b.jpg"],        1.0,  "ensign2.txt"),    # flag bearer; covers the captain's head, so:
+    ("captain_head2","inpaint",(1904, 560, 2560, 1408),   ["lakem_b.jpg"],      1.0,  "captain_head2.txt"),
+    ("lieut_head","inpaint",   (2976, 784, 3520, 1232),   ["ray_a.jpg"],        1.0,  "lieut_head.txt"), # the ensign box covered his hat and gave him a new face
+    ("sergeant_body","inpaint",(1600, 1000, 1904, 3072),  ["palette.png"],      1.0,  "sergeant_body.txt"), # the head pass ended in a straight cut with nothing in front
+    ("pikes3",    "inpaint",   (3040, 0, 5216, 800),      ["palette.png"],      0.8,  "pikes3.txt"),     # pikes2 FAILED (composed a gallery of militia in the empty box); region reverted first, then 0.8 keeps the wall
+    ("pikes4",    "inpaint",   (3440, 704, 3920, 1216),   ["palette.png"],      0.8,  "pikes4.txt"),     # the shafts stopped on the cornice at the box edge; carry them down
 ]
 LOCAL_START = "halberdier"       # passes from here on were rendered locally in windows
 WINDOW_MP = 4.0
@@ -82,6 +91,8 @@ def save_state(s):
 
 def px_box(frac, W, H):
     x0, y0, x1, y1 = frac
+    if max(frac) > 1:                      # already pixels
+        return [int(x0), int(y0), min(W, int(x1)), min(H, int(y1))]
     snap = lambda v: int(round(v / 16) * 16)
     return [snap(x0 * W), snap(y0 * H), min(W, snap(x1 * W)), min(H, snap(y1 * H))]
 

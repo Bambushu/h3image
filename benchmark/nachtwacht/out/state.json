@@ -24,9 +24,18 @@
   "drummer2",
   "dog_full",
   "lieut_knee",
-  "shield2"
+  "shield2",
+  "pikes2",
+  "sergeant",
+  "ensign2",
+  "captain_head2",
+  "lieut_head",
+  "sergeant_body",
+  "pikes2_revert",
+  "pikes3",
+  "pikes4"
  ],
- "canvas": "/Users/mikes/h3edit/benchmark/nachtwacht/out/shield2.png",
+ "canvas": "/Users/mikes/h3edit/benchmark/nachtwacht/out/pikes4.png",
  "log": [
   {
    "name": "canvas",
@@ -555,6 +564,232 @@
    ],
    "denoise": 0.85,
    "wall_s": 342,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "pikes2",
+   "kind": "inpaint",
+   "box": [
+    3040,
+    0,
+    5216,
+    800
+   ],
+   "window": [
+    2784,
+    0,
+    5440,
+    1472
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 392,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "sergeant",
+   "kind": "inpaint",
+   "box": [
+    1520,
+    480,
+    1904,
+    1024
+   ],
+   "window": [
+    384,
+    0,
+    3040,
+    1472
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 372,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "ensign2",
+   "kind": "inpaint",
+   "box": [
+    1952,
+    0,
+    3376,
+    1408
+   ],
+   "window": [
+    1664,
+    0,
+    3648,
+    1984
+   ],
+   "refs": [
+    "ray_b.jpg"
+   ],
+   "denoise": 1.0,
+   "wall_s": 382,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "captain_head2",
+   "kind": "inpaint",
+   "box": [
+    1904,
+    560,
+    2560,
+    1408
+   ],
+   "window": [
+    896,
+    224,
+    3552,
+    1696
+   ],
+   "refs": [
+    "lakem_b.jpg"
+   ],
+   "denoise": 1.0,
+   "wall_s": 402,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "lieut_head",
+   "kind": "inpaint",
+   "box": [
+    2976,
+    784,
+    3520,
+    1232
+   ],
+   "window": [
+    1920,
+    256,
+    4576,
+    1728
+   ],
+   "refs": [
+    "ray_a.jpg"
+   ],
+   "denoise": 1.0,
+   "wall_s": 392,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "sergeant_body",
+   "kind": "inpaint",
+   "box": [
+    1600,
+    1000,
+    1904,
+    3072
+   ],
+   "window": [
+    992,
+    416,
+    2464,
+    3072
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 1.0,
+   "wall_s": 362,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "pikes2_revert",
+   "kind": "revert",
+   "box": [
+    3040,
+    0,
+    5216,
+    800
+   ],
+   "refs": [],
+   "denoise": null,
+   "wall_s": 0,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "pixel"
+  },
+  {
+   "name": "pikes3",
+   "kind": "inpaint",
+   "box": [
+    3040,
+    0,
+    5216,
+    800
+   ],
+   "window": [
+    2784,
+    0,
+    5440,
+    1472
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 0.8,
+   "wall_s": 352,
+   "size": [
+    5440,
+    3072
+   ],
+   "backend": "local"
+  },
+  {
+   "name": "pikes4",
+   "kind": "inpaint",
+   "box": [
+    3440,
+    704,
+    3920,
+    1216
+   ],
+   "window": [
+    2336,
+    224,
+    4992,
+    1696
+   ],
+   "refs": [
+    "palette.png"
+   ],
+   "denoise": 0.8,
+   "wall_s": 362,
    "size": [
     5440,
     3072
