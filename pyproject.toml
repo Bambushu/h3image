@@ -3,13 +3,17 @@ name = "h3edit"
 version = "0.1.0"
 description = "Instruction-based image editing on MiniMax H3, locally (one-frame R2V)"
 requires-python = ">=3.10"
-dependencies = ["websocket-client"]
+dependencies = ["websocket-client", "pillow"]
+
+[project.optional-dependencies]
+score = ["numpy", "scikit-image"]
 
 [project.scripts]
 h3edit = "h3edit:main"
+h3-inpaint = "h3_inpaint:main"
 
 [tool.setuptools]
-py-modules = ["h3edit", "export_graph"]
+py-modules = ["h3edit", "export_graph", "h3_inpaint"]
 
 [build-system]
 requires = ["setuptools>=61"]

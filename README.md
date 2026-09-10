@@ -117,6 +117,45 @@ On the [benchmark](benchmark/README.md#5-second-pass-candidates-what-actually-fi
 
 Two rules from the [benchmark](benchmark/README.md#3-detail-pass---detail--works-with-two-caveats): **the box must include a physical edge of the object** (a crop that is only flat panel and text gets a whole new plate hallucinated inside it), and **it sharpens, it does not correct** — a wrong digit in the base render survives the pass; reroll the base seed for that.
 
+## Canvas builds and region repairs (`h3-inpaint`)
+
+For an image no single prompt can produce, or a finished image with a wrong region: keep ONE
+canvas and paint it in masked passes, one box at a time, back to front. Each pass is
+`h3edit --inpaint` on a ~4 MP window cut around the box; only the box goes back onto the canvas,
+in pixel space, so nothing outside a box ever moves (outside SSIM 1.000, pass after pass).
+
+```sh
+h3-inpaint init  nw --canvas start.png                       # start.png = any image, sides /32
+h3-inpaint add   nw dog  --box 3584,2208,4672,3072 --prompt dog.txt          # no -r: a palette card from the canvas
+h3-inpaint add   nw girl --box 768,928,1680,1840  --prompt girl.txt -r rosalie.png
+h3-inpaint run   nw                                          # every pass not yet done, in order
+h3-inpaint show  nw dog                                      # 1:1 crop of that box: LOOK before the next pass
+h3-inpaint revert nw dog                                     # bad pass: pixel revert, then add it again under a new name
+h3-inpaint score nw                                          # outside/seam SSIM per pass + making-of sheet
+```
+
+Rules, each of which cost a pass to learn on the [43-pass Nachtwacht build](benchmark/nachtwacht/README.md):
+
+- **Back to front.** A later box overwrites whatever it covers, references or not: a box that
+  has to cover a finished neighbour's head gets that head repainted right after.
+- **Box = the whole thing you are composing plus a strip of finished ground on every side.** Too
+  small clips a body or decapitates a neighbour; too big only costs the neighbours inside it.
+- **An empty box is a blank page.** At `--denoise 1.0` bare wall becomes a fresh picture (a whole
+  gallery of militiamen once). Props on bare ground: `--denoise 0.85`, the ground survives. 1.0
+  needs existing content on at least two sides. 0.8 will not paint over lit, detailed ground.
+- **Ask for five fingers** and audit at 1:1 (`show` with no pass name writes 12 tiles); a
+  six-fingered hand survived thirty passes unnoticed at half size.
+- **Identity from a persona still is weak** at ~150 px faces: costume, pose and light carry over,
+  the likeness mostly does not. With no reference the model copies the figures already on the canvas.
+- Prompt shape per box: what `<Picture 1>` supplies (identity only / colours only / lettering
+  exactly), "the frame shows …" naming what is already there and must stay, the one thing to add
+  and where it sits relative to those anchors, then "The frame is a crop of a much larger finished
+  painting: continue its light, palette, scale and brushwork exactly. Paint only inside the frame."
+  See `benchmark/nachtwacht/prompts/`.
+
+Local turbo lane: 6-7 min per pass on an M5 at 4 MP windows. On a pod the same graph runs at
+full 16 MP in ~65 s per pass (`benchmark/nachtwacht/build.py --pod`).
+
 ## Benchmark
 
 Six scripted stress tests, pinned seeds, shipped inputs: [`benchmark/`](benchmark/README.md). On a 5090 at 4 MP, **8 of 8 seeds render every line of a five-tier plate down to 23-px caps at ≥0.96 character accuracy**; lettering holds to ~17 px caps and starts inventing characters at 12 px. The one miss in 40 lines is a single digit swap (reroll). Also measured: what survives outside the edit (large structure yes, brick texture no), the neon sign's pavement reflection (ΔE 21, local) versus its glow on brick (barely measurable), and seven second-pass candidates against one wrong digit — tiling fails, `--inpaint` and a latent-upscale refine fix it.
