@@ -50,7 +50,15 @@ PLAN = [
     ("captain",   "inpaint",   (0.30, 0.22, 0.50, 1.00),  ["lakem_b.jpg"],      1.0,  "captain.txt"),
     ("dog",       "inpaint",   (0.66, 0.72, 0.84, 1.00),  ["palette.png"],      1.0,  "dog.txt"),
     ("harmonize", "harmonize", None,                      [],                   0.35, "harmonize.txt"),
+    # --- round 2, local (M5, turbo lane) in ~4 MP windows cut around each box ---
+    ("halberdier","inpaint",   (0.66, 0.28, 0.80, 1.00),  ["ray_b.jpg"],        1.0,  "halberdier.txt"),
+    ("gunner",    "inpaint",   (0.50, 0.08, 0.62, 0.46),  ["speaker.jpg"],      1.0,  "gunner.txt"),
+    ("boy",       "inpaint",   (0.17, 0.10, 0.30, 0.46),  ["palette.png"],      1.0,  "boy.txt"),
+    ("captain_head","inpaint", (0.35, 0.20, 0.47, 0.40),  ["lakem_b.jpg"],      0.85, "captain_head.txt"),
+    ("dog_head",  "inpaint",   (0.735, 0.76, 0.81, 0.93), ["palette.png"],      1.0,  "dog_head.txt"),   # the halberdier box clipped the dog
 ]
+LOCAL_START = "halberdier"       # passes from here on were rendered locally in windows
+WINDOW_MP = 4.0
 INT8 = P.INT8
 
 
@@ -117,6 +125,50 @@ def masked_pass(url, name, canvas, box, refs, denoise, prompt, a):
     return P.submit(url, prompt, f"nw_{name}", a.base_mp, nodeset, addnodes, apiset)
 
 
+def window_for(box, W, H, mp=WINDOW_MP, margin=128):
+    """Smallest ~mp window (sides multiples of 32) that contains box+margin, clamped to the canvas."""
+    x0, y0, x1, y1 = box
+    bw, bh = x1 - x0 + 2 * margin, y1 - y0 + 2 * margin
+    best = None
+    for ar in (16 / 9, 3 / 2, 4 / 3, 1.0, 3 / 4, 2 / 3, 9 / 16):
+        w = int((mp * 1e6 * ar) ** 0.5) // 32 * 32
+        h = int((mp * 1e6 / ar) ** 0.5) // 32 * 32
+        if w >= bw and h >= bh and (best is None or w * h < best[0] * best[1]):
+            best = (w, h)
+    if best is None:
+        sys.exit(f"box {box} does not fit a {mp} MP window; split it")
+    w, h = min(best[0], W), min(best[1], H)
+    cx, cy = (x0 + x1) // 2, (y0 + y1) // 2
+    wx0 = max(0, min(W - w, cx - w // 2)) // 32 * 32
+    wy0 = max(0, min(H - h, cy - h // 2)) // 32 * 32
+    return [wx0, wy0, wx0 + w, wy0 + h]
+
+
+def local_pass(name, canvas, box, refs, denoise, prompt, a):
+    """Cut a window around the box, run `h3edit --inpaint` on it (the CLI pastes the box back
+    inside the window), then put the window back on the canvas. Outside the window nothing moves."""
+    import subprocess
+    im = Image.open(canvas).convert("RGB")
+    W, H = im.size
+    win = window_for(box, W, H)
+    wx0, wy0, wx1, wy1 = win
+    crop_p = os.path.join(OUT, f"{name}_window.png")
+    im.crop(win).save(crop_p)
+    rel = [box[0] - wx0, box[1] - wy0, box[2] - wx0, box[3] - wy0]
+    out_p = os.path.join(OUT, f"{name}_window_out.png")
+    c = ["h3edit", open(prompt).read(), "--inpaint", ",".join(map(str, rel)), "--source", crop_p,
+         "--denoise", str(denoise), "--grow", str(a.grow), "--feather", str(a.feather),
+         "--seed", str(SEED + len(name) * 7919), "--name", f"nw_{name}", "-o", out_p, "--wait"]
+    for r in refs:
+        c += ["-r", os.path.join(REFS, r)]
+    print(f"    window {win} ({wx1-wx0}x{wy1-wy0}), box in window {rel}", flush=True)
+    r = subprocess.run(c, capture_output=True, text=True)
+    if r.returncode != 0 or not os.path.exists(out_p):
+        sys.exit("local pass failed:\n" + (r.stdout + r.stderr)[-2000:])
+    comp = im.copy(); comp.paste(Image.open(out_p).convert("RGB"), (wx0, wy0))
+    return comp, win
+
+
 def paste_back(prev_canvas, render, box, grow, feather, out):
     """Feathered pixel-space paste of the box: outside stays bit-exact, no VAE round-trip."""
     from PIL import ImageFilter
@@ -134,6 +186,7 @@ def paste_back(prev_canvas, render, box, grow, feather, out):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pod", default="nw")
+    ap.add_argument("--backend", choices=["pod", "local"], default="pod", help="local = h3edit CLI on ~4 MP windows")
     ap.add_argument("--base-mp", type=float, default=4.0, help="canvas base; the refine doubles it (4 -> 5440x3072)")
     ap.add_argument("--grow", type=int, default=32)
     ap.add_argument("--feather", type=int, default=64)
@@ -141,7 +194,7 @@ def main():
     ap.add_argument("--redo", help="drop this pass and everything after it from the state, then rebuild")
     a = ap.parse_args()
     os.makedirs(OUT, exist_ok=True)
-    url = pod.podenv(a.pod)
+    url = pod.podenv(a.pod) if a.backend == "pod" else None
     st = load_state()
     names = [p[0] for p in PLAN]
     if a.redo:
@@ -154,6 +207,19 @@ def main():
             continue
         prompt = os.path.join(PROMPTS, pfile)
         t0 = time.time()
+        if a.backend == "local":
+            W, H = Image.open(st["canvas"]).size
+            box = px_box(frac, W, H)
+            print(f"=== {name} (local window) box={box} refs={refs} denoise={denoise}", flush=True)
+            comp, win = local_pass(name, st["canvas"], box, refs, denoise, prompt, a)
+            out = os.path.join(OUT, f"{name}.png"); comp.save(out)
+            wall = time.time() - t0
+            st["done"].append(name); st["canvas"] = out
+            st["log"].append({"name": name, "kind": "inpaint", "box": box, "window": win, "refs": refs, "denoise": denoise,
+                              "wall_s": round(wall), "size": [W, H], "backend": "local"})
+            save_state(st)
+            print(f"    done in {wall:.0f}s", flush=True)
+            continue
         if kind == "canvas":
             pid = canvas_pass(url, name, refs, prompt, a)
             box = None

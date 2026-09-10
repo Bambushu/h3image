@@ -259,7 +259,6 @@ def inpaint_run(args):
     if out:
         comp.save(out)
         print(f"{out}  (inpaint box {x0},{y0},{x1},{y1}, denoise {args.denoise}, pasted back)")
-    return out
 
 
 def detail(args):

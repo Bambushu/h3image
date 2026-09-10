@@ -2,13 +2,13 @@
 
 The stress test the plate benchmark could not be: an image no single prompt produces, on any
 tool. A 5440x3072 militia group portrait in the manner of the Night Watch, painted from a blank
-canvas by MiniMax H3 in 15 passes on one canvas. Every figure, prop and the lettered shield is its
+canvas by MiniMax H3 in 20 passes on one canvas. Every figure, prop and the lettered shield is its
 own `--inpaint` pass at full resolution; nothing outside a pass's box is ever regenerated.
 
 ![final](out/final_4k.jpg)
 
-**Numbers (RTX PRO 6000, base model, 20 steps, 2026-09-10):** 15 passes, 21 minutes 40 seconds
-of wall time end to end, ~65 s per masked pass at 16.7 MP. Outside every box the canvas stayed at
+**Numbers (RTX PRO 6000, base model, 20 steps, 2026-09-10):** 15 passes on the pod, 21 minutes 40 seconds
+of wall time end to end, ~65 s per masked pass at 16.7 MP; five more passes locally on the M5 afterwards (round 2 below). Outside every box the canvas stayed at
 SSIM 1.000 pass after pass; seam SSIM 0.96–0.98. Total render cost roughly $1.
 
 ![making of](out/sheet_makingof.png)
@@ -46,6 +46,31 @@ python3 benchmark/nachtwacht/score.py                  # SSIM per pass, sheets, 
 | captain | 1088x2400 | 1.000 | 0.983 | 63 s |
 | dog | 992x864 | 1.000 | 0.983 | 72 s |
 | harmonize | full frame | 0.877 | | 122 s |
+
+## Round 2: five more boxes, rendered locally
+
+The pod was gone, so passes 16–20 ran on the M5 through `h3edit --inpaint` (turbo LoRA, 8 steps)
+in a ~4 MP window cut around each box; the window goes back onto the 16 MP canvas afterwards
+(`build.py --backend local`). 380–460 s per pass. Halberdier, a gunner blowing on his match behind
+the lieutenant, a figure at the back left, the captain's head redone at denoise 0.85, and a repair
+of the dog's head after the halberdier's box clipped it.
+
+| pass | box (px) | window | outside SSIM | seam SSIM | wall |
+|---|---|---|---|---|---|
+| halberdier | 768x2208 | 1472x2656 | 1.000* | 0.870 | 460 s |
+| gunner | 656x1168 | 2656x1472 | 1.000 | 0.985 | 402 s |
+| back-left figure | 704x1104 | 2656x1472 | 1.000 | 0.985 | 382 s |
+| captain head (0.85) | 656x624 | 2656x1472 | 1.000 | 0.988 | 402 s |
+| dog head | 400x528 | 2656x1472 | 1.000 | 0.988 | 372 s |
+
+\* scored against the discarded harmonize state in the log; against the pass-14 canvas it is 1.000
+by construction (the window is pasted back whole).
+
+Lessons from the round: boxes overlap what is already painted, so a new figure's box takes the
+neighbour with it (the halberdier ate the dog's head; the gunner replaced the ensign). Plan boxes
+on empty ground or repair afterwards. "A small boy" came out as another adult in a red coat: with
+no identity reference the model defaults to the figures already on the canvas. The local turbo lane
+leaves more chroma noise in the box than the pod's 20-step base lane.
 
 ## What it proved, and what it did not
 

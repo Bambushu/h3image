@@ -305,5 +305,145 @@
   ],
   "outside_ssim": 0.877,
   "seam_ssim": null
+ },
+ {
+  "name": "halberdier",
+  "kind": "inpaint",
+  "box": [
+   3584,
+   864,
+   4352,
+   3072
+  ],
+  "window": [
+   3232,
+   416,
+   4704,
+   3072
+  ],
+  "refs": [
+   "ray_b.jpg"
+  ],
+  "denoise": 1.0,
+  "wall_s": 460,
+  "size": [
+   5440,
+   3072
+  ],
+  "backend": "local",
+  "outside_ssim": 0.872,
+  "seam_ssim": 0.87
+ },
+ {
+  "name": "gunner",
+  "kind": "inpaint",
+  "box": [
+   2720,
+   240,
+   3376,
+   1408
+  ],
+  "window": [
+   1696,
+   64,
+   4352,
+   1536
+  ],
+  "refs": [
+   "speaker.jpg"
+  ],
+  "denoise": 1.0,
+  "wall_s": 402,
+  "size": [
+   5440,
+   3072
+  ],
+  "backend": "local",
+  "outside_ssim": 1.0,
+  "seam_ssim": 0.985
+ },
+ {
+  "name": "boy",
+  "kind": "inpaint",
+  "box": [
+   928,
+   304,
+   1632,
+   1408
+  ],
+  "window": [
+   0,
+   96,
+   2656,
+   1568
+  ],
+  "refs": [
+   "palette.png"
+  ],
+  "denoise": 1.0,
+  "wall_s": 382,
+  "size": [
+   5440,
+   3072
+  ],
+  "backend": "local",
+  "outside_ssim": 1.0,
+  "seam_ssim": 0.985
+ },
+ {
+  "name": "captain_head",
+  "kind": "inpaint",
+  "box": [
+   1904,
+   608,
+   2560,
+   1232
+  ],
+  "window": [
+   896,
+   160,
+   3552,
+   1632
+  ],
+  "refs": [
+   "lakem_b.jpg"
+  ],
+  "denoise": 0.85,
+  "wall_s": 402,
+  "size": [
+   5440,
+   3072
+  ],
+  "backend": "local",
+  "outside_ssim": 1.0,
+  "seam_ssim": 0.988
+ },
+ {
+  "name": "dog_head",
+  "kind": "inpaint",
+  "box": [
+   4000,
+   2336,
+   4400,
+   2864
+  ],
+  "window": [
+   2784,
+   1600,
+   5440,
+   3072
+  ],
+  "refs": [
+   "palette.png"
+  ],
+  "denoise": 1.0,
+  "wall_s": 372,
+  "size": [
+   5440,
+   3072
+  ],
+  "backend": "local",
+  "outside_ssim": 1.0,
+  "seam_ssim": 0.988
  }
 ]

@@ -1,0 +1,7 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the front of a lean grey dog lying on the stone floor, in an oil painting in the manner of a Dutch Golden Age militia group portrait: deep umber and black shadows, warm ochre and gold light falling from the upper left, visible brushwork, glazed highlights on metal and lace, a fine craquelure over the whole surface; its body continues out of the frame to the left. Paint the dog's head and neck here, raised and turned toward the drum at the right, mouth open, ears back, joined naturally to the body, in the same raking light. Keep the stone floor, the boots and the halberd that touch the frame exactly as they are. The frame is a crop of a much larger finished painting: continue its light, palette, scale and brushwork exactly. Paint only inside the frame. No text.
+
+A single coherent passage of the same oil painting.
