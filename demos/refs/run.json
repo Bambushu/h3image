@@ -1,12 +1,12 @@
 {
   "preset": "V4_DEFAULT_20",
-  "size": "1280x720",
+  "size": "1216x832",
   "results": [
     {
-      "name": "can_label",
-      "seed": 84,
-      "png": "refs/can_label-s84.png",
-      "seconds": 741,
+      "name": "scene_backdrop",
+      "seed": 7,
+      "png": "refs/scene_backdrop-s7.png",
+      "seconds": 259,
       "refused": false
     }
   ],

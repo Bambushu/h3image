@@ -157,7 +157,7 @@ Rules, each of which cost a pass to learn on the [43-pass Nachtwacht build](benc
   See `benchmark/nachtwacht/prompts/`.
 
 Local turbo lane: 6-7 min per pass on an M5 at 4 MP windows. On a pod the same graph runs at
-full 16 MP in ~65 s per pass (`benchmark/nachtwacht/build.py --pod`).
+full 16 MP in ~65 s per pass (`h3-inpaint run --pod NAME`).
 
 ## Benchmark
 

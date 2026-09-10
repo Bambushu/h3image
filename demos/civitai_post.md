@@ -1,6 +1,6 @@
 # CivitAI post draft — h3edit (DO NOT POST WITHOUT MIKE'S REVIEW)
 
-Title: MiniMax H3 as an image editor — on a Mac (workflow + CLI)
+Title: MiniMax H3 Image Editor — Mac / Apple Silicon (1-frame R2V workflow + CLI)
 
 ---
 
