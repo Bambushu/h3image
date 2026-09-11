@@ -195,8 +195,8 @@ def run_pass(p, plan, state, e, pod_url=None):
     out = os.path.join(p["out"], f"{e['name']}.png"); comp.save(out)
     wall = round(time.time() - t0)
     state["done"].append(e["name"]); state["canvas"] = out
-    state["log"].append({"name": e["name"], "kind": "inpaint", "box": box, "window": win, "refs": e.get("refs") or [],
-                         "denoise": e.get("denoise", 1.0), "seed": seed, "wall_s": wall, "size": [W, H], "backend": "pod" if pod_url else "local"})
+    state["log"].append({"name": e["name"], "kind": e.get("kind", "inpaint"), "box": box, "window": win, "refs": e.get("refs") or [],
+                         "denoise": e.get("denoise", 1.0), "seed": seed, "wall_s": wall, "size": [W, H], "backend": "pod" if pod_url else "local", "lane": e.get("lane") or plan.get("lane", "turbo")})
     print(f"    -> {out}  ({wall}s)", flush=True)
 
 
@@ -208,12 +208,21 @@ def local_pass(p, plan, e, im, box, refs, prompt, seed):
     crop_p = os.path.join(p["out"], f"{e['name']}_window.png"); im.crop(win).save(crop_p)
     rel = [box[0] - wx0, box[1] - wy0, box[2] - wx0, box[3] - wy0]
     out_p = os.path.join(p["out"], f"{e['name']}_window_out.png")
-    c = ["h3edit", prompt, "--inpaint", ",".join(map(str, rel)), "--source", crop_p,
-         "--denoise", str(e.get("denoise", 1.0)), "--grow", str(plan.get("grow", 32)), "--feather", str(plan.get("feather", 64)),
-         "--seed", str(seed), "--name", f"inpaint_{e['name']}", "-o", out_p, "--wait"]
-    for r in refs:
-        c += ["-r", r]
-    print(f"=== {e['name']}  box={box}  window={win} ({wx1-wx0}x{wy1-wy0})  denoise={e.get('denoise', 1.0)}  refs={[os.path.basename(r) for r in refs]}", flush=True)
+    if e.get("kind") == "detail":               # reference-only re-render of the box (no encoded context: no cell grid)
+        c = ["h3edit", prompt, "--detail", ",".join(map(str, rel)), "--source", crop_p, "--mp", str(plan.get("window_mp", WINDOW_MP)),
+             "--feather", str(plan.get("feather", 64)), "--seed", str(seed), "--name", f"detail_{e['name']}", "-o", out_p, "--wait"]
+        for r in [r for r in refs if not r.endswith("_palette.png")]:
+            c += ["-r", r]
+    else:
+        c = ["h3edit", prompt, "--inpaint", ",".join(map(str, rel)), "--source", crop_p,
+             "--denoise", str(e.get("denoise", 1.0)), "--grow", str(plan.get("grow", 32)), "--feather", str(plan.get("feather", 64)),
+             "--seed", str(seed), "--name", f"inpaint_{e['name']}", "-o", out_p, "--wait"]
+        for r in refs:
+            c += ["-r", r]
+    lane = e.get("lane") or plan.get("lane", "turbo")
+    if lane == "base":                          # base model, 20 steps, no turbo LoRA (~2.5x slower)
+        c += ["--lora", "off", "--steps", "20", "--sampler", "euler", "--scheduler", "simple"]
+    print(f"=== {e['name']}  box={box}  window={win} ({wx1-wx0}x{wy1-wy0})  denoise={e.get('denoise', 1.0)}  lane={lane}  refs={[os.path.basename(r) for r in refs]}", flush=True)
     r = subprocess.run(c, capture_output=True, text=True)
     if r.returncode != 0 or not os.path.exists(out_p):
         sys.exit(f"{e['name']}: h3edit failed:\n" + (r.stdout + r.stderr)[-2000:])
@@ -258,6 +267,10 @@ def cmd_add(a):
     if any(e["name"] == a.name for e in plan["passes"]):
         sys.exit(f"pass {a.name} already in the plan")
     e = {"name": a.name, "box": a.box, "refs": [os.path.basename(r) for r in a.refs], "denoise": a.denoise, "prompt": a.prompt}
+    if a.lane:
+        e["lane"] = a.lane
+    if a.kind == "detail":
+        e["kind"] = "detail"
     for r in a.refs:
         dst = os.path.join(p["refs"], os.path.basename(r))
         if os.path.abspath(r) != os.path.abspath(dst):
@@ -372,6 +385,8 @@ def main():
     s.add_argument("--prompt", required=True, help="prompt text, or a file name in DIR/prompts/")
     s.add_argument("-r", "--ref", dest="refs", action="append", default=[], help="reference image (copied into DIR/refs/); none = a palette card from the canvas")
     s.add_argument("--denoise", type=float, default=1.0, help="1.0 composes a new thing in the box; 0.8-0.85 adds a prop to bare ground or corrects lettering")
+    s.add_argument("--kind", choices=["inpaint", "detail"], default="inpaint", help="inpaint = masked latent pass (composes; carries the decoder's cell grid); detail = reference-only re-render of the box (re-details soft areas, grid-free, weaker geometry)")
+    s.add_argument("--lane", choices=["turbo", "base"], default=None, help="turbo = 8-step LoRA lane (default); base = base model, 20 steps euler/simple")
     s.set_defaults(f=cmd_add)
     s = sp.add_parser("run", help="run every pass not yet done"); s.add_argument("dir"); s.add_argument("--only"); s.add_argument("--redo", help="drop this pass and everything after it, then run")
     s.add_argument("--pod", metavar="NAME", help="render on the pod in ~/renderpod/h3/podenv.NAME.sh: whole canvas per pass, base model 20 steps (default: local h3edit on a ~4 MP window)"); s.set_defaults(f=cmd_run)

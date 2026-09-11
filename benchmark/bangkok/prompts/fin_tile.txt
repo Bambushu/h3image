@@ -1,0 +1,5 @@
+Task: Reference-guided generation.
+
+<Picture 1> supplies everything: the exact scene, layout, colours and light of the frame. Reproduce it exactly: every person, vehicle, animal, stall, sign, lantern, building and reflection stays exactly where it is and exactly what it is, same faces, clothes and poses, exactly five fingers on every visible hand, do not add, move or remove anything. Render it as a sharp, fully detailed real photograph at this size: skin and fabric texture, clean edges, legible signs, crisp wet asphalt with mirror reflections, no blur and no smoothing.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour. No text.

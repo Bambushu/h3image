@@ -65,7 +65,7 @@ Enables `length=1` without modifying ComfyUI. **Restart ComfyUI after linking.**
 
 **Decode with the video VAE.** 2-D FFT grid score on matched seeds: the image VAE leaves a faint 16-px grid (harmonic 33–84× background); the video VAE scores 3.6–12× — clean range. Verified on CUDA and Apple Silicon (can demo: 16-px harmonic 9.8 → 4.0). Bundled graphs load the video VAE in node 119.
 
-**`--inpaint` output is de-gridded by default** (`--no-notch` keeps it raw). The clean range above holds for plain R2V frames at ~1 MP. Two related artifacts of the 16-px-cell decoder show elsewhere (measured 2026-09-10, `benchmark/bangkok/out/grid/`): (1) a horizontal 16-px harmonic, 50–200× background, on every frame sampled with encoded context (`--inpaint`), pod and local alike, inside the regenerated box as much as in the frozen area; (2) a per-cell tone mosaic of 1–3 levels in smooth areas (skies, walls, paint), strongest locally at 4 MP and on every local inpaint (cell-boundary step ratio 1.4–2.7 vs 1.0–1.2 for a 1 MP R2V frame or the pod). Ruled out: the VAE file (both share the encoder), fp32 VAE, frame count, scheduler (sigma starts at 1.0), the lane, decoding only the box; the encoded latent itself is clean. The CLI fixes both in pixel space on the render before the paste: `notch_grid` zeroes the exact 16/8-px harmonics (a real peak there, so no ringing) and `deblock_cells` ramps across cell boundaries where the step is small and both sides flat (real edges untouched); box step ratio 1.41 → 1.08, mean change ~1 level. For a whole canvas use `h3-inpaint degrid` (deblock only, 32 + 16 px: a whole-canvas notch rings in smooth skies).
+**`--inpaint` carries a faint 16-px cell grid; `--detail` does not.** Measured 2026-09-10/11 (`benchmark/bangkok/out/grid/`): every frame sampled with an encoded latent as context (`--inpaint`, `H3V2VInit`) decodes with a 16-px harmonic (50–200× background) and a 1–3 level per-cell mosaic in smooth areas, on the pod and locally, on the turbo and the base lane, with fp16, fp32 and CPU decode alike; the encoded latent itself is clean. A plain R2V frame is clean, and so is `--detail` (the crop as `<Picture 1>`, no latent). So: compose with `--inpaint`, then re-render the box with `--detail` for the final pixels. `--inpaint` still notches the exact harmonics and deblocks cell boundaries in its render before the paste (`--no-notch` disables) as a partial mitigation.
 
 **3. The CLI:**
 
@@ -136,8 +136,12 @@ h3-inpaint run   nw                                          # every pass not ye
 h3-inpaint run   nw --pod nw                                 # same, on a pod: whole canvas per pass, base model 20 steps, ~65 s at 16 MP
 h3-inpaint show  nw dog                                      # 1:1 crop of that box: LOOK before the next pass
 h3-inpaint revert nw dog                                     # bad pass: pixel revert, then add it again under a new name
+h3-inpaint add   nw fin_r0c0 --box 0,0,1600,1280 --prompt fin.txt --kind detail   # reference-only re-render: grid-free, sharper
+h3-inpaint degrid nw                                         # whole-canvas cell deblock (a 2x-upscaled base)
 h3-inpaint score nw                                          # outside/seam SSIM per pass + making-of sheet
 ```
+
+**Finish every canvas with `--kind detail` tiles** (~1.3 MP boxes, one "reproduce exactly, sharper" prompt): a masked-latent pass always carries the decoder's 16 px cell grid, a reference-only re-render of the same box does not and is 2x sharper ([why](benchmark/bangkok/README.md#the-faint-grid-what-it-was-and-what-fixed-it)). Keep those boxes small and give each crop a real edge.
 
 Rules, each of which cost a pass to learn on the [43-pass Nachtwacht build](benchmark/nachtwacht/README.md):
 

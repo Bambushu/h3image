@@ -294,6 +294,224 @@
    ],
    "denoise": 0.85,
    "prompt": "street_sign.txt"
+  },
+  {
+   "name": "rd_right_top",
+   "box": [
+    4352,
+    0,
+    5440,
+    2040
+   ],
+   "refs": [],
+   "denoise": 0.75,
+   "prompt": "rd_right_top.txt"
+  },
+  {
+   "name": "rd_left_top",
+   "box": [
+    0,
+    0,
+    880,
+    2040
+   ],
+   "refs": [],
+   "denoise": 0.75,
+   "prompt": "rd_left_top.txt"
+  },
+  {
+   "name": "rd_sky_top",
+   "box": [
+    2064,
+    0,
+    3136,
+    704
+   ],
+   "refs": [],
+   "prompt": "rd_sky_top.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "rd_right_top_b",
+   "box": [
+    4352,
+    0,
+    5440,
+    2040
+   ],
+   "refs": [],
+   "denoise": 0.75,
+   "prompt": "rd_right_top.txt",
+   "lane": "base"
+  },
+  {
+   "name": "rd2_right_top",
+   "box": [
+    4352,
+    0,
+    5440,
+    2040
+   ],
+   "refs": [],
+   "prompt": "rd2_right_top.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "ss_r0c0",
+   "box": [
+    0,
+    0,
+    1600,
+    1280
+   ],
+   "refs": [],
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "ss_r0c1",
+   "box": [
+    1280,
+    0,
+    2880,
+    1280
+   ],
+   "refs": [],
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "ss_r0c2",
+   "box": [
+    2560,
+    0,
+    4160,
+    1280
+   ],
+   "refs": [],
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "ss_r0c3",
+   "box": [
+    3840,
+    0,
+    5440,
+    1280
+   ],
+   "refs": [],
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "ss_r1c0",
+   "box": [
+    0,
+    896,
+    1600,
+    2176
+   ],
+   "refs": [],
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "ss_r1c1",
+   "box": [
+    1280,
+    896,
+    2880,
+    2176
+   ],
+   "refs": [],
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "ss_r1c2",
+   "box": [
+    2560,
+    896,
+    4160,
+    2176
+   ],
+   "refs": [],
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "ss_r1c3",
+   "box": [
+    3840,
+    896,
+    5440,
+    2176
+   ],
+   "refs": [],
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "ss_r2c0",
+   "box": [
+    0,
+    1792,
+    1600,
+    3072
+   ],
+   "refs": [],
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "ss_r2c1",
+   "box": [
+    1280,
+    1792,
+    2880,
+    3072
+   ],
+   "refs": [],
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "ss_r2c2",
+   "box": [
+    2560,
+    1792,
+    4160,
+    3072
+   ],
+   "refs": [],
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "ss_r2c3",
+   "box": [
+    3840,
+    1792,
+    5440,
+    3072
+   ],
+   "refs": [],
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "ss_r2c3_base",
+   "box": [
+    3840,
+    1792,
+    5440,
+    3072
+   ],
+   "refs": [],
+   "prompt": "fin_tile.txt",
+   "kind": "detail",
+   "lane": "base"
   }
  ]
 }

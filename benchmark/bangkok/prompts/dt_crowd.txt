@@ -1,0 +1,5 @@
+Task: Reference-guided generation.
+
+<Picture 1> supplies everything: the exact scene, the four pedestrians and the small girl with the red balloon exactly as they are, their faces, clothes, poses and positions, the arcade, the steel shutter, the lit shopfront, the wet pavement, the colours and the light. Reproduce it exactly, do not add, move or remove anything, exactly five fingers on every visible hand. Render it as a sharp, fully detailed real photograph at this size: skin and fabric texture, clean edges, the pattern of the dress, no blur and no smoothing.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour. No text.

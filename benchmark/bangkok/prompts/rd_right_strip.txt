@@ -1,0 +1,5 @@
+Task: Reference-guided generation.
+
+<Picture 1> supplies everything: the exact scene, layout, colours and light of the frame, which shows the roofline and top floor of the shophouses on the right side of the street against the dusk sky, tiled roofs, black cables. Reproduce it exactly, do not add, move or remove anything. Render it as a sharp, fully detailed real photograph at this size: crisp plaster and brick texture, clean window frames, individual cables, tile edges, the grain of wood and rust on metal, a smooth clean sky with no blocks, no blur and no smoothing.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, deep blue-violet sky. No text.

@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object or a layout.
+
+The frame shows the upper floors and roofs of the old shophouses on the left side of the street, with green arched shutters, a balcony, peeling plaster and black cables, and the dusk sky above the roofline. Keep everything exactly where it is and exactly what it is: every building line, window, shutter, balcony, cable, pole, sign, lantern and person stays in place. Re-render it sharp and fully detailed as a real photograph would be at this size: crisp plaster and brick texture, clean window frames, individual cables, tile edges, the grain of wood and rust on metal, no blur and no smoothing.
+
+STYLE: a real photograph of Yaowarat Road, Bangkok Chinatown at dusk, 35 mm lens, sharp, natural colour, wet asphalt reflecting the lights, deep blue-violet sky.
+The frame is a crop of a much larger finished photograph: continue its light, colour, perspective, scale and sharpness exactly. Paint only inside the frame. No text.
