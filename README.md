@@ -128,18 +128,31 @@ canvas and paint it in masked passes, one box at a time, back to front. Locally 
 on the shipped edit graph. Either way only the box goes back onto the canvas, in pixel space, so
 nothing outside a box ever moves (outside SSIM 1.000, pass after pass).
 
+Worked example, the [Nachtwacht build](benchmark/nachtwacht/README.md): a 5440x3072 militia group
+portrait painted from a blank canvas in 43 masked passes (15 on a pod, 28 local). Every prompt is in
+`benchmark/nachtwacht/prompts/`, the whole pass list with boxes, refs and denoise in its `build.py` PLAN.
+
 ```sh
-h3-inpaint init  nw --canvas start.png                       # start.png = any image, sides /32
-h3-inpaint add   nw dog  --box 3584,2208,4672,3072 --prompt dog.txt          # no -r: a palette card from the canvas
-h3-inpaint add   nw girl --box 768,928,1680,1840  --prompt girl.txt -r rosalie.png
-h3-inpaint run   nw                                          # every pass not yet done, in order (local: ~4 MP window, 6-7 min/pass on an M5)
-h3-inpaint run   nw --pod nw                                 # same, on a pod: whole canvas per pass, base model 20 steps, ~65 s at 16 MP
-h3-inpaint show  nw dog                                      # 1:1 crop of that box: LOOK before the next pass
-h3-inpaint revert nw dog                                     # bad pass: pixel revert, then add it again under a new name
-h3-inpaint add   nw fin_r0c0 --box 0,0,1600,1280 --prompt fin.txt --kind detail   # reference-only re-render: grid-free, sharper
-h3-inpaint degrid nw                                         # whole-canvas cell deblock (a 2x-upscaled base)
-h3-inpaint score nw                                          # outside/seam SSIM per pass + making-of sheet
+cd benchmark/nachtwacht
+h3edit "$(cat prompts/canvas.txt)" -r refs/palette.png --ar 16:9 --mp 4 -o out/canvas.png --wait   # the empty hall, palette card only
+h3-inpaint init  . --canvas out/start.png                                      # 5440x3072, sides /32
+h3-inpaint add   . banner  --box 1952,0,3488,928     --prompt banner.txt                  # back to front: banner, steps, pikes first
+h3-inpaint add   . shield  --box 4352,64,5216,672    --prompt shield.txt  -r shield_art.png --denoise 0.85   # exact lettering from an artwork card
+h3-inpaint add   . girl    --box 768,992,1696,2720   --prompt girl.txt    -r rosalie.png   # a persona still as <Picture 1>
+h3-inpaint add   . captain --box 1632,672,2720,3072  --prompt captain.txt -r lakem_b.jpg
+h3-inpaint add   . dog     --box 3584,2208,4672,3072 --prompt dog.txt                     # no -r: a palette card from the canvas
+h3-inpaint run   .                                       # every pass not yet done, in order (local: ~4 MP window, 6-7 min/pass on an M5)
+h3-inpaint run   . --pod nw                              # same, on a pod: whole canvas per pass, base model 20 steps, ~65 s at 16 MP
+h3-inpaint show  . dog                                   # 1:1 crop of that box: LOOK before the next pass
+h3-inpaint revert . pikes2                               # bad pass (a gallery of militiamen in an empty box): pixel revert, add again under a new name
+h3-inpaint add   . fin_r0c0 --box 0,0,1600,1280 --prompt fin.txt --kind detail   # finish: reference-only tiles, grid-free, sharper
+h3-inpaint degrid .                                      # whole-canvas cell deblock (a 2x-upscaled base)
+h3-inpaint score .                                       # outside/seam SSIM per pass + making-of sheet
 ```
+
+![nachtwacht](benchmark/nachtwacht/out/final_4k.jpg)
+
+*Outside every box the canvas stayed at SSIM 1.000, pass after pass; the shield names read at 1:1.*
 
 **Finish every canvas with `--kind detail` tiles** (~1.3 MP boxes, one "reproduce exactly, sharper" prompt): a masked-latent pass always carries the decoder's 16 px cell grid, a reference-only re-render of the same box does not and is 2x sharper ([why](benchmark/bangkok/README.md#the-faint-grid-what-it-was-and-what-fixed-it)). Keep those boxes small and give each crop a real edge.
 
