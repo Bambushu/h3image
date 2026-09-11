@@ -128,18 +128,30 @@ canvas and paint it in masked passes, one box at a time, back to front. Locally 
 on the shipped edit graph. Either way only the box goes back onto the canvas, in pixel space, so
 nothing outside a box ever moves (outside SSIM 1.000, pass after pass).
 
+Worked example, the [Bangkok Chinatown build](benchmark/bangkok/README.md) (every prompt in
+`benchmark/bangkok/prompts/`, every box and seed in its `plan.json`/`state.json`):
+
 ```sh
-h3-inpaint init  nw --canvas start.png                       # start.png = any image, sides /32
-h3-inpaint add   nw dog  --box 3584,2208,4672,3072 --prompt dog.txt          # no -r: a palette card from the canvas
-h3-inpaint add   nw girl --box 768,928,1680,1840  --prompt girl.txt -r rosalie.png
-h3-inpaint run   nw                                          # every pass not yet done, in order (local: ~4 MP window, 6-7 min/pass on an M5)
-h3-inpaint run   nw --pod nw                                 # same, on a pod: whole canvas per pass, base model 20 steps, ~65 s at 16 MP
-h3-inpaint show  nw dog                                      # 1:1 crop of that box: LOOK before the next pass
-h3-inpaint revert nw dog                                     # bad pass: pixel revert, then add it again under a new name
-h3-inpaint add   nw fin_r0c0 --box 0,0,1600,1280 --prompt fin.txt --kind detail   # reference-only re-render: grid-free, sharper
-h3-inpaint degrid nw                                         # whole-canvas cell deblock (a 2x-upscaled base)
-h3-inpaint score nw                                          # outside/seam SSIM per pass + making-of sheet
+cd benchmark/bangkok
+h3edit "$(cat prompts/canvas.txt)" -r refs/palette.png --ar 16:9 --mp 4 --seed 8800 -o out/canvas_4mp.png --wait
+#   Lanczos x2 -> out/start.png (5440x3072); the canvas prompt is the EMPTY street, everything else is a box
+h3-inpaint init  . --canvas out/start.png                                            # sides /32
+h3-inpaint add   . neon_left   --box 688,1088,2496,2448  --prompt neon_left.txt --denoise 0.9   # onto a facade: 0.9
+h3-inpaint add   . far_street  --box 2288,1856,3200,2448 --prompt far_street.txt              # no -r: a palette card from the canvas
+h3-inpaint add   . taxi        --box 3376,2400,4784,3072 --prompt taxi.txt                    # vehicles before the stalls they pass
+h3-inpaint add   . street_sign --box 2832,1200,3264,1680 --prompt street_sign.txt -r sign_art.png --denoise 0.85   # exact lettering
+h3-inpaint run   .                                       # every pass not yet done, in order (local: ~4 MP window, 6-7 min/pass on an M5)
+h3-inpaint run   . --pod NAME                            # same, on a pod: whole canvas per pass, base model 20 steps, ~65 s at 16 MP
+h3-inpaint show  . taxi                                  # 1:1 crop of that box: LOOK before the next pass
+h3-inpaint revert . cat                                  # bad pass: pixel revert, then add it again under a new name
+h3-inpaint add   . ss_r0c0 --box 0,0,1600,1280 --prompt fin_tile.txt --kind detail   # ... x12 tiles: reference-only re-render, grid-free, sharper
+h3-inpaint degrid .                                      # whole-canvas cell deblock (a 2x-upscaled base)
+h3-inpaint score .                                       # outside/seam SSIM per pass + making-of sheet
 ```
+
+![bangkok](benchmark/bangkok/out/final_4k.jpg)
+
+*5440x3072, 24 masked passes plus 12 detail tiles, all on an M5. Outside SSIM 1.000 on every pass.*
 
 **Finish every canvas with `--kind detail` tiles** (~1.3 MP boxes, one "reproduce exactly, sharper" prompt): a masked-latent pass always carries the decoder's 16 px cell grid, a reference-only re-render of the same box does not and is 2x sharper ([why](benchmark/bangkok/README.md#the-faint-grid-what-it-was-and-what-fixed-it)). Keep those boxes small and give each crop a real edge.
 
@@ -163,13 +175,14 @@ Rules, each of which cost a pass to learn on the [43-pass Nachtwacht build](benc
   See `benchmark/nachtwacht/prompts/`.
 
 Local turbo lane: 6-7 min per pass on an M5 at 4 MP windows. On a pod the same graph runs at
-full 16 MP in ~65 s per pass (`h3-inpaint run --pod NAME`). Second build, photoreal: [Bangkok Chinatown, 24 passes](benchmark/bangkok/README.md).
+full 16 MP in ~65 s per pass (`h3-inpaint run --pod NAME`). The first build, a painted group
+portrait: [Nachtwacht, 43 passes](benchmark/nachtwacht/README.md).
 
 ## Benchmark
 
 Six scripted stress tests, pinned seeds, shipped inputs: [`benchmark/`](benchmark/README.md). On a 5090 at 4 MP, **8 of 8 seeds render every line of a five-tier plate down to 23-px caps at ≥0.96 character accuracy**; lettering holds to ~17 px caps and starts inventing characters at 12 px. The one miss in 40 lines is a single digit swap (reroll). Also measured: what survives outside the edit (large structure yes, brick texture no), the neon sign's pavement reflection (ΔE 21, local) versus its glow on brick (barely measurable), and seven second-pass candidates against one wrong digit — tiling fails, `--inpaint` and a latent-upscale refine fix it.
 
-**Stress test:** a 16 MP group painting built from a blank canvas by H3 alone in 43 masked passes (15 on a pod, 28 local), every pass leaving the rest of the canvas at SSIM 1.000: [`benchmark/nachtwacht/`](benchmark/nachtwacht/README.md).
+**Stress tests:** two 16 MP images built from a blank canvas by H3 alone, every pass leaving the rest of the canvas at SSIM 1.000: the photoreal [Bangkok Chinatown](benchmark/bangkok/README.md) (24 masked passes + 12 detail tiles, where the inpaint cell grid was traced and fixed) and the painted [Nachtwacht](benchmark/nachtwacht/README.md) (43 passes, 15 on a pod).
 
 ![nachtwacht](benchmark/nachtwacht/out/final_4k.jpg)
 
