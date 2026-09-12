@@ -479,6 +479,10 @@ def main():
     p.add_argument("--seeds", type=lambda v: [int(s) for s in v.split(",")], default=None,
                    help="seed-select: exact seeds, comma-separated (overrides --n)")
     p.add_argument("--name", default="h3_edit", help="output filename prefix")
+    p.add_argument("--generate", action="store_true",
+                   help="text-to-image: generate from the prompt alone, no -r needed (auto-injects a "
+                        "neutral reference). Up to 16 MP via --mp; pairs with --n for seed-select. "
+                        "Ideogram 4 stays sharper for small stills -- use --generate for large-format")
     p.add_argument("--wait", action="store_true", help="block until the render lands")
     p.add_argument("--doctor", action="store_true", help="check the local install and exit")
     p.add_argument("--export", metavar="TAB",
@@ -490,6 +494,19 @@ def main():
     if args.export:
         from export_graph import export
         return export(args.export, GRAPH)
+    if args.generate:
+        if not args.prompt:
+            p.error("--generate needs a prompt")
+        if args.detail or args.inpaint:
+            p.error("--generate is text-to-image; do not combine it with --detail/--inpaint")
+        if args.mp is not None and args.mp > 16:
+            p.error("--generate is capped at 16 MP (the ResolutionSelector rejects more); go bigger by "
+                    "tiling up with --detail / --outpaint")
+        if not args.refs:
+            from PIL import Image
+            gray = os.path.join(INPUT_DIR, "generate_neutral.png")
+            Image.new("RGB", (512, 512), (128, 128, 128)).save(gray)
+            args.refs = [gray]     # cold-start T2I: neutral card, prompt drives (verified 2026-09-12)
     if args.detail:
         if not (args.prompt and args.source and args.out and len(args.detail) == 4):
             p.error("--detail needs a prompt, --source, -o and a X0,Y0,X1,Y1 box")
