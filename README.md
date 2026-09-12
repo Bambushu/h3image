@@ -204,6 +204,23 @@ h3edit --autofix out.png -o out_fixed.png            # refine every face, accumu
 - **Hands have no reliable CPU detector on the Mac** (mediapipe's wheels are Tasks-only and abort on a Metal check), so fix a bad hand by pointing detection-free `--regions x0,y0,x1,y1;...` at it. Same detail+feather pass.
 - Needs the `[autofix]` extra (`uv tool install --force -e ".[autofix]"`); the YuNet model is fetched to `~/.cache/h3edit/models` on first use. `--doctor` reports availability.
 
+### Outpaint / reframe (`--outpaint`, `--reframe`)
+
+Extend an image past its borders, or change its aspect ratio, by *generating* the new margins instead of cropping. Each new margin is an `--inpaint` strip where the original image is the frozen context that anchors the continuation.
+
+```sh
+h3edit "continue the sunlit courtyard, same light and depth of field, no new people" \
+  --outpaint 0,0,256,0 --source in.png -o out.png            # add 256px on the right (L,T,R,B)
+h3edit "continue the beach and sky" --reframe 16:9 --anchor center --source in.png -o out.png
+h3edit "..." --reframe 3:2 --source in.png -o out.png --dry-run    # plan image, no renders
+```
+
+- The positional prompt describes the scene to continue; give it what is *outside* the frame, and say "no new people" so a side margin beside a subject stays empty.
+- **Per-side, top+bottom then left+right**, so corners are generated with two populated neighbours. Sizes snap to `/32`; `--reframe` only ever extends (never crops), `--anchor` places the original.
+- A single strip per side up to ~25% of the current dimension; larger extensions are split into ≤25% chunks and re-encoded between (each new strip then anchors to real pixels). ~25% per anchored edge is the coherence ceiling — beyond ~50% total it drifts (verified 2026-09-12: H3 continues a scene on one anchored edge, but it is not a trained outpaint model).
+- **No `--detail` finish on margins** — a detail crop of a blurred, edgeless margin hallucinates (it invented graph-paper and water drops in testing). The notched, tone-matched inpaint strip is the clean output; the faint quilt on smooth surfaces is the same floor as any `--inpaint`.
+- `--dry-run` writes a plan image (green = original, grey = margins) and renders nothing.
+
 ## Canvas builds (`h3-inpaint`)
 
 Use `h3-inpaint` for an image no single prompt can produce, or for a finished image with a wrong region.
