@@ -111,6 +111,22 @@ h3edit "Task: Reference-guided generation. ..." -r scene.png -r artwork.png \
 
 `-r` is a reference image. You can pass up to 5 references. The first reference becomes `<Picture 1>` in the prompt. The second becomes `<Picture 2>`.
 
+## Generate a new image (`--generate`)
+
+Text-to-image from the prompt alone — no reference needed. H3 is a large-format generator: coherent one-shot up to **16 MP** (5472x3072), where Ideogram 4 caps ~1-2 MP.
+
+```sh
+h3edit --generate "a grand old library interior, one-point perspective, checkerboard floor, sunbeams" \
+  --ar 16:9 --mp 16 -o library.png                 # 16MP one-shot (~43 min on the M5)
+h3edit --generate "..." --mp 4 --n 6 -o scout.png  # scout compositions: 6 seeds + a contact sheet
+```
+
+- No `-r`: a neutral card is auto-injected and the prompt drives the image (verified cold-start, no tint).
+- **`--mp` up to 16** (24 MP is rejected by the graph's ResolutionSelector). Go bigger by tiling up with `--detail` and extending with `--outpaint`.
+- Reuses `--n`/`--seeds` (seed-select), `--ar`, `--lora`. Resolution reframes at a fixed seed, so scout prompt/seed at 4 MP, then commit the framing at 16 MP.
+- **When to use Ideogram 4 instead:** small, sharp stills and crisp typography. `--generate` is for large-format work and for making a base to then `--inpaint` / `--detail` / `--outpaint` inside h3edit.
+- Times (M5 turbo lane): ~3.5 min at 4 MP, ~17 min at 8 MP, ~28 min at 12 MP, ~43 min at 16 MP. Use a pod for volume.
+
 ## Modes and flags
 
 | flag | default | why |
