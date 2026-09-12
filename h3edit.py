@@ -302,6 +302,30 @@ def deblock_cells(im, cell=16, T=10.0, r=3):
     return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
 
 
+def tone_match(ren, src, box, grow, band=64):
+    """Correct the whole-box tone-shift of a V2V render. The masked-latent decode shifts the box's
+    colour a few levels (a visible rectangle of "different" sand/wall against a clean base); notch and
+    deblock remove the periodic grid but not this DC offset. Match ren to src on a ring just around
+    the grown box (same frozen-context content on both, so the median ratio isolates the tone shift),
+    then apply that per-channel gain to ren before the paste. (Phuket 2026-09-12.)"""
+    import numpy as np
+    from PIL import Image
+    r = np.asarray(ren, np.float32); s = np.asarray(src, np.float32)
+    H, W = r.shape[:2]; x0, y0, x1, y1 = box
+    ox0, oy0 = max(0, x0 - grow - band), max(0, y0 - grow - band)
+    ox1, oy1 = min(W, x1 + grow + band), min(H, y1 + grow + band)
+    ix0, iy0 = max(0, x0 - grow), max(0, y0 - grow)
+    ix1, iy1 = min(W, x1 + grow), min(H, y1 + grow)
+    ring = np.zeros((H, W), bool); ring[oy0:oy1, ox0:ox1] = True; ring[iy0:iy1, ix0:ix1] = False
+    if ring.sum() < 100:
+        return ren
+    rr, ss = r[ring], s[ring]
+    bright = ss.sum(1) > np.percentile(ss.sum(1), 45)   # stable bright surfaces (sand/wall), not saturated props
+    rr, ss = rr[bright], ss[bright]
+    gain = np.array([np.clip(np.median(ss[:, c]) / max(1.0, np.median(rr[:, c])), 0.8, 1.5) for c in range(3)])
+    return Image.fromarray(np.clip(r * gain, 0, 255).astype(np.uint8))
+
+
 def inpaint_run(args):
     """--inpaint: render, then paste only the (grown, feathered) box back onto --source. The model
     saw the frozen latent for context; the pixels outside the box never take a VAE round-trip
@@ -319,6 +343,8 @@ def inpaint_run(args):
     if not args.no_notch:
         ren = deblock_cells(notch_grid(ren))
     x0, y0, x1, y1 = args.inpaint
+    if not args.no_tonematch:
+        ren = tone_match(ren, src, (x0, y0, x1, y1), args.grow)
     m = Image.new("L", src.size, 0)
     ImageDraw.Draw(m).rectangle((x0 - args.grow, y0 - args.grow, x1 + args.grow, y1 + args.grow), fill=255)
     m = m.filter(ImageFilter.GaussianBlur(args.feather / 2))
@@ -393,6 +419,7 @@ def main():
     p.add_argument("--encode-tiled", action="store_true", help="diagnostic: VAEEncodeTiled for the --inpaint encode")
     p.add_argument("--save-latent", action="store_true", help="diagnostic: SaveLatent of the encoded and sampled latents (output/latents/)")
     p.add_argument("--no-notch", action="store_true", help="--inpaint: skip the cell-grid filter (default: the 16/8 px harmonics are notched and the cell boundaries deblocked in the render before the paste)")
+    p.add_argument("--no-tonematch", action="store_true", help="--inpaint: skip matching the box's tone to the surrounding source (default: a per-channel gain from a ring around the box removes the V2V decode's whole-box colour shift)")
     p.add_argument("--decode-crop", action="store_true", help="--inpaint: decode only the box (+grow+feather+32 px) instead of the whole frame")
     p.add_argument("--te", default=None, help="GGUF text encoder file instead of ClipProj")
     p.add_argument("--ref-size", default="match", choices=["match", "max"],
