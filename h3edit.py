@@ -94,6 +94,11 @@ def doctor():
     except ImportError:
         ok = False
         print("FAIL pillow missing in this install -- run: uv tool install --force -e .  (stale tool venv)")
+    try:
+        import cv2  # noqa: F401
+        print("ok   opencv present (--autofix face detection available)")
+    except ImportError:
+        print("info --autofix unavailable: install the extra with  uv tool install --force -e '.[autofix]'")
     if "H3V2VInit" in api("/api/object_info/H3V2VInit"):
         print("ok   H3V2VInit registered (ComfyUI-MAINodes; --inpaint)")
     else:
@@ -387,6 +392,105 @@ def detail(args):
     print(f"{out}  (detail box {x0},{y0},{x1},{y1} at {args.ar}, feather {f}px)")
 
 
+AUTOFIX_MODELS = os.path.expanduser("~/.cache/h3edit/models")
+# OpenCV Zoo's YuNet face detector (CPU, ~230 KB ONNX); fetched once to the cache on first --autofix.
+# mediapipe was the plan but every arm-mac / py3.13 wheel is a Tasks-only build whose vision graphs
+# abort on a Metal service check (2026-09-12). YuNet runs clean on CPU. Hands: pass --regions.
+_YUNET_URL = "https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx"
+
+_FIX_PROMPT = {
+    "face": ("Task: Reference-guided generation. <Picture 1> is a crop of a finished image showing "
+             "a person's face. Reproduce it exactly -- same identity, pose, expression, framing, "
+             "lighting and colours -- rendered sharper and anatomically correct: two eyes, natural "
+             "symmetric features and skin. Continue the crop's style. Paint only inside the frame. No text."),
+    "region": ("Task: Reference-guided generation. <Picture 1> is a crop of a finished image. "
+               "Reproduce it exactly -- same content, framing, lighting and colours -- rendered sharper "
+               "and anatomically correct, with natural proportions and exactly five fingers on any hand. "
+               "Continue the crop's style. Paint only inside the frame. No text."),
+}
+
+
+def _fetch_model(url):
+    """Download a detector model to the cache on first use; return the local path."""
+    os.makedirs(AUTOFIX_MODELS, exist_ok=True)
+    path = os.path.join(AUTOFIX_MODELS, url.rsplit("/", 1)[1])
+    if not os.path.exists(path):
+        print(f"fetching {os.path.basename(path)} from github.com/opencv/opencv_zoo -> {path}")
+        urllib.request.urlretrieve(url, path)
+    return path
+
+
+def detect_faces(img_path, min_size, conf=0.5):
+    """Face boxes (pixels) via OpenCV YuNet: [(x0,y0,x1,y1,'face'), ...] plus (W,H)."""
+    try:
+        import cv2
+    except ImportError:
+        sys.exit("--autofix needs opencv: uv tool install --force -e '~/h3edit[autofix]'")
+    img = cv2.imread(img_path)
+    if img is None:
+        sys.exit(f"--autofix: cannot read image {img_path}")
+    H, W = img.shape[:2]
+    det = cv2.FaceDetectorYN.create(_fetch_model(_YUNET_URL), "", (W, H), score_threshold=conf)
+    det.setInputSize((W, H))
+    _, faces = det.detect(img)
+    out = []
+    for fdet in (faces if faces is not None else []):
+        x, y, w, h = (int(v) for v in fdet[:4])
+        x0, y0, x1, y1 = max(0, x), max(0, y), min(W, x + w), min(H, y + h)
+        if min(x1 - x0, y1 - y0) >= min_size:
+            out.append((x0, y0, x1, y1, "face"))
+    return out, (W, H)
+
+
+def _pad_box(box, pad, W, H):
+    x0, y0, x1, y1 = box
+    px, py = int((x1 - x0) * pad), int((y1 - y0) * pad)
+    return (max(0, x0 - px), max(0, y0 - py), min(W, x1 + px), min(H, y1 + py))
+
+
+def autofix(args):
+    """Re-render each face (auto, YuNet) or --regions box through the grid-free --detail path IN
+    PLACE. Detection finds WHERE faces are, not whether they are malformed, so every one is refined;
+    the detail crop preserves identity/colour and the feathered paste blends the edge. Hands have no
+    reliable CPU detector on this box, so fix them by pointing --regions at the bad one."""
+    from PIL import Image, ImageDraw
+    src = args.autofix
+    base_name = args.name
+    if args.regions:
+        W, H = Image.open(src).size
+        boxes = [(max(0, x0), max(0, y0), min(x1, W), min(y1, H), "region")
+                 for (x0, y0, x1, y1) in args.regions]
+    else:
+        boxes, (W, H) = detect_faces(src, args.min_size)
+    padded = [(_pad_box(b[:4], args.pad, W, H), b[4]) for b in boxes]
+    padded = [pb for pb in padded if min(pb[0][2] - pb[0][0], pb[0][3] - pb[0][1]) >= 64]  # detail() floor
+    if not padded:
+        return print("autofix: no regions >= min-size found; nothing to do "
+                     "(hands: pass --regions x0,y0,x1,y1)")
+    print(f"autofix: {len(padded)} region(s): " + ", ".join(f"{k} {b}" for b, k in padded))
+    if args.dry_run:
+        over = Image.open(src).convert("RGB"); d = ImageDraw.Draw(over)
+        for (x0, y0, x1, y1), k in padded:
+            d.rectangle((x0, y0, x1, y1), outline=(255, 0, 0), width=6)
+            d.text((x0 + 8, y0 + 8), k, fill=(255, 0, 0))
+        op = args.out or os.path.join(OUTPUT_DIR, f"{base_name}_autofix_overlay.png")
+        over.save(op)
+        return print(f"dry-run overlay: {op}  ({len(padded)} boxes, no renders run)")
+    out = args.out or os.path.join(OUTPUT_DIR, f"{base_name}_autofix.png")
+    Image.open(src).convert("RGB").save(out)   # working copy; region fixes accumulate here
+    for i, ((x0, y0, x1, y1), k) in enumerate(padded):
+        print(f"[{i + 1}/{len(padded)}] {k} {x0},{y0},{x1},{y1}")
+        args.prompt = _FIX_PROMPT[k]
+        args.source = out
+        args.out = out
+        args.detail = [x0, y0, x1, y1]
+        args.refs = []
+        args.name = f"{base_name}_af{i}"       # unique crop filename per region
+        detail(args)
+    print(f"autofix -> {out}")
+
+
+
 def dispatch(args):
     """Run one variation in whatever mode the args select; the result lands at args.out."""
     if args.detail:
@@ -479,6 +583,18 @@ def main():
     p.add_argument("--seeds", type=lambda v: [int(s) for s in v.split(",")], default=None,
                    help="seed-select: exact seeds, comma-separated (overrides --n)")
     p.add_argument("--name", default="h3_edit", help="output filename prefix")
+    p.add_argument("--autofix", metavar="IMAGE",
+                   help="detect faces (OpenCV YuNet) and re-render each through the grid-free --detail "
+                        "path in place; needs the [autofix] extra (opencv). Hands: use --regions")
+    p.add_argument("--regions", default=None,
+                   type=lambda v: [[int(n) for n in b.split(",")] for b in v.split(";")],
+                   help="--autofix: skip face detection, fix these boxes 'x0,y0,x1,y1;...' (e.g. a bad hand)")
+    p.add_argument("--min-size", dest="min_size", type=int, default=64,
+                   help="--autofix: ignore detected faces smaller than this (px)")
+    p.add_argument("--pad", type=float, default=0.35,
+                   help="--autofix: grow each box by this fraction per side (give --detail a real edge)")
+    p.add_argument("--dry-run", dest="dry_run", action="store_true",
+                   help="--autofix: write an overlay of the boxes it would fix and run nothing")
     p.add_argument("--wait", action="store_true", help="block until the render lands")
     p.add_argument("--doctor", action="store_true", help="check the local install and exit")
     p.add_argument("--export", metavar="TAB",
@@ -490,6 +606,14 @@ def main():
     if args.export:
         from export_graph import export
         return export(args.export, GRAPH)
+    if args.autofix:
+        if not os.path.exists(args.autofix):
+            p.error(f"--autofix: image not found: {args.autofix}")
+        if args.mp is None:
+            args.mp = 4.0
+        if args.seed is None:
+            args.seed = random.randrange(1, 2**31)
+        return autofix(args)
     if args.detail:
         if not (args.prompt and args.source and args.out and len(args.detail) == 4):
             p.error("--detail needs a prompt, --source, -o and a X0,Y0,X1,Y1 box")

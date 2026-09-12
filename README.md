@@ -190,6 +190,20 @@ Two rules from the [benchmark](benchmark/README.md#3-detail-pass---detail--works
 - The box must include a physical edge of the object. A crop that is only flat panel and text gets a whole new plate hallucinated inside it.
 - It sharpens, it does not correct. A wrong digit in the base render survives the pass. Reroll the base seed for that.
 
+### Auto-repair faces (`--autofix`)
+
+`--autofix IMAGE` finds every face with OpenCV YuNet and re-renders each through the grid-free `--detail` path in place, so soft or AI faces get a supersampled, anatomically-cleaner pass without hunting boxes by hand. It detects *where* faces are, not whether they are broken, so it refines all of them.
+
+```sh
+h3edit --autofix out.png --dry-run -o overlay.png    # see the boxes first, no renders
+h3edit --autofix out.png -o out_fixed.png            # refine every face, accumulate in one file
+```
+
+- `--dry-run` writes an overlay of the boxes and runs nothing — always look before spending render time.
+- `--min-size` (default 64 px) skips tiny background faces; `--pad` (0.35) grows each box to give `--detail` a real edge.
+- **Hands have no reliable CPU detector on the Mac** (mediapipe's wheels are Tasks-only and abort on a Metal check), so fix a bad hand by pointing detection-free `--regions x0,y0,x1,y1;...` at it. Same detail+feather pass.
+- Needs the `[autofix]` extra (`uv tool install --force -e ".[autofix]"`); the YuNet model is fetched to `~/.cache/h3edit/models` on first use. `--doctor` reports availability.
+
 ## Canvas builds (`h3-inpaint`)
 
 Use `h3-inpaint` for an image no single prompt can produce, or for a finished image with a wrong region.
