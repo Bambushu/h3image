@@ -13,7 +13,7 @@ from the established local R2V workflow, so the autogrow reference inputs carry 
 sets values in it, and refuses to queue if those keys have gone missing. Re-export with --export
 after editing the graph in the GUI.
 """
-import argparse, json, os, random, shutil, sys, time, urllib.request
+import argparse, json, math, os, random, shutil, sys, time, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GRAPH = os.path.join(HERE, "api_graph.json")
@@ -387,6 +387,56 @@ def detail(args):
     print(f"{out}  (detail box {x0},{y0},{x1},{y1} at {args.ar}, feather {f}px)")
 
 
+def dispatch(args):
+    """Run one variation in whatever mode the args select; the result lands at args.out."""
+    if args.detail:
+        return detail(args)
+    if args.inpaint:
+        return inpaint_run(args)
+    return run(args)
+
+
+def make_sheet(items, out_path):
+    """Contact sheet of the variations, each cell captioned with its seed. items = [(path, label)]."""
+    from PIL import Image, ImageDraw
+    ims = [Image.open(p).convert("RGB") for p, _ in items]
+    n = len(ims)
+    cols = math.ceil(math.sqrt(n)); rows = math.ceil(n / cols)
+    tw = 480; cap = 26; pad = 8
+    th = max(1, round(tw * ims[0].height / ims[0].width))
+    cw, ch = tw + pad, th + cap + pad
+    sheet = Image.new("RGB", (cols * cw + pad, rows * ch + pad), (24, 24, 24))
+    d = ImageDraw.Draw(sheet)
+    for i, ((_, label), im) in enumerate(zip(items, ims)):
+        r, c = divmod(i, cols)
+        x, y = pad + c * cw, pad + r * ch
+        sheet.paste(im.resize((tw, th), Image.LANCZOS), (x, y))
+        d.text((x + 4, y + th + 6), label, fill=(235, 235, 235))
+    sheet.save(out_path)
+    return out_path
+
+
+def batch(args, seeds):
+    """Render one variation per seed, save all, and write a labeled contact sheet (seed-select)."""
+    base_out, base_name = args.out, args.name
+    if base_out:
+        stem, ext = os.path.splitext(base_out)
+    else:
+        stem, ext = os.path.join(OUTPUT_DIR, base_name), ".png"
+    print(f"seed-select: {len(seeds)} variations (sequential; ~{len(seeds)}x a single render)")
+    items = []
+    for i, s in enumerate(seeds):
+        args.seed = s
+        args.name = f"{base_name}_s{s}"          # keep per-seed intermediates from colliding
+        args.out = f"{stem}_s{s}{ext}"
+        args.wait = True
+        print(f"[{i + 1}/{len(seeds)}] seed {s} -> {args.out}")
+        dispatch(args)
+        items.append((args.out, f"seed {s}"))
+    sheet = make_sheet(items, f"{stem}_sheet{ext}")
+    print(f"sheet: {sheet}\nvariations: " + ", ".join(p for p, _ in items))
+
+
 def main():
     p = argparse.ArgumentParser(description="Instruction-based image editing on MiniMax H3, local.")
     p.add_argument("prompt", nargs="?", help="edit instruction; see prompts/reference_prompts.txt")
@@ -425,6 +475,9 @@ def main():
     p.add_argument("--ref-size", default="match", choices=["match", "max"],
                    help="'max' pins refs to a 2048px short edge: ~10x slower, no better")
     p.add_argument("--seed", type=int, default=None)
+    p.add_argument("--n", type=int, default=1, help="seed-select: render N variations (seed, seed+1, ...) and a labeled contact sheet; pick one by eye")
+    p.add_argument("--seeds", type=lambda v: [int(s) for s in v.split(",")], default=None,
+                   help="seed-select: exact seeds, comma-separated (overrides --n)")
     p.add_argument("--name", default="h3_edit", help="output filename prefix")
     p.add_argument("--wait", action="store_true", help="block until the render lands")
     p.add_argument("--doctor", action="store_true", help="check the local install and exit")
@@ -455,11 +508,10 @@ def main():
         args.mp = 2.0 if args.detail else 4.0
     if args.seed is None:
         args.seed = random.randrange(1, 2**31)
-    if args.detail:
-        return detail(args)
-    if args.inpaint:
-        return inpaint_run(args)
-    run(args)
+    seeds = args.seeds if args.seeds else [args.seed + i for i in range(args.n)]
+    if len(seeds) > 1:
+        return batch(args, seeds)
+    return dispatch(args)
 
 
 if __name__ == "__main__":
