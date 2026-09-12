@@ -190,6 +190,21 @@ Two rules from the [benchmark](benchmark/README.md#3-detail-pass---detail--works
 - The box must include a physical edge of the object. A crop that is only flat panel and text gets a whole new plate hallucinated inside it.
 - It sharpens, it does not correct. A wrong digit in the base render survives the pass. Reroll the base seed for that.
 
+### Upscale + re-detail (`--upscale`)
+
+Enlarge an image and add *real* H3 detail — the large-format finisher (generate/commit -> upscale -> outpaint). Lanczos scaffold, then saliency-gated 4 MP detail tiles recombined so lighting can't drift.
+
+```sh
+h3edit --upscale in.png --scale 2 -o out.png --dry-run    # tile plan (green=detail, red=skip), no renders
+h3edit --upscale in.png --scale 2 -o out.png              # then render
+```
+
+- **Lanczos enlarge** to `--scale`x (/32), then tile into ~`--tile-mp` (1.2) crops with `--overlap` (0.2), origins/sizes snapped to the 16 px VAE grid.
+- **Saliency gate**: tiles below `--edge-thresh` (Laplacian variance, default 6) are left as the Lanczos scaffold — skips flat regions, which both avoids the detail-crop hallucination and saves renders. `--dry-run` prints per-tile scores to tune it.
+- **Wavelet recombine**: each tile keeps the scaffold's low frequencies (lighting/colour) and takes only the H3 render's high frequencies (texture), so tiles can't drift tile-to-tile.
+- **Cost is real**: each tile is a 4 MP render (~3.5-12 min on the M5 depending on crop size). A 2x of a 4 MP image is ~28 tiles -> hours locally; use a pod for large jobs.
+- **Not for text/faces**: detail tiles mangle letterforms and can shift a face -- repair those with `--inpaint` / `--autofix` after. For a fast, faithful, light re-detail instead, use the MLX-DLSS Image Upscale workflow (the owning local upscaler); `--upscale` is for heavy generative detail.
+
 ## Canvas builds (`h3-inpaint`)
 
 Use `h3-inpaint` for an image no single prompt can produce, or for a finished image with a wrong region.
