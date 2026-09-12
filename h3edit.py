@@ -387,6 +387,119 @@ def detail(args):
     print(f"{out}  (detail box {x0},{y0},{x1},{y1} at {args.ar}, feather {f}px)")
 
 
+_OP_OVER = 48   # px of real content pulled into each strip so it anchors + gives --detail an edge
+
+
+def _reframe_sides(size, ar, anchor):
+    """px to add per side (L,T,R,B) to reach aspect `ar` by EXTENDING only (never cropping)."""
+    W, H = size
+    aw, ah = (int(x) for x in ar.split(":"))
+    target, cur = aw / ah, W / H
+    snap = lambda v: max(0, (int(v) // 32) * 32)
+    L = T = R = B = 0
+    if cur < target - 1e-6:                       # too narrow -> add width
+        add = snap(round(H * target) - W)
+        if anchor == "left": R = add
+        elif anchor == "right": L = add
+        else: L = snap(add // 2); R = add - L
+    elif cur > target + 1e-6:                      # too wide -> add height
+        add = snap(round(W / target) - H)
+        if anchor == "top": B = add
+        elif anchor == "bottom": T = add
+        else: T = snap(add // 2); B = add - T
+    return L, T, R, B
+
+
+def _extend_side(args, side, add, palette, seed, base, work):
+    """Grow the working file `work` by `add` px on one side: edge-replicate into the new margin, then
+    inpaint it (the frozen original conditions the continuation). No --detail finish: a detail crop of
+    a blurred, edgeless margin hallucinates (graph-paper, droplets); the notched+tone-matched inpaint
+    strip is the clean result. inpaint_run resets args.out to None on return, so re-point it at `work`."""
+    from PIL import Image
+    cur = Image.open(work).convert("RGB")
+    W, H = cur.size
+    over = _OP_OVER
+    if side in ("left", "right"):
+        canvas = Image.new("RGB", (W + add, H))
+        canvas.paste(cur, (add, 0) if side == "left" else (0, 0))
+        if side == "right":
+            canvas.paste(cur.crop((W - 1, 0, W, H)).resize((add, H)), (W, 0))
+            box = (W - over, 0, W + add, H)
+        else:
+            canvas.paste(cur.crop((0, 0, 1, H)).resize((add, H)), (0, 0))
+            box = (0, 0, add + over, H)
+    else:
+        canvas = Image.new("RGB", (W, H + add))
+        canvas.paste(cur, (0, add) if side == "top" else (0, 0))
+        if side == "bottom":
+            canvas.paste(cur.crop((0, H - 1, W, H)).resize((W, add)), (0, H))
+            box = (0, H - over, W, H + add)
+        else:
+            canvas.paste(cur.crop((0, 0, W, 1)).resize((W, add)), (0, 0))
+            box = (0, 0, W, add + over)
+    canvas.save(work)
+    user = args.prompt
+    # inpaint the margin (denoise 1.0; the frozen original conditions it)
+    args.out = work
+    args.source = work
+    args.inpaint = list(box); args.detail = None
+    args.denoise = 1.0
+    args.refs = [palette]
+    args.seed = seed
+    args.name = f"{base}_op_{side}_{seed}"
+    args.prompt = (user + f"\nThe frame extends the photo on the {side} side; continue the scene "
+                   "seamlessly from the existing edge. <Picture 1> is the colour palette only. "
+                   "Paint only inside the frame. No text.")
+    inpaint_run(args)
+    args.prompt = user      # restore for the next side
+
+
+def outpaint(args):
+    """Extend an image past its borders (--outpaint L,T,R,B) or to an aspect ratio (--reframe AR) by
+    GENERATING the new margins: per-side strips, top+bottom then left+right so corners get two
+    populated neighbours; a single strip per side up to 25% of the current dimension, chunked and
+    re-encoded beyond that. Verified 2026-09-12: H3 continues a scene coherently on one anchored edge."""
+    from PIL import Image, ImageFilter, ImageDraw
+    base = args.name
+    src0 = Image.open(args.source).convert("RGB")
+    if args.reframe:
+        L, T, R, B = _reframe_sides(src0.size, args.reframe, args.anchor)
+    else:
+        L, T, R, B = args.outpaint
+    plan = [("top", T), ("bottom", B), ("left", L), ("right", R)]
+    fw = src0.width + L + R
+    fh = src0.height + T + B
+    if not any(v > 0 for _, v in plan):
+        return print(f"outpaint: nothing to add (source already {src0.width}x{src0.height} for that target)")
+    print(f"outpaint: {src0.width}x{src0.height} -> {fw}x{fh}  (L{L} T{T} R{R} B{B})")
+    if args.dry_run:
+        over = Image.new("RGB", (fw, fh), (40, 40, 40)); over.paste(src0, (L, T))
+        d = ImageDraw.Draw(over); d.rectangle((L, T, L + src0.width - 1, T + src0.height - 1),
+                                              outline=(0, 220, 0), width=6)
+        op = args.out or os.path.join(OUTPUT_DIR, f"{base}_outpaint_plan.png")
+        over.save(op)
+        return print(f"dry-run plan: {op}  (green = original, grey = margins to generate; no renders)")
+    work = args.out
+    src0.save(work)
+    palette = os.path.join(INPUT_DIR, f"{base}_op_palette.png")
+    src0.resize((16, 16)).resize((256, 256), Image.NEAREST).filter(ImageFilter.GaussianBlur(20)).save(palette)
+    si = 0
+    for side, total in plan:
+        remaining = total
+        while remaining > 0:
+            cur = Image.open(work).size
+            dim = cur[1] if side in ("top", "bottom") else cur[0]
+            cap = max(32, (int(dim * 0.25) // 32) * 32)
+            add = max(32, (min(remaining, cap) // 32) * 32)
+            print(f"[{side}] +{add}px (remaining {remaining})")
+            _extend_side(args, side, add, palette, args.seed + si, base, work)
+            si += 1
+            remaining -= add
+    final = Image.open(work).size
+    print(f"outpaint -> {work} ({final[0]}x{final[1]})")
+
+
+
 def dispatch(args):
     """Run one variation in whatever mode the args select; the result lands at args.out."""
     if args.detail:
@@ -479,6 +592,14 @@ def main():
     p.add_argument("--seeds", type=lambda v: [int(s) for s in v.split(",")], default=None,
                    help="seed-select: exact seeds, comma-separated (overrides --n)")
     p.add_argument("--name", default="h3_edit", help="output filename prefix")
+    p.add_argument("--outpaint", metavar="L,T,R,B", type=lambda v: [int(x) for x in v.split(",")],
+                   default=None, help="extend the image by these px per side, generating the margins")
+    p.add_argument("--reframe", metavar="W:H", default=None,
+                   help="extend (never crop) to reach this aspect ratio; use with --anchor")
+    p.add_argument("--anchor", default="center", choices=["center", "left", "right", "top", "bottom"],
+                   help="--reframe: where the original sits inside the new frame")
+    p.add_argument("--dry-run", dest="dry_run", action="store_true",
+                   help="--outpaint/--reframe: save a plan image of the margins and render nothing")
     p.add_argument("--wait", action="store_true", help="block until the render lands")
     p.add_argument("--doctor", action="store_true", help="check the local install and exit")
     p.add_argument("--export", metavar="TAB",
@@ -490,6 +611,20 @@ def main():
     if args.export:
         from export_graph import export
         return export(args.export, GRAPH)
+    if args.outpaint or args.reframe:
+        if not (args.source and args.out):
+            p.error("--outpaint/--reframe need --source and -o")
+        if not args.prompt:
+            p.error("--outpaint/--reframe need a prompt describing the scene to continue")
+        if args.outpaint and len(args.outpaint) != 4:
+            p.error("--outpaint takes L,T,R,B (four integers)")
+        if args.outpaint and args.reframe:
+            p.error("--outpaint and --reframe are alternatives; pass one")
+        if args.mp is None:
+            args.mp = 4.0
+        if args.seed is None:
+            args.seed = random.randrange(1, 2**31)
+        return outpaint(args)
     if args.detail:
         if not (args.prompt and args.source and args.out and len(args.detail) == 4):
             p.error("--detail needs a prompt, --source, -o and a X0,Y0,X1,Y1 box")

@@ -190,6 +190,23 @@ Two rules from the [benchmark](benchmark/README.md#3-detail-pass---detail--works
 - The box must include a physical edge of the object. A crop that is only flat panel and text gets a whole new plate hallucinated inside it.
 - It sharpens, it does not correct. A wrong digit in the base render survives the pass. Reroll the base seed for that.
 
+### Outpaint / reframe (`--outpaint`, `--reframe`)
+
+Extend an image past its borders, or change its aspect ratio, by *generating* the new margins instead of cropping. Each new margin is an `--inpaint` strip where the original image is the frozen context that anchors the continuation.
+
+```sh
+h3edit "continue the sunlit courtyard, same light and depth of field, no new people" \
+  --outpaint 0,0,256,0 --source in.png -o out.png            # add 256px on the right (L,T,R,B)
+h3edit "continue the beach and sky" --reframe 16:9 --anchor center --source in.png -o out.png
+h3edit "..." --reframe 3:2 --source in.png -o out.png --dry-run    # plan image, no renders
+```
+
+- The positional prompt describes the scene to continue; give it what is *outside* the frame, and say "no new people" so a side margin beside a subject stays empty.
+- **Per-side, top+bottom then left+right**, so corners are generated with two populated neighbours. Sizes snap to `/32`; `--reframe` only ever extends (never crops), `--anchor` places the original.
+- A single strip per side up to ~25% of the current dimension; larger extensions are split into ≤25% chunks and re-encoded between (each new strip then anchors to real pixels). ~25% per anchored edge is the coherence ceiling — beyond ~50% total it drifts (verified 2026-09-12: H3 continues a scene on one anchored edge, but it is not a trained outpaint model).
+- **No `--detail` finish on margins** — a detail crop of a blurred, edgeless margin hallucinates (it invented graph-paper and water drops in testing). The notched, tone-matched inpaint strip is the clean output; the faint quilt on smooth surfaces is the same floor as any `--inpaint`.
+- `--dry-run` writes a plan image (green = original, grey = margins) and renders nothing.
+
 ## Canvas builds (`h3-inpaint`)
 
 Use `h3-inpaint` for an image no single prompt can produce, or for a finished image with a wrong region.
