@@ -1,0 +1,203 @@
+{
+ "1": {
+  "class_type": "ResolutionSelector",
+  "inputs": {
+   "aspect_ratio": "2:3 (Portrait Photo)",
+   "megapixels": 4,
+   "multiple": 32
+  }
+ },
+ "2": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "minimax_h3_t1_image_vae_step1597.safetensors"
+  }
+ },
+ "3": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+  }
+ },
+ "4": {
+  "class_type": "VAEDecodeAudio",
+  "inputs": {
+   "samples": [
+    "8",
+    0
+   ],
+   "vae": [
+    "3",
+    0
+   ]
+  }
+ },
+ "5": {
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "8",
+    0
+   ],
+   "vae": [
+    "2",
+    0
+   ]
+  }
+ },
+ "6": {
+  "class_type": "KSamplerSelect",
+  "inputs": {
+   "sampler_name": "euler"
+  }
+ },
+ "7": {
+  "class_type": "BasicScheduler",
+  "inputs": {
+   "scheduler": "simple",
+   "steps": 20,
+   "denoise": 1,
+   "model": [
+    "14",
+    0
+   ]
+  }
+ },
+ "8": {
+  "class_type": "SamplerCustomAdvanced",
+  "inputs": {
+   "noise": [
+    "12",
+    0
+   ],
+   "guider": [
+    "9",
+    0
+   ],
+   "sampler": [
+    "6",
+    0
+   ],
+   "sigmas": [
+    "7",
+    0
+   ],
+   "latent_image": [
+    "13",
+    1
+   ]
+  }
+ },
+ "9": {
+  "class_type": "BasicGuider",
+  "inputs": {
+   "model": [
+    "14",
+    0
+   ],
+   "conditioning": [
+    "13",
+    0
+   ]
+  }
+ },
+ "10": {
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "minimax_h3_hybrid_fl2va_ref2va_b25-49.safetensors",
+   "weight_dtype": "default"
+  }
+ },
+ "11": {
+  "class_type": "CLIPLoader",
+  "inputs": {
+   "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+   "type": "minimax",
+   "device": "default"
+  }
+ },
+ "12": {
+  "class_type": "RandomNoise",
+  "inputs": {
+   "noise_seed": 20260819
+  }
+ },
+ "13": {
+  "class_type": "MiniMaxH3ReferenceToVideo",
+  "inputs": {
+   "prompt": "Task: Reference-guided generation. Make a dramatic, unmistakable body-size transformation of the adult from <Picture 1>. Keep his identity, face, eyes, hairstyle, expression, skin tone, outfit design, pose, studio background, and photographic style, but do not preserve his original body proportions. Depict him with severe obesity and a very large, heavy body: an extremely large protruding round abdomen, much wider waist and torso, thick upper arms, large hips and thighs, a broad neck, and clearly increased facial fullness. The substantial weight must be immediately obvious across his entire silhouette, with anatomically coherent, realistic fat distribution. He must not look merely broad, muscular, stocky, chubby, or slightly overweight. Resize the jacket, shirt, and trousers so they fit the much larger body realistically. Complete full-body 2:3 portrait, both feet visible.",
+   "width": [
+    "1",
+    0
+   ],
+   "height": [
+    "1",
+    1
+   ],
+   "length": [
+    "20",
+    0
+   ],
+   "ref_image_size": "max",
+   "clip": [
+    "11",
+    0
+   ],
+   "vae": [
+    "2",
+    0
+   ],
+   "audio_vae": [
+    "3",
+    0
+   ],
+   "ref_images.ref_image_0": [
+    "17",
+    0
+   ]
+  }
+ },
+ "14": {
+  "class_type": "ModelAttentionBackend",
+  "inputs": {
+   "attention": "comfy kitchen attention",
+   "model": [
+    "10",
+    0
+   ]
+  }
+ },
+ "15": {
+  "class_type": "ImageFromBatch",
+  "inputs": {
+   "batch_index": 0,
+   "length": 1,
+   "image": [
+    "5",
+    0
+   ]
+  }
+ },
+ "16": {
+  "class_type": "SaveImage",
+  "inputs": {
+   "filename_prefix": "minimax_h3_edit_benchmark",
+   "images": [
+    "15",
+    0
+   ]
+  }
+ },
+ "17": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "character_1.png"
+  }
+ },
+ "20": {
+  "class_type": "PrimitiveInt",
+  "inputs": {
+   "value": 1
+  }
+ }
+}

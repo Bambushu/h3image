@@ -8,7 +8,37 @@ MiniMax H3 is an open-weight 33B video model. Run in reference-to-video (R2V) mo
 
 The technique was published by [Patient_Ratio4177](https://www.reddit.com/r/StableDiffusion/comments/1vo1ab3/h3_as_a_singleimage_edit_model/), originally on CUDA. This repo began as the Apple Silicon (MPS) port and ships a ComfyUI workflow, a single-frame compatibility node, and an `h3edit` CLI. The CLI is host-agnostic: it queues the bundled workflow over HTTP against any running ComfyUI (point `H3EDIT_COMFY` at it) and sets every widget by name, never hand-building a graph.
 
-**Platform status.** Apple Silicon / MPS is the verified target today. Running against a CUDA ComfyUI is in progress — the graph and node-map are still tied to the MacMax export, so a CUDA card needs a re-exported graph (`--export`) and the node-resolution work tracked in the roadmap. Do not assume the CUDA path is validated yet.
+## CUDA / non-Mac (`--profile cuda`)
+
+The CLI drives two shipped graphs, chosen with `--profile` (or `$H3EDIT_PROFILE`, default `mac`):
+
+- `mac` — the MacMax H3 R2V graph (MPS), Parasyte turbo lane. Unchanged.
+- `cuda` — the shipped `int8_convrot` single-image edit graph (`api_graph.cuda.json`), base model,
+  euler/simple 20 steps. For a CUDA ComfyUI, local or a pod.
+
+```sh
+# local CUDA box (own ComfyUI, shared filesystem — same I/O model as mac):
+H3EDIT_COMFY=http://127.0.0.1:8188 h3edit --profile cuda --generate "a red sailboat on turquoise sea" --mp 12 -o out.png --wait
+h3edit --profile cuda --doctor
+
+# a remote pod (COMFY host is not localhost) auto-switches to /upload/image + /view:
+H3EDIT_COMFY=https://<pod>-8188.proxy.runpod.net h3edit --profile cuda --generate "..." --mp 12 -o out.png --wait
+```
+
+Needs the H3 int8_convrot models present (`minimax_h3_fl2va_int8_convrot`, `qwen3vl_32b_minimax_h3_int8_convrot`,
+`minimax_h3_video_vae_fp16`) and a Blackwell card on driver >= 580 (cu130). Verified on an RTX PRO 6000
+and a 5090 (2026-09-13): `--generate` was rendered end-to-end through this path (graph build, submit,
+download) and `--doctor` passes. Edit/`--detail`/`--inpaint` reuse the same `build_cuda` primitive and
+`--outpaint`/`--upscale`/`--autofix` are pure orchestration on top of them — code-complete, but not yet
+each rendered on CUDA (unverified per-mode). The mac-only diagnostic flags
+(`--te/--dit/--encode-*/--save-latent/--decode-crop/--frames`) are rejected under `--profile cuda`.
+
+**One-shot resolution ceiling (measured 2026-09-13, PRO 6000).** The `ResolutionSelector` clamps a
+one-shot generation at **16.88 MP (5024x3360 at 3:2)** — requesting 20/24/28/32 MP silently returns the
+same 16.88 MP frame (no error, unlike the HTTP 400 seen on Mac at 24 MP). Warm render times: 8 MP 76s,
+12 MP 109s, 16.88 MP ~150s. Go past 16.88 MP by tiling with `--upscale` / `--outpaint`.
+
+**Platform status.** Apple Silicon / MPS and CUDA are both supported — pick with `--profile` (see below). The CUDA path (shipped int8_convrot edit graph) was verified on an RTX PRO 6000 and a 5090 on 2026-09-13: text-to-image (`--generate`) renders end-to-end and `--doctor` passes; the other modes share the same primitive and are code-complete but not yet each rendered on CUDA.
 
 ![mural demo](demos/sheets/gable.png)
 

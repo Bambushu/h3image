@@ -13,7 +13,7 @@ from the established local R2V workflow, so the autogrow reference inputs carry 
 sets values in it, and refuses to queue if those keys have gone missing. Re-export with --export
 after editing the graph in the GUI.
 """
-import argparse, json, math, os, random, shutil, sys, time, urllib.request
+import argparse, json, math, os, random, shutil, sys, time, urllib.request, urllib.parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GRAPH = os.path.join(HERE, "api_graph.json")
@@ -44,10 +44,71 @@ ASPECTS = {"1:1": "1:1 (Square)", "2:3": "2:3 (Portrait Photo)", "3:2": "3:2 (Ph
            "21:9": "21:9 (Ultrawide)"}
 
 
+# --- Graph profiles ------------------------------------------------------------------
+# Two SHIPPED graphs, each exported once via the frontend's graphToPrompt (NEVER hand-built):
+#   mac  = api_graph.json      (MacMax H3 R2V, MPS; ClipProj TE + Parasyte turbo lane)
+#   cuda = api_graph.cuda.json (shipped int8_convrot single-image edit graph; base model, euler/simple)
+# int8_convrot has no MPS path and MacMax has no CUDA path, so the split is inherent. Node maps are
+# the graphToPrompt ids of each export (cuda ported from the 5090-validated h3edit_pod.py nodeset).
+# Pick with --profile / $H3EDIT_PROFILE (default mac). Local CUDA box = HTTP + shared filesystem I/O
+# (identical to mac); a REMOTE pod (COMFY host not localhost) switches to /upload/image + /view.
+CUDA_GRAPH = os.path.join(HERE, "api_graph.cuda.json")
+_PROFILES = {
+    "mac": {"graph": GRAPH, "comfy": COMFY, "prompt_key": "value",
+            "nodes": dict(prompt="138", res="115", steps="124", seed="129", r2v="136",
+                          sampler="123", save="664", ksampler="125", vae="119",
+                          length="131", batch="663", unet="665", lora="666", te="661"),
+            "ref_nodes": [("137", "ref_images.ref_image_0"), ("139", "ref_images.ref_image_1")],
+            "models": {},
+            "lane": dict(sampler="er_sde", scheduler="beta57", steps=8)},
+    "cuda": {"graph": CUDA_GRAPH, "comfy": os.environ.get("H3EDIT_COMFY", ""), "prompt_key": "prompt",
+             "nodes": dict(prompt="13", res="1", steps="7", seed="12", r2v="13",
+                           sampler="6", save="16", ksampler="8", vae="2",
+                           length="20", batch="15", unet="10", lora=None, te=None),
+             "ref_nodes": [("17", "ref_images.ref_image_0")],
+             "models": {"10": ("unet_name", "minimax_h3_fl2va_int8_convrot.safetensors"),
+                        "11": ("clip_name", "qwen3vl_32b_minimax_h3_int8_convrot.safetensors"),
+                        "2": ("vae_name", "minimax_h3_video_vae_fp16.safetensors")},
+             "lane": dict(sampler="euler", scheduler="simple", steps=20)},
+}
+PROFILE = "mac"
+PROF = _PROFILES["mac"]
+
+
+def apply_profile(name):
+    global PROFILE, PROF, GRAPH, COMFY
+    if name not in _PROFILES:
+        sys.exit(f"unknown --profile {name!r} (choose: mac, cuda)")
+    PROFILE, PROF = name, _PROFILES[name]
+    GRAPH = PROF["graph"]
+    if PROF["comfy"]:
+        COMFY = PROF["comfy"]
+
+
+def _remote():
+    from urllib.parse import urlparse
+    return (urlparse(COMFY).hostname or "") not in ("127.0.0.1", "localhost", "::1", "")
+
+
+def _upload(path):
+    """POST an image to a remote ComfyUI's /upload/image and return the stored name."""
+    import mimetypes, uuid
+    name = os.path.basename(path)
+    bnd = uuid.uuid4().hex
+    ct = mimetypes.guess_type(path)[0] or "application/octet-stream"
+    body = (f"--{bnd}\r\nContent-Disposition: form-data; name=\"image\"; filename=\"{name}\"\r\n"
+            f"Content-Type: {ct}\r\n\r\n").encode() + open(path, "rb").read() + \
+        (f"\r\n--{bnd}\r\nContent-Disposition: form-data; name=\"type\"\r\n\r\ninput\r\n"
+         f"--{bnd}\r\nContent-Disposition: form-data; name=\"overwrite\"\r\n\r\ntrue\r\n--{bnd}--\r\n").encode()
+    req = urllib.request.Request(COMFY + "/upload/image", body,
+                                 {"Content-Type": f"multipart/form-data; boundary={bnd}", "User-Agent": "curl/8"})
+    return json.loads(urllib.request.urlopen(req, timeout=120).read() or b"{}").get("name", name)
+
+
 def api(path, payload=None):
     data = json.dumps(payload).encode() if payload is not None else None
     req = urllib.request.Request(COMFY + path, data=data,
-                                 headers={"Content-Type": "application/json"})
+                                 headers={"Content-Type": "application/json", "User-Agent": "curl/8"})
     with urllib.request.urlopen(req, timeout=60) as r:
         return json.loads(r.read().decode())
 
@@ -58,7 +119,31 @@ def combo_options(node, widget):
     return v[1]["options"] if isinstance(v[0], str) else v[0]
 
 
+def doctor_cuda():
+    ok = True
+    try:
+        api("/system_stats")
+        print("ok   ComfyUI reachable at", COMFY, "(remote pod)" if _remote() else "(local)")
+    except Exception as e:
+        print("FAIL ComfyUI not reachable at", COMFY, "--", str(e)[:120]); return False
+    if not os.path.exists(GRAPH):
+        print("FAIL", GRAPH, "missing -- export it once from a ComfyUI with the H3 edit graph loaded"); return False
+    print("ok   graph:", os.path.basename(GRAPH))
+    for cls in ("MiniMaxH3ReferenceToVideo", "H3V2VInit", "ResolutionSelector"):
+        if cls in api(f"/api/object_info/{cls}"):
+            print(f"ok   {cls} registered")
+        else:
+            ok = False; print(f"FAIL {cls} not registered on the CUDA ComfyUI")
+    unets = combo_options("UNETLoader", "unet_name")
+    want = PROF["models"]["10"][1]
+    print(f"ok   {want} present" if want in unets else f"FAIL {want} not in models/diffusion_models")
+    ok = ok and want in unets
+    return ok
+
+
 def doctor():
+    if PROFILE == "cuda":
+        return doctor_cuda()
     ok = True
     try:
         api("/system_stats")
@@ -125,6 +210,8 @@ def doctor():
 
 
 def build(args):
+    if PROFILE == "cuda":
+        return build_cuda(args)
     g = json.load(open(GRAPH))
     for key, (nid, cls) in N.items():
         if nid not in g or g[nid]["class_type"] != cls:
@@ -237,8 +324,80 @@ def inpaint_wire(g, args):
         g["122"]["inputs"]["samples"] = ["9310", 0]
 
 
+def build_cuda(args):
+    """Drive the shipped int8_convrot edit graph over HTTP, widgets by name (ported from the
+    5090-validated h3edit_pod.py nodeset). Generate = a neutral card as the only reference."""
+    if args.te or args.dit or args.encode_vae or args.encode_tiled or args.save_latent \
+            or args.decode_crop or args.frames != 1:
+        sys.exit("--profile cuda does not support the mac-only diagnostic flags "
+                 "(--te/--dit/--encode-vae/--encode-tiled/--save-latent/--decode-crop/--frames)")
+    if args.lora not in ("off", TURBO_LORA):
+        sys.exit("--profile cuda runs the base model; --lora is mac-only (drop it or pass --lora off)")
+    g = json.load(open(GRAPH))
+    nd = PROF["nodes"]
+    for key, nid in nd.items():
+        if nid and nid not in g:
+            sys.exit(f"api_graph.cuda.json is missing node {nid} ({key}). Re-export it.")
+    lane = PROF["lane"]      # swap the mac argparse defaults to the cuda base lane unless overridden
+    sampler = lane["sampler"] if args.sampler == "er_sde" else args.sampler
+    scheduler = lane["scheduler"] if args.scheduler == "beta57" else args.scheduler
+    steps = lane["steps"] if args.steps == 8 else args.steps
+    args.steps, args.sampler, args.scheduler = steps, sampler, scheduler   # reflect the base lane in logs
+    for nid, (k, v) in PROF["models"].items():
+        if nid in g:
+            g[nid]["inputs"][k] = v
+    g[nd["prompt"]]["inputs"][PROF["prompt_key"]] = args.prompt
+    g[nd["res"]]["inputs"].update(aspect_ratio=ASPECTS[args.ar], megapixels=args.mp)
+    g[nd["steps"]]["inputs"].update(steps=steps, scheduler=scheduler)
+    g[nd["sampler"]]["inputs"]["sampler_name"] = sampler
+    g[nd["seed"]]["inputs"]["noise_seed"] = args.seed
+    g[nd["r2v"]]["inputs"]["ref_image_size"] = args.ref_size
+    if args.vae:
+        g[nd["vae"]]["inputs"]["vae_name"] = args.vae
+    g[nd["save"]]["inputs"]["filename_prefix"] = "h3_edit/" + args.name
+    names = [stage_ref(pth) for pth in args.refs]
+    r2v = g[nd["r2v"]]["inputs"]
+    slot0 = PROF["ref_nodes"][0][0]
+    for i, name in enumerate(names):
+        if i == 0:
+            g[slot0]["inputs"]["image"] = name
+        else:
+            nid = f"91{i:02d}"
+            g[nid] = {"class_type": "LoadImage", "inputs": {"image": name}}
+            r2v[f"ref_images.ref_image_{i}"] = [nid, 0]
+    if args.inpaint:
+        cuda_inpaint_wire(g, args)
+    return g
+
+
+def cuda_inpaint_wire(g, args):
+    """Masked partial denoise on the cuda graph: the source enters ONLY as an encoded latent through
+    H3V2VInit; the -r artworks are the references (already wired by build_cuda). Ported from
+    h3edit_pod.py (5090, 2026-09-10)."""
+    from PIL import Image, ImageDraw
+    x0, y0, x1, y1 = args.inpaint
+    src = Image.open(args.source).convert("RGB"); W, H = src.size
+    if W % 32 or H % 32 or x1 > W or y1 > H or x1 - x0 < 32 or y1 - y0 < 32:
+        sys.exit(f"--inpaint box {args.inpaint} must fit {args.source} ({W}x{H}), sides multiples of 32")
+    m = Image.new("L", (W, H), 0)
+    ImageDraw.Draw(m).rectangle((x0 - args.grow, y0 - args.grow, x1 + args.grow, y1 + args.grow), fill=255)
+    mpath = os.path.join(INPUT_DIR, f"{args.name}_mask.png"); m.save(mpath)
+    mask_name = stage_ref(mpath)
+    src_name = stage_ref(args.source)
+    nd = PROF["nodes"]
+    g["9300"] = {"class_type": "LoadImage", "inputs": {"image": src_name}}
+    g["9301"] = {"class_type": "VAEEncode", "inputs": {"pixels": ["9300", 0], "vae": [nd["vae"], 0]}}
+    g["9302"] = {"class_type": "LoadImageMask", "inputs": {"image": mask_name, "channel": "red"}}
+    g["9303"] = {"class_type": "H3V2VInit", "inputs": {"samples": ["9301", 0], "mask": ["9302", 0], "mask_feather": args.feather}}
+    g[nd["ksampler"]]["inputs"]["latent_image"] = ["9303", 0]
+    g[nd["r2v"]]["inputs"].update(width=W, height=H)
+    g[nd["steps"]]["inputs"]["denoise"] = args.denoise
+
+
 def stage_ref(path):
     """Copy a reference into ComfyUI's input dir and return its basename."""
+    if _remote():
+        return _upload(path)
     name = os.path.basename(path)
     dst = os.path.join(INPUT_DIR, name)
     if os.path.abspath(path) != os.path.abspath(dst):
@@ -263,10 +422,19 @@ def run(args):
             if v["status"]["status_str"] != "success":
                 sys.exit("render failed: " + json.dumps(v["status"])[:600])
             im = next(i for o in v["outputs"].values() for i in o.get("images", []))
-            src = os.path.join(OUTPUT_DIR, im.get("subfolder", ""), im["filename"])
-            if args.out:
-                shutil.copy(src, args.out)
-                src = args.out
+            if _remote():
+                q = (f"/view?filename={urllib.parse.quote(im['filename'])}"
+                     f"&subfolder={urllib.parse.quote(im.get('subfolder', ''))}&type=output")
+                data = urllib.request.urlopen(urllib.request.Request(
+                    COMFY + q, headers={"User-Agent": "curl/8"}), timeout=600).read()
+                src = args.out or os.path.join(OUTPUT_DIR, im["filename"])
+                os.makedirs(os.path.dirname(os.path.abspath(src)), exist_ok=True)
+                open(src, "wb").write(data)
+            else:
+                src = os.path.join(OUTPUT_DIR, im.get("subfolder", ""), im["filename"])
+                if args.out:
+                    shutil.copy(src, args.out)
+                    src = args.out
             print(f"{src}  ({int(time.time() - t0)}s)")
             return src
         time.sleep(10)
@@ -745,6 +913,9 @@ def batch(args, seeds):
 
 def main():
     p = argparse.ArgumentParser(description="Instruction-based image editing on MiniMax H3, local.")
+    p.add_argument("--profile", default=os.environ.get("H3EDIT_PROFILE", "mac"), choices=["mac", "cuda"],
+                   help="mac = MacMax MPS graph (default); cuda = shipped int8_convrot edit graph "
+                        "(local CUDA ComfyUI via $H3EDIT_COMFY, or a remote pod)")
     p.add_argument("prompt", nargs="?", help="edit instruction; see prompts/reference_prompts.txt")
     p.add_argument("-r", "--ref", dest="refs", action="append", default=[],
                    help=f"reference image (repeatable, max {MAX_REFS})")
@@ -820,6 +991,7 @@ def main():
     p.add_argument("--export", metavar="TAB",
                    help="re-export api_graph.json from a ComfyUI tab id on CDP $H3EDIT_CDP")
     args = p.parse_args()
+    apply_profile(args.profile)
 
     if args.doctor:
         sys.exit(0 if doctor() else 1)
@@ -853,9 +1025,9 @@ def main():
             p.error("--generate needs a prompt")
         if args.detail or args.inpaint:
             p.error("--generate is text-to-image; do not combine it with --detail/--inpaint")
-        if args.mp is not None and args.mp > 16:
-            p.error("--generate is capped at 16 MP (the ResolutionSelector rejects more); go bigger by "
-                    "tiling up with --detail / --outpaint")
+        if PROFILE == "mac" and args.mp is not None and args.mp > 16:
+            p.error("--generate is capped at 16 MP on mac (the ResolutionSelector rejects more); go bigger by "
+                    "tiling up with --detail / --outpaint, or use --profile cuda")
         if not args.refs:
             from PIL import Image
             gray = os.path.join(INPUT_DIR, "generate_neutral.png")
