@@ -1,12 +1,14 @@
-# h3edit-mac
+# h3image
 
-MiniMax H3 image editing on Apple Silicon (ComfyUI + CLI).
+MiniMax H3 image editing + generation, driven headlessly through ComfyUI (CLI).
 
 ## What it is
 
 MiniMax H3 is an open-weight 33B video model. Run in reference-to-video (R2V) mode, render for exactly one frame, and decode through the video VAE — this turns it into a strong instruction-based image editor.
 
-The technique was published by [Patient_Ratio4177](https://www.reddit.com/r/StableDiffusion/comments/1vo1ab3/h3_as_a_singleimage_edit_model/) and was CUDA-only. This repo is the Apple Silicon port. It ships a ComfyUI workflow, a single-frame compatibility node, and an `h3edit` CLI. The CLI queues the bundled workflow through a running ComfyUI server.
+The technique was published by [Patient_Ratio4177](https://www.reddit.com/r/StableDiffusion/comments/1vo1ab3/h3_as_a_singleimage_edit_model/), originally on CUDA. This repo began as the Apple Silicon (MPS) port and ships a ComfyUI workflow, a single-frame compatibility node, and an `h3edit` CLI. The CLI is host-agnostic: it queues the bundled workflow over HTTP against any running ComfyUI (point `H3EDIT_COMFY` at it) and sets every widget by name, never hand-building a graph.
+
+**Platform status.** Apple Silicon / MPS is the verified target today. Running against a CUDA ComfyUI is in progress — the graph and node-map are still tied to the MacMax export, so a CUDA card needs a re-exported graph (`--export`) and the node-resolution work tracked in the roadmap. Do not assume the CUDA path is validated yet.
 
 ![mural demo](demos/sheets/gable.png)
 
