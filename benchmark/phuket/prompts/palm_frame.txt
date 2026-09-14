@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object, a layout or a format.
+
+The frame shows bright blue midday sky in the upper corner over the beach. Add the fronds and part of the trunk of a coconut palm leaning in from the top corner, dark green fronds overhanging into the frame as a natural foreground frame, a few coconuts at the crown, backlit by the bright sky. Keep the sky. This is only foliage entering from the edge.
+
+Bright midday tropical beach photograph: hard overhead sun, crisp short shadows on the sand, high clarity, saturated turquoise water, photoreal, natural colour, shot on a 35 mm lens.
+The frame is a crop of a much larger finished photograph of Patong Beach: continue its light, palette, scale and perspective exactly. Paint only inside the frame. No text, no watermark.

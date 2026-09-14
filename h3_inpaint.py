@@ -159,7 +159,11 @@ def pod_pass(url, p, plan, e, canvas, box, refs, prompt_path, seed, out_raw):
             st = h[pid].get("status", {})
             if st.get("status_str") == "error":
                 sys.exit(f"{e['name']}: pod render failed: " + json.dumps(st)[-3000:])
+            if st.get("status_str") != "success":
+                time.sleep(8); continue          # entry exists but still running: don't read a half-done job
             im = next((o for n in h[pid]["outputs"].values() for o in n.get("images", [])), None)
+            if im is None:
+                sys.exit(f"{e['name']}: render succeeded but produced no image")
             q = f"/view?filename={urllib.request.quote(im['filename'])}&subfolder={urllib.request.quote(im.get('subfolder', ''))}&type=output"
             open(out_raw, "wb").write(urllib.request.urlopen(urllib.request.Request(url.rstrip("/") + q, headers={"User-Agent": "curl/8"}), timeout=600).read())
             return

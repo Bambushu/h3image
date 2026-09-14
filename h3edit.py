@@ -115,7 +115,10 @@ def api(path, payload=None):
 
 def combo_options(node, widget):
     """Options of a COMBO input: v[1]['options'] on the current schema, v[0] on the old one."""
-    v = api(f"/api/object_info/{node}")[node]["input"]["required"][widget]
+    info = api(f"/api/object_info/{node}")
+    if node not in info:            # unknown node -> ComfyUI returns {} (HTTP 200); let callers FAIL cleanly
+        return []
+    v = info[node]["input"]["required"][widget]
     return v[1]["options"] if isinstance(v[0], str) else v[0]
 
 
@@ -162,6 +165,8 @@ def doctor():
         ok = False
         print("FAIL h3_single_frame custom node is not loaded. Symlink it into ComfyUI's "
               "custom_nodes/ and RESTART ComfyUI.")
+    if not os.path.exists(GRAPH):
+        return print(f"FAIL {GRAPH} missing -- export it once with --export") or False
     g = json.load(open(GRAPH))
     for key, (nid, cls) in N.items():
         if nid not in g or g[nid]["class_type"] != cls:
@@ -198,6 +203,8 @@ def doctor():
     else:
         ok = False
         print(f"FAIL {TURBO_LORA} not in models/loras -- download it (Plaguekind/H3-Lora) or run --lora off")
+    if N["r2v"][0] not in g:      # already reported FAIL in the node loop; avoid a KeyError traceback here
+        return ok
     refs = g[N["r2v"][0]]["inputs"]
     missing = [k for _, k in REF_NODES if k not in refs]
     if missing:
@@ -291,6 +298,7 @@ def inpaint_wire(g, args):
     ImageDraw.Draw(mask).rectangle((x0 - args.grow, y0 - args.grow, x1 + args.grow, y1 + args.grow), fill=255)
     mask_path = os.path.join(INPUT_DIR, f"{args.name}_mask.png")
     mask.save(mask_path)
+    mask_name = stage_ref(mask_path)
     src_name = stage_ref(args.source)
     g["9300"] = {"class_type": "LoadImage", "inputs": {"image": src_name}}
     enc_vae = [N["vae"][0], 0]
@@ -305,7 +313,7 @@ def inpaint_wire(g, args):
     if args.encode_tiled:                        # grid diagnostics: tiled encode (less memory)
         g["9301"] = {"class_type": "VAEEncodeTiled", "inputs": {"pixels": pixels, "vae": enc_vae, "tile_size": 512, "overlap": 64,
                                                                 "temporal_size": 64, "temporal_overlap": 8}}
-    g["9302"] = {"class_type": "LoadImageMask", "inputs": {"image": os.path.basename(mask_path), "channel": "red"}}
+    g["9302"] = {"class_type": "LoadImageMask", "inputs": {"image": mask_name, "channel": "red"}}
     g["9303"] = {"class_type": "H3V2VInit", "inputs": {"samples": ["9301", 0], "mask": ["9302", 0], "mask_feather": args.feather}}
     g[N["ksampler"][0]]["inputs"]["latent_image"] = ["9303", 0]
     if args.save_latent:                          # grid diagnostics: dump the encoded and the sampled latent
@@ -415,13 +423,15 @@ def run(args):
     if not args.wait:
         return
     t0 = time.time()
-    while True:
+    while time.time() - t0 < 3600:
         h = api(f"/history/{pid}")
         if h:
             v = next(iter(h.values()))
             if v["status"]["status_str"] != "success":
                 sys.exit("render failed: " + json.dumps(v["status"])[:600])
-            im = next(i for o in v["outputs"].values() for i in o.get("images", []))
+            im = next((i for o in v["outputs"].values() for i in o.get("images", [])), None)
+            if im is None:
+                sys.exit("render reported success but produced no image: " + json.dumps(v["status"])[:300])
             if _remote():
                 q = (f"/view?filename={urllib.parse.quote(im['filename'])}"
                      f"&subfolder={urllib.parse.quote(im.get('subfolder', ''))}&type=output")
@@ -433,11 +443,13 @@ def run(args):
             else:
                 src = os.path.join(OUTPUT_DIR, im.get("subfolder", ""), im["filename"])
                 if args.out:
+                    os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
                     shutil.copy(src, args.out)
                     src = args.out
             print(f"{src}  ({int(time.time() - t0)}s)")
             return src
         time.sleep(10)
+    sys.exit(f"render timed out after 3600s (prompt {pid} never completed)")
 
 
 def notch_grid(im, periods=(16, 8), width=1):
@@ -494,6 +506,8 @@ def tone_match(ren, src, box, grow, band=64):
         return ren
     rr, ss = r[ring], s[ring]
     bright = ss.sum(1) > np.percentile(ss.sum(1), 45)   # stable bright surfaces (sand/wall), not saturated props
+    if bright.sum() < 16:        # flat/uniform ring: no stable surface to match -> skip (else NaN gain -> black box)
+        return ren
     rr, ss = rr[bright], ss[bright]
     gain = np.array([np.clip(np.median(ss[:, c]) / max(1.0, np.median(rr[:, c])), 0.8, 1.5) for c in range(3)])
     return Image.fromarray(np.clip(r * gain, 0, 255).astype(np.uint8))
@@ -584,7 +598,9 @@ def _fetch_model(url):
     path = os.path.join(AUTOFIX_MODELS, url.rsplit("/", 1)[1])
     if not os.path.exists(path):
         print(f"fetching {os.path.basename(path)} from github.com/opencv/opencv_zoo -> {path}")
-        urllib.request.urlretrieve(url, path)
+        tmp = path + ".tmp"
+        urllib.request.urlretrieve(url, tmp)
+        os.replace(tmp, path)          # atomic: an interrupted download can't poison the cache
     return path
 
 
@@ -737,6 +753,7 @@ def outpaint(args):
         L, T, R, B = _reframe_sides(src0.size, args.reframe, args.anchor)
     else:
         L, T, R, B = args.outpaint
+    L, T, R, B = (int(round(v / 32)) * 32 for v in (L, T, R, B))   # /32: strips render at /32, so snap to avoid overshoot
     plan = [("top", T), ("bottom", B), ("left", L), ("right", R)]
     fw = src0.width + L + R
     fh = src0.height + T + B
@@ -979,13 +996,16 @@ def main():
                         "neutral reference). Up to 16 MP via --mp; pairs with --n for seed-select. "
                         "Ideogram 4 stays sharper for small stills -- use --generate for large-format")
     p.add_argument("--upscale", metavar="IMAGE",
-                   help="enlarge + add real H3 detail: Lanczos scaffold, then saliency-gated 4 MP detail "
-                        "tiles recombined wavelet-style. Plain faithful upscale = the MLX-DLSS workflow instead")
+                   help="[WIP - BROKEN on multi-tile scenes] enlarge + add H3 detail: Lanczos scaffold, then "
+                        "saliency-gated 4 MP detail tiles recombined wavelet-style. The tile compositor does not "
+                        "register cleanly yet (collaged output); needs --allow-wip to run. Faithful upscale = MLX-DLSS")
     p.add_argument("--scale", type=float, default=2.0, help="--upscale: enlargement factor (1 = re-detail in place)")
     p.add_argument("--tile-mp", dest="tile_mp", type=float, default=1.2, help="--upscale: crop size in MP (rendered at 4 MP)")
     p.add_argument("--overlap", type=float, default=0.2, help="--upscale: tile overlap fraction")
     p.add_argument("--edge-thresh", dest="edge_thresh", type=float, default=6.0,
                    help="--upscale: skip tiles whose Laplacian variance is below this (flat = no detail needed)")
+    p.add_argument("--allow-wip", dest="allow_wip", action="store_true",
+                   help="opt in to run features flagged WIP/broken (currently: --upscale)")
     p.add_argument("--wait", action="store_true", help="block until the render lands")
     p.add_argument("--doctor", action="store_true", help="check the local install and exit")
     p.add_argument("--export", metavar="TAB",
@@ -1034,6 +1054,10 @@ def main():
             Image.new("RGB", (512, 512), (128, 128, 128)).save(gray)
             args.refs = [gray]     # cold-start T2I: neutral card, prompt drives (verified 2026-09-12)
     if args.upscale:
+        if not args.allow_wip and not args.dry_run:
+            p.error("--upscale is WIP and produces broken (collaged) output on multi-tile scenes; the tile "
+                    "compositor does not register yet. Re-run with --allow-wip if you want it anyway, or use "
+                    "the MLX-DLSS workflow for a faithful upscale.")
         if not (args.upscale and args.out):
             p.error("--upscale needs an IMAGE and -o")
         if not os.path.exists(args.upscale):

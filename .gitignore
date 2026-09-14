@@ -13,3 +13,57 @@ benchmark/nachtwacht/out/*
 !benchmark/nachtwacht/out/final_4k.jpg
 !benchmark/nachtwacht/out/scores.json
 !benchmark/nachtwacht/out/state.json
+
+# --- generalized render-output ignores (added for public release) ---
+.DS_Store
+**/.DS_Store
+*.pre_videovae_*
+
+# every benchmark build's render outputs; keep only the making-of keepers
+benchmark/*/out/*
+!benchmark/*/out/sheet_*.png
+!benchmark/*/out/final_4k.jpg
+!benchmark/*/out/final_2k.jpg
+!benchmark/*/out/scores.json
+!benchmark/*/out/state.json
+benchmark/*/v2/
+benchmark/*/refs/_*.png
+
+# scratch alternate demo set (curated showcase = book/can/gable/neon/tattoo only)
+demos/cover_gable.png
+demos/cover_neon.png
+demos/out/hair.png
+demos/out/outfit.png
+demos/out/scene.png
+demos/out/scene2.png
+demos/out/tee.png
+demos/out/tee_phoenix.png
+demos/prompts/hair.txt
+demos/prompts/outfit.txt
+demos/prompts/scene.txt
+demos/prompts/scene2.txt
+demos/prompts/tee.txt
+demos/sheets/person_hair.png
+demos/sheets/person_outfit.png
+demos/sheets/person_scene.png
+demos/sheets/person_tee.png
+demos/caps/garment_flat.json
+demos/caps/person_scene.json
+demos/caps/scene_backdrop.json
+demos/caps/tee_graphic.json
+demos/specs/garment_flat.yaml
+demos/specs/person_scene.yaml
+demos/specs/scene_backdrop.yaml
+demos/specs/tee_graphic.yaml
+demos/refs/garment_flat-s42.png
+demos/refs/person_scene-s42.png
+demos/refs/scene_backdrop-s7.png
+demos/refs/tee_graphic-s42.png
+demos/refs/tee_graphic_phoenix-s42.png
+demos/refs/krea_person-s3.png
+demos/refs/krea_person-s7.png
+demos/refs/krea_person-s42.png
+
+# internal dev note, not for public repo
+INPAINT_BRIEF.md
+.crucible-cache/

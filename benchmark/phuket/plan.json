@@ -1,0 +1,1004 @@
+{
+ "canvas": "./out/canvas.png",
+ "grow": 32,
+ "feather": 64,
+ "window_mp": 4.0,
+ "seed": 4200,
+ "passes": [
+  {
+   "name": "parasail_L",
+   "box": [
+    900,
+    650,
+    1620,
+    1180
+   ],
+   "refs": [],
+   "denoise": 0.8,
+   "prompt": "parasail_left.txt"
+  },
+  {
+   "name": "parasail_right",
+   "box": [
+    2700,
+    420,
+    3360,
+    980
+   ],
+   "refs": [],
+   "denoise": 0.8,
+   "prompt": "parasail_right.txt"
+  },
+  {
+   "name": "birds",
+   "box": [
+    1750,
+    780,
+    2300,
+    1150
+   ],
+   "refs": [],
+   "denoise": 0.8,
+   "prompt": "birds.txt"
+  },
+  {
+   "name": "longtails_far",
+   "box": [
+    2100,
+    1560,
+    2900,
+    1820
+   ],
+   "refs": [],
+   "denoise": 0.85,
+   "prompt": "longtails_far.txt"
+  },
+  {
+   "name": "speedboat",
+   "box": [
+    900,
+    1660,
+    1750,
+    1920
+   ],
+   "refs": [],
+   "denoise": 0.85,
+   "prompt": "speedboat.txt"
+  },
+  {
+   "name": "jetski_1",
+   "box": [
+    700,
+    1650,
+    1500,
+    1980
+   ],
+   "refs": [],
+   "denoise": 0.85,
+   "prompt": "jetski_1.txt"
+  },
+  {
+   "name": "jetski_2",
+   "box": [
+    1450,
+    1620,
+    2050,
+    1900
+   ],
+   "refs": [],
+   "denoise": 0.85,
+   "prompt": "jetski_2.txt"
+  },
+  {
+   "name": "banana_boat",
+   "box": [
+    300,
+    1720,
+    1150,
+    2010
+   ],
+   "refs": [],
+   "denoise": 0.85,
+   "prompt": "banana_boat.txt"
+  },
+  {
+   "name": "buoy_line",
+   "box": [
+    400,
+    1900,
+    1900,
+    2120
+   ],
+   "refs": [],
+   "denoise": 0.85,
+   "prompt": "buoy_line.txt"
+  },
+  {
+   "name": "swimmers",
+   "box": [
+    750,
+    1900,
+    1650,
+    2320
+   ],
+   "refs": [],
+   "denoise": 0.85,
+   "prompt": "swimmers.txt"
+  },
+  {
+   "name": "kids_water",
+   "box": [
+    1550,
+    1900,
+    2260,
+    2470
+   ],
+   "refs": [],
+   "denoise": 0.85,
+   "prompt": "kids_water.txt"
+  },
+  {
+   "name": "umbrellas_R",
+   "box": [
+    3300,
+    1560,
+    4700,
+    2360
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "umbrellas_R.txt"
+  },
+  {
+   "name": "umbrellas_L",
+   "box": [
+    900,
+    1820,
+    2100,
+    2520
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "umbrellas_L.txt"
+  },
+  {
+   "name": "loungers_front_R",
+   "box": [
+    3300,
+    2350,
+    4900,
+    3030
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "loungers_front_R.txt"
+  },
+  {
+   "name": "loungers_front_L",
+   "box": [
+    1700,
+    2400,
+    3100,
+    3060
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "loungers_front_L.txt"
+  },
+  {
+   "name": "vendor_cart",
+   "box": [
+    600,
+    2380,
+    1250,
+    2920
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "vendor_cart.txt"
+  },
+  {
+   "name": "vendor_pole",
+   "box": [
+    3350,
+    2450,
+    3950,
+    3020
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "vendor_pole.txt"
+  },
+  {
+   "name": "crowd_walk",
+   "box": [
+    1450,
+    2560,
+    2550,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "crowd_walk.txt"
+  },
+  {
+   "name": "family_towels",
+   "box": [
+    2650,
+    2650,
+    3760,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "family_towels.txt"
+  },
+  {
+   "name": "kids_ball",
+   "box": [
+    800,
+    2720,
+    1560,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "kids_ball.txt"
+  },
+  {
+   "name": "couple_fg",
+   "box": [
+    4100,
+    2520,
+    5120,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "couple_fg.txt"
+  },
+  {
+   "name": "sandcastle",
+   "box": [
+    1950,
+    2860,
+    2560,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "sandcastle.txt"
+  },
+  {
+   "name": "dt_probe",
+   "box": [
+    400,
+    200,
+    2000,
+    1480
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtp_para",
+   "box": [
+    950,
+    700,
+    1500,
+    1320
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtp_beach",
+   "box": [
+    1700,
+    2100,
+    3300,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dt_AL",
+   "box": [
+    600,
+    1820,
+    2200,
+    2520
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dt_AM",
+   "box": [
+    1700,
+    1720,
+    3400,
+    2420
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dt_AR",
+   "box": [
+    3200,
+    1700,
+    4900,
+    2420
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dt_BL",
+   "box": [
+    560,
+    2400,
+    2160,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dt_BR",
+   "box": [
+    3200,
+    2380,
+    4980,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dt_BRR",
+   "box": [
+    4060,
+    2480,
+    5160,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dt_longtails",
+   "box": [
+    2050,
+    1520,
+    2980,
+    1880
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dt_speedboat",
+   "box": [
+    860,
+    1620,
+    1820,
+    1970
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dt_jetski1",
+   "box": [
+    660,
+    1620,
+    1560,
+    2020
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dt_jetski2",
+   "box": [
+    1420,
+    1590,
+    2110,
+    1940
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dt_banana",
+   "box": [
+    260,
+    1690,
+    1210,
+    2050
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dt_swim",
+   "box": [
+    720,
+    1860,
+    1720,
+    2360
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dt_pararight",
+   "box": [
+    2640,
+    380,
+    3430,
+    1060
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dt_birds",
+   "box": [
+    1710,
+    730,
+    2350,
+    1210
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "para_a",
+   "box": [
+    1000,
+    320,
+    1560,
+    1060
+   ],
+   "refs": [],
+   "denoise": 0.8,
+   "prompt": "parasail_left.txt"
+  },
+  {
+   "name": "para_b",
+   "box": [
+    2850,
+    240,
+    3420,
+    940
+   ],
+   "refs": [],
+   "denoise": 0.8,
+   "prompt": "parasail_right.txt"
+  },
+  {
+   "name": "gulls",
+   "box": [
+    1850,
+    560,
+    2260,
+    830
+   ],
+   "refs": [],
+   "denoise": 0.8,
+   "prompt": "birds.txt"
+  },
+  {
+   "name": "paddleboard",
+   "box": [
+    350,
+    1760,
+    920,
+    2120
+   ],
+   "refs": [],
+   "denoise": 0.85,
+   "prompt": "paddleboard.txt"
+  },
+  {
+   "name": "kayak",
+   "box": [
+    1500,
+    1690,
+    2120,
+    1990
+   ],
+   "refs": [],
+   "denoise": 0.85,
+   "prompt": "kayak.txt"
+  },
+  {
+   "name": "longtail_beached",
+   "box": [
+    2050,
+    1830,
+    2720,
+    2230
+   ],
+   "refs": [],
+   "denoise": 0.9,
+   "prompt": "longtail_beached.txt"
+  },
+  {
+   "name": "massage",
+   "box": [
+    3560,
+    2160,
+    4240,
+    2640
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "massage.txt"
+  },
+  {
+   "name": "volleyball",
+   "box": [
+    4320,
+    1980,
+    5180,
+    2680
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "volleyball.txt"
+  },
+  {
+   "name": "beach_bar",
+   "box": [
+    4820,
+    1900,
+    5330,
+    2450
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "beach_bar.txt"
+  },
+  {
+   "name": "lifeguard",
+   "box": [
+    3120,
+    1900,
+    3520,
+    2520
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "lifeguard.txt"
+  },
+  {
+   "name": "loungers_extra",
+   "box": [
+    4320,
+    2360,
+    5180,
+    2880
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "loungers_extra.txt"
+  },
+  {
+   "name": "beach_dog",
+   "box": [
+    3050,
+    2520,
+    3520,
+    2820
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "beach_dog.txt"
+  },
+  {
+   "name": "photographer",
+   "box": [
+    900,
+    2460,
+    1360,
+    2900
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "photographer.txt"
+  },
+  {
+   "name": "fruit_vendor",
+   "box": [
+    1500,
+    2700,
+    2080,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fruit_vendor.txt"
+  },
+  {
+   "name": "kids_dig",
+   "box": [
+    2380,
+    2840,
+    2900,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "kids_dig.txt"
+  },
+  {
+   "name": "football",
+   "box": [
+    3400,
+    2720,
+    3980,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "football.txt"
+  },
+  {
+   "name": "sunbathers1",
+   "box": [
+    4000,
+    2700,
+    4640,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "sunbathers1.txt"
+  },
+  {
+   "name": "sunbathers2",
+   "box": [
+    4660,
+    2650,
+    5300,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "sunbathers2.txt"
+  },
+  {
+   "name": "dtb_r1b",
+   "box": [
+    2400,
+    1750,
+    3400,
+    2450
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtb_r1c",
+   "box": [
+    3300,
+    1650,
+    4300,
+    2450
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtb_r1d",
+   "box": [
+    4200,
+    1560,
+    5240,
+    2460
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtb_m1",
+   "box": [
+    500,
+    2240,
+    1520,
+    2860
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtb_m2",
+   "box": [
+    1420,
+    2200,
+    2440,
+    2820
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtb_r2a",
+   "box": [
+    0,
+    2420,
+    1080,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtb_r2b",
+   "box": [
+    980,
+    2440,
+    1980,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtb_r2c",
+   "box": [
+    1880,
+    2460,
+    2880,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtb_r2d",
+   "box": [
+    2780,
+    2460,
+    3780,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtb_r2e",
+   "box": [
+    3680,
+    2440,
+    4680,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtb_r2f",
+   "box": [
+    4560,
+    2400,
+    5440,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtb_paddle",
+   "box": [
+    300,
+    1740,
+    960,
+    2170
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtb_kayak",
+   "box": [
+    1450,
+    1650,
+    2170,
+    2030
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtb_longtailb",
+   "box": [
+    2010,
+    1790,
+    2770,
+    2280
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "r_loungers",
+   "box": [
+    3650,
+    2360,
+    4700,
+    2900
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "loungers_extra.txt"
+  },
+  {
+   "name": "r_towelgroup",
+   "box": [
+    3600,
+    2780,
+    4400,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "sunbathers2.txt"
+  },
+  {
+   "name": "r_beachkids",
+   "box": [
+    4400,
+    2820,
+    4980,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "kids_dig.txt"
+  },
+  {
+   "name": "rr_loungers",
+   "box": [
+    3720,
+    2560,
+    4640,
+    2940
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "sand_loungers.txt"
+  },
+  {
+   "name": "rr_group",
+   "box": [
+    4680,
+    2700,
+    5300,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "sand_group.txt"
+  },
+  {
+   "name": "dtc_seam1",
+   "box": [
+    2700,
+    1880,
+    3600,
+    2680
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtc_seam2",
+   "box": [
+    2700,
+    2460,
+    3600,
+    3072
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtc_rr",
+   "box": [
+    3620,
+    2480,
+    4740,
+    2990
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  },
+  {
+   "name": "dtc_clusterseam",
+   "box": [
+    3060,
+    2250,
+    4360,
+    2820
+   ],
+   "refs": [],
+   "denoise": 1.0,
+   "prompt": "fin_tile.txt",
+   "kind": "detail"
+  }
+ ]
+}

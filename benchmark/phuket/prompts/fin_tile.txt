@@ -1,0 +1,5 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a finished photograph of a stretch of Patong Beach. Reproduce it exactly: the same composition, the same objects in the same places, the same colours, the same light and shadows. Do not add, move, remove or restyle anything. Render it sharper and cleaner than the source, with crisp fine detail and smooth even tone, no grid, no blocky or quilted texture.
+
+Bright midday tropical beach photograph, hard overhead sun, high clarity, photoreal, natural colour. No text, no watermark.

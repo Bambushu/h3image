@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object, a layout or a format.
+
+The frame shows turquoise sea near the shore. Add one jet ski at speed with a single rider leaning into a turn, throwing a fan of white spray, a bright hull (yellow and black). Keep the surrounding water.
+
+Bright midday tropical beach photograph: hard overhead sun, crisp short shadows on the sand, high clarity, saturated turquoise water, photoreal, natural colour, shot on a 35 mm lens.
+The frame is a crop of a much larger finished photograph of Patong Beach: continue its light, palette, scale and perspective exactly. Paint only inside the frame. No text, no watermark.

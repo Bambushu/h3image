@@ -8,6 +8,38 @@ MiniMax H3 is an open-weight 33B video model. Run in reference-to-video (R2V) mo
 
 The technique was published by [Patient_Ratio4177](https://www.reddit.com/r/StableDiffusion/comments/1vo1ab3/h3_as_a_singleimage_edit_model/), originally on CUDA. This repo began as the Apple Silicon (MPS) port and ships a ComfyUI workflow, a single-frame compatibility node, and an `h3edit` CLI. The CLI is host-agnostic: it queues the bundled workflow over HTTP against any running ComfyUI (point `H3EDIT_COMFY` at it) and sets every widget by name, never hand-building a graph.
 
+## Quickstart
+
+Install the CLI (after the models + node setup under [Install](#install)):
+
+```sh
+uv tool install --force -e .
+h3edit --doctor                     # verifies ComfyUI, the compat node, the graph
+```
+
+Point `H3EDIT_COMFY` at your ComfyUI if it is not on `127.0.0.1:8288`.
+
+```sh
+# edit an image with an instruction + reference(s)
+h3edit "Task: Reference-guided generation. Put the jacket from <Picture 2> on the person in <Picture 1>." \
+  -r person.png -r jacket.png --ar 16:9 -o out.png --wait
+
+# generate a large-format image from text alone (up to 16 MP)
+h3edit --generate "a grand old library interior, sunbeams, checkerboard floor" --mp 8 -o library.png --wait
+```
+
+| mode | flag | what it does |
+|---|---|---|
+| edit | *(default)* | instruction edit from 1-5 reference images |
+| detail | `--detail X0,Y0,X1,Y1` | re-render a region sharper, reference-only (grid-free) |
+| inpaint | `--inpaint MASK` | replace a masked region (composing new content) |
+| outpaint | `--outpaint L,T,R,B` / `--reframe` | extend the canvas outward |
+| generate | `--generate` | text-to-image, no reference, large-format |
+| autofix | `--autofix IMAGE` | detect faces and re-render them cleaner |
+| upscale | `--upscale IMAGE` | **WIP / broken** on multi-tile scenes (needs `--allow-wip`); use MLX-DLSS for faithful upscale |
+
+Big multi-figure images and region-by-region repairs are a separate tool, **`h3-inpaint`** — see [Canvas builds](#canvas-builds-h3-inpaint). Running on CUDA or a pod instead of Apple Silicon: [next section](#cuda--non-mac---profile-cuda).
+
 ## CUDA / non-Mac (`--profile cuda`)
 
 The CLI drives two shipped graphs, chosen with `--profile` (or `$H3EDIT_PROFILE`, default `mac`):
@@ -269,13 +301,21 @@ h3edit "..." --reframe 3:2 --source in.png -o out.png --dry-run    # plan image,
 - A single strip per side up to ~25% of the current dimension; larger extensions are split into ≤25% chunks and re-encoded between (each new strip then anchors to real pixels). ~25% per anchored edge is the coherence ceiling — beyond ~50% total it drifts (verified 2026-09-12: H3 continues a scene on one anchored edge, but it is not a trained outpaint model).
 - **No `--detail` finish on margins** — a detail crop of a blurred, edgeless margin hallucinates (it invented graph-paper and water drops in testing). The notched, tone-matched inpaint strip is the clean output; the faint quilt on smooth surfaces is the same floor as any `--inpaint`.
 - `--dry-run` writes a plan image (green = original, grey = margins) and renders nothing.
-### Upscale + re-detail (`--upscale`)
+### Upscale + re-detail (`--upscale`) — WIP / broken
 
-Enlarge an image and add *real* H3 detail — the large-format finisher (generate/commit -> upscale -> outpaint). Lanczos scaffold, then saliency-gated 4 MP detail tiles recombined so lighting can't drift.
+> **Status: broken on multi-tile scenes, disabled behind `--allow-wip`.** The design below is sound in
+> principle, but the tile compositor does not register the H3 renders to the scaffold — each tile
+> reinterprets its crop as different content, so a multi-tile result comes out as a visible collage
+> rather than a super-resolved image. Reproducible from the raw tiles off-GPU, so it is an algorithmic
+> problem, not platform-specific. The real fix (parked) is geometry-preserving low-denoise V2V tiles.
+> **For a faithful upscale today, use the MLX-DLSS Image Upscale workflow instead.** The flag is gated:
+> pass `--allow-wip` if you want to run it anyway (e.g. a single tile).
+
+Intended behaviour: enlarge an image and add *real* H3 detail — the large-format finisher (generate/commit -> upscale -> outpaint). Lanczos scaffold, then saliency-gated 4 MP detail tiles recombined so lighting can't drift.
 
 ```sh
-h3edit --upscale in.png --scale 2 -o out.png --dry-run    # tile plan (green=detail, red=skip), no renders
-h3edit --upscale in.png --scale 2 -o out.png              # then render
+h3edit --upscale in.png --scale 2 -o out.png --dry-run              # tile plan (green=detail, red=skip), no renders
+h3edit --upscale in.png --scale 2 -o out.png --allow-wip           # run anyway (collages on multi-tile scenes)
 ```
 
 - **Lanczos enlarge** to `--scale`x (/32), then tile into ~`--tile-mp` (1.2) crops with `--overlap` (0.2), origins/sizes snapped to the 16 px VAE grid.

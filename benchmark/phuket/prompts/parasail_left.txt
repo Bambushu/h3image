@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object, a layout or a format.
+
+The frame shows bright blue midday sky with a few scattered white cumulus clouds over the far sea. Add one parasailing tourist high in the sky: a large brightly coloured parachute canopy (red and yellow) fully open, with a single person seated in a harness far below it, small in the frame, being towed. The canopy is crisp against the blue. Nothing else changes.
+
+Bright midday tropical beach photograph: hard overhead sun, crisp short shadows on the sand, high clarity, saturated turquoise water, photoreal, natural colour, shot on a 35 mm lens.
+The frame is a crop of a much larger finished photograph of Patong Beach: continue its light, palette, scale and perspective exactly. Paint only inside the frame. No text, no watermark.

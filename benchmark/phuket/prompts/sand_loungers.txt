@@ -1,0 +1,5 @@
+Task: Reference-guided generation.
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object, a layout or a format.
+The frame is entirely dry golden beach sand on all sides, part of a busy beach. Add a short row of wooden sun loungers with blue-and-yellow striped cushions and one open orange beach umbrella, one lounger with a tourist lying back reading, a cooler box and a beach bag on the sand, hard midday shadows. The ground is dry sand everywhere around them. There is NO water, NO sea, NO horizon, NO waterline in this frame. Every hand has exactly five fingers.
+Bright midday tropical beach photograph: hard overhead sun, crisp short shadows, high clarity, photoreal, natural colour, shot on a 35 mm lens.
+The frame is a crop of a much larger finished photograph of Patong Beach: continue its light, palette, scale and perspective exactly. Paint only inside the frame. No text.

@@ -1,0 +1,8 @@
+Task: Reference-guided generation.
+
+<Picture 1> is a palette card and supplies only colours. It does not supply a scene, an object, a layout or a format.
+
+The frame shows turquoise sea and a waterline at the top, an existing row of colourful beach umbrellas at the left edge, and open golden sand. Continue the same row of beach umbrellas and paired wooden sun loungers to the right, receding toward the distant headland: big round parasols alternating red, blue, yellow and green, striped lounger cushions, hard round shadows on the sand. Match the size and spacing of the umbrellas at the left edge. Keep the sea and waterline at the top.
+
+Bright midday tropical beach photograph: hard overhead sun, crisp short shadows on the sand, high clarity, saturated turquoise water, photoreal, natural colour, shot on a 35 mm lens.
+The frame is a crop of a much larger finished photograph of Patong Beach: continue its light, palette, scale and perspective exactly. Paint only inside the frame. No text, no watermark.
