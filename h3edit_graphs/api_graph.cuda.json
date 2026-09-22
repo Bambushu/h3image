@@ -10,7 +10,7 @@
  "2": {
   "class_type": "VAELoader",
   "inputs": {
-   "vae_name": "minimax_h3_t1_image_vae_step1597.safetensors"
+   "vae_name": "minimax_h3_video_vae_fp16.safetensors"
   }
  },
  "3": {
@@ -104,14 +104,14 @@
  "10": {
   "class_type": "UNETLoader",
   "inputs": {
-   "unet_name": "minimax_h3_hybrid_fl2va_ref2va_b25-49.safetensors",
+   "unet_name": "minimax_h3_fl2va_int8_convrot.safetensors",
    "weight_dtype": "default"
   }
  },
  "11": {
   "class_type": "CLIPLoader",
   "inputs": {
-   "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+   "clip_name": "qwen3vl_32b_minimax_h3_int8_convrot.safetensors",
    "type": "minimax",
    "device": "default"
   }
@@ -125,7 +125,7 @@
  "13": {
   "class_type": "MiniMaxH3ReferenceToVideo",
   "inputs": {
-   "prompt": "Task: Reference-guided generation. Make a dramatic, unmistakable body-size transformation of the adult from <Picture 1>. Keep his identity, face, eyes, hairstyle, expression, skin tone, outfit design, pose, studio background, and photographic style, but do not preserve his original body proportions. Depict him with severe obesity and a very large, heavy body: an extremely large protruding round abdomen, much wider waist and torso, thick upper arms, large hips and thighs, a broad neck, and clearly increased facial fullness. The substantial weight must be immediately obvious across his entire silhouette, with anatomically coherent, realistic fat distribution. He must not look merely broad, muscular, stocky, chubby, or slightly overweight. Resize the jacket, shirt, and trousers so they fit the much larger body realistically. Complete full-body 2:3 portrait, both feet visible.",
+   "prompt": "Task: Reference-guided generation. (placeholder -- h3edit replaces this prompt at queue time)",
    "width": [
     "1",
     0
@@ -138,7 +138,7 @@
     "20",
     0
    ],
-   "ref_image_size": "max",
+   "ref_image_size": "match",
    "clip": [
     "11",
     0
@@ -181,7 +181,7 @@
  "16": {
   "class_type": "SaveImage",
   "inputs": {
-   "filename_prefix": "minimax_h3_edit_benchmark",
+   "filename_prefix": "h3_edit/h3_edit",
    "images": [
     "15",
     0
@@ -191,7 +191,7 @@
  "17": {
   "class_type": "LoadImage",
   "inputs": {
-   "image": "character_1.png"
+   "image": "example.png"
   }
  },
  "20": {

@@ -1,5 +1,11 @@
 # Patong Beach: a busy 16 MP beach day, and what empty regions do to masked inpainting
 
+> **This is a failure analysis, not a quality showcase.** The final image has visible defects at
+> presentation size: rectangular insertion patches, a pasted photo-in-photo in the lower right with
+> its own second waterline, half-transparent ghost figures, and a grey blob in the sky. It is kept
+> because it maps exactly where masked inpainting breaks (large flat regions). For what the method
+> does well, see [Nachtwacht](../nachtwacht/README.md) and [Bangkok](../bangkok/README.md).
+
 The third canvas build, and the one that mapped the failure mode the first two never hit: **large
 empty regions**. Patong Beach in Phuket at midday, 5440x3072, built from an empty bay on an M5
 overnight with `h3-inpaint`. Around forty composed elements — parasails, boats, a long umbrella
@@ -101,7 +107,10 @@ when both sides share the same base image.
 
 ## Honest residuals
 
-A faint ghost figure stands half-transparent in the right-mid sand, and the foreground-right vendor
-cluster still carries a slight tone patch after one blend tile. Both are compose/paste artifacts
-left in rather than risk another round of seams. `out/final.png` is the full 5440x3072;
+Visible at 2k, not just at 1:1: a half-transparent ghost figure in the right-mid sand; the
+foreground-right vendor cluster sits in a rectangular patch that is a whole second beach photo, with
+its own sea and waterline cutting across the sand; soft rectangles around the paddleboarder and the
+left jet-ski group; and a flat grey cloud blob in the upper sky. All are compose/paste artifacts of
+boxes over flat ground, left in rather than risk another round of seams. Fixing them would mean
+reverting and re-planning those boxes (tighter boxes, lower denoise, a waterline in every sand box). `out/final.png` is the full 5440x3072;
 `out/final_4k.jpg`, `out/final_2k.jpg` the exports.

@@ -2,7 +2,8 @@
 """h3-inpaint: build or repair a large image on ONE canvas, one masked H3 pass at a time.
 
 Each pass is `h3edit --inpaint` on a ~4 MP window cut around a box of the canvas; only the box
-(grown, feathered) goes back onto the canvas in pixel space, so nothing outside a box ever moves.
+(grown by `grow`, feathered by `feather`) goes back onto the canvas in pixel space. Pixels beyond
+box + grow + ~feather never change; the feather ramp itself does blend into the old canvas.
 Passes run back to front: a later box overwrites whatever it covers.
 
   h3-inpaint init  DIR --canvas start.png            # project: plan.json, refs/, prompts/, out/
@@ -32,7 +33,20 @@ UUID_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 
 # ----------------------------------------------------------------------------- project state
 def paths(d):
-    return {k: os.path.join(d, v) for k, v in dict(plan="plan.json", state="state.json", refs="refs", prompts="prompts", out="out").items()}
+    d = os.path.abspath(d)
+    return {"dir": d, **{k: os.path.join(d, v) for k, v in dict(plan="plan.json", state="state.json", refs="refs", prompts="prompts", out="out").items()}}
+
+
+def _resolve(d, v):
+    """A stored canvas path -> absolute. New projects store paths relative to the project dir; older
+    ones stored them relative to whatever cwd `init` ran in, or absolute on the author's machine, so
+    fall back to the same file name under out/."""
+    if os.path.isabs(v) and os.path.exists(v):
+        return v
+    for cand in (os.path.join(d, v), os.path.join(d, "out", os.path.basename(v))):
+        if os.path.exists(cand):
+            return os.path.abspath(cand)
+    return os.path.join(d, v)
 
 
 def load(d):
@@ -41,14 +55,25 @@ def load(d):
         sys.exit(f"{d}: no plan.json (run `h3-inpaint init` first)")
     plan = json.load(open(p["plan"]))
     state = json.load(open(p["state"])) if os.path.exists(p["state"]) else {"done": [], "canvas": plan["canvas"], "log": []}
+    plan["canvas"] = _resolve(p["dir"], plan["canvas"])
+    state["canvas"] = _resolve(p["dir"], state["canvas"])
     return p, plan, state
 
 
+def _dump(obj, path):
+    tmp = path + ".tmp"                   # atomic: a crash mid-write can't truncate the project's history
+    with open(tmp, "w") as f:
+        json.dump(obj, f, indent=1)
+    os.replace(tmp, path)
+
+
 def save(p, plan=None, state=None):
+    """Canvas paths are written relative to the project dir, so a project opens from any cwd and moves."""
+    rel = lambda v: os.path.relpath(v, p["dir"]) if os.path.isabs(v) else v
     if plan is not None:
-        json.dump(plan, open(p["plan"], "w"), indent=1)
+        _dump({**plan, "canvas": rel(plan["canvas"])}, p["plan"])
     if state is not None:
-        json.dump(state, open(p["state"], "w"), indent=1)
+        _dump({**state, "canvas": rel(state["canvas"])}, p["state"])
 
 
 # ----------------------------------------------------------------------------- geometry
@@ -187,6 +212,9 @@ def run_pass(p, plan, state, e, pod_url=None):
     seed = e.get("seed") or (plan.get("seed", 4200) + sum(map(ord, e["name"])) * 7919) % (2**31)
     t0 = time.time()
     if pod_url:
+        if e.get("kind") == "detail":
+            sys.exit(f"{e['name']}: --kind detail passes are local-only (the pod backend only does masked inpaint); "
+                     "run this pass without --pod")
         if not os.path.exists(pf):
             pf = os.path.join(p["out"], f"{e['name']}_prompt.txt"); open(pf, "w").write(prompt)
         print(f"=== {e['name']}  box={box}  whole canvas {W}x{H} on the pod  denoise={e.get('denoise', 1.0)}  refs={[os.path.basename(r) for r in refs]}", flush=True)
@@ -252,6 +280,9 @@ def cmd_degrid(a):
 # ----------------------------------------------------------------------------- commands
 def cmd_init(a):
     p = paths(a.dir)
+    if os.path.exists(p["plan"]) and not a.force:
+        sys.exit(f"{a.dir} is already a project (plan.json exists); init would wipe its plan and history. "
+                 "Pass --force to start over.")
     for k in ("refs", "prompts", "out"):
         os.makedirs(p[k], exist_ok=True)
     im = Image.open(a.canvas).convert("RGB")
@@ -377,13 +408,15 @@ def cmd_score(a):
     for i, t in enumerate(tiles):
         S.paste(t, ((i % cols) * 640, (i // cols) * h))
     S.save(os.path.join(p["out"], "sheet_makingof.png"))
-    print(f"scores.json + sheet_makingof.png in {p['out']}  (outside SSIM must read 1.000: a lower value means a box leaked)")
+    print(f"scores.json + sheet_makingof.png in {p['out']}  (outside SSIM is a quarter-res perceptual check, not pixel "
+          "identity; anything below 1.000 means a box leaked)")
 
 
 def main():
     ap = argparse.ArgumentParser(description="Build or repair a large image on one canvas, one masked H3 pass at a time (see README).")
     sp = ap.add_subparsers(dest="cmd", required=True)
-    s = sp.add_parser("init", help="new project from a starting canvas"); s.add_argument("dir"); s.add_argument("--canvas", required=True); s.set_defaults(f=cmd_init)
+    s = sp.add_parser("init", help="new project from a starting canvas"); s.add_argument("dir"); s.add_argument("--canvas", required=True)
+    s.add_argument("--force", action="store_true", help="re-initialize an existing project (wipes plan + history)"); s.set_defaults(f=cmd_init)
     s = sp.add_parser("add", help="append a pass to the plan"); s.add_argument("dir"); s.add_argument("name")
     s.add_argument("--box", required=True, type=lambda v: [int(x) for x in v.split(",")], metavar="X0,Y0,X1,Y1")
     s.add_argument("--prompt", required=True, help="prompt text, or a file name in DIR/prompts/")

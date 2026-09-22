@@ -1,5 +1,8 @@
 # CivitAI post draft — h3edit (DO NOT POST WITHOUT MIKE'S REVIEW)
 
+> **STALE (2026-09-22).** Written for the old Mac-only `h3edit-mac` repo: old URL, image VAE,
+> lightx2v LoRA and sampler recipe, no CUDA. Rewrite from the current README before posting.
+
 Title: MiniMax H3 Image Editor — Mac / Apple Silicon (1-frame R2V workflow + CLI)
 
 ---

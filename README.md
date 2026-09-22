@@ -6,14 +6,29 @@ MiniMax H3 image editing + generation, driven headlessly through ComfyUI (CLI).
 
 MiniMax H3 is an open-weight 33B video model. Run in reference-to-video (R2V) mode, render for exactly one frame, and decode through the video VAE — this turns it into a strong instruction-based image editor.
 
-The technique was published by [Patient_Ratio4177](https://www.reddit.com/r/StableDiffusion/comments/1vo1ab3/h3_as_a_singleimage_edit_model/), originally on CUDA. This repo began as the Apple Silicon (MPS) port and ships a ComfyUI workflow, a single-frame compatibility node, and an `h3edit` CLI. The CLI is host-agnostic: it queues the bundled workflow over HTTP against any running ComfyUI (point `H3EDIT_COMFY` at it) and sets every widget by name, never hand-building a graph.
+The technique was published by [Patient_Ratio4177](https://www.reddit.com/r/StableDiffusion/comments/1vo1ab3/h3_as_a_singleimage_edit_model/), originally on CUDA. This repo began as the Apple Silicon (MPS) port and ships a ComfyUI workflow, a single-frame compatibility node, and an `h3edit` CLI (also installed as `h3image`). The CLI is host-agnostic: it queues a bundled graph over HTTP against any running ComfyUI (point `H3EDIT_COMFY` at it) and sets widgets by name. The base graphs are the frontend's own exports; the masked modes add a small, fixed set of nodes (`VAEEncode`, `LoadImageMask`, `H3V2VInit`) and the CLI checks the graph's node contract before it queues.
+
+This is a workflow toolkit around an existing video model, not a new trained image model and not a faithful upscaler.
+
+![mural demo](demos/sheets/gable.png)
+
+*Two references in (a bare wall, a flat artwork), one image out. Brick texture stays visible through the painted area; the design stops at the window opening.*
+
+### What is supported
+
+| status | modes |
+|---|---|
+| **stable** | edit (`-r` references + instruction), `--generate` |
+| **supported, with limits** | `--inpaint` and `--detail` (single region; see the boundary note under [Modes](#modes-detail-and-inpaint)) |
+| **experimental** | `--autofix`, `--outpaint` / `--reframe`, `h3-inpaint` canvas builds (case studies, not turnkey) |
+| **WIP, gated** | `--upscale` (needs `--allow-wip`; broken on multi-tile scenes) |
 
 ## Quickstart
 
 Install the CLI (after the models + node setup under [Install](#install)):
 
 ```sh
-uv tool install --force -e .
+uv tool install --force -e .        # from a checkout; or: pip install git+https://github.com/Bambushu/h3image
 h3edit --doctor                     # verifies ComfyUI, the compat node, the graph
 ```
 
@@ -22,21 +37,23 @@ Point `H3EDIT_COMFY` at your ComfyUI if it is not on `127.0.0.1:8288`.
 ```sh
 # edit an image with an instruction + reference(s)
 h3edit "Task: Reference-guided generation. Put the jacket from <Picture 2> on the person in <Picture 1>." \
-  -r person.png -r jacket.png --ar 16:9 -o out.png --wait
+  -r person.png -r jacket.png --ar 16:9 -o out.png
 
 # generate a large-format image from text alone (up to 16 MP)
-h3edit --generate "a grand old library interior, sunbeams, checkerboard floor" --mp 8 -o library.png --wait
+h3edit --generate "a grand old library interior, sunbeams, checkerboard floor" --mp 8 -o library.png
 ```
+
+`-o` waits for the render and writes it there. Without `-o` the job is only queued (add `--wait` to block and print the output path).
 
 | mode | flag | what it does |
 |---|---|---|
 | edit | *(default)* | instruction edit from 1-5 reference images |
 | detail | `--detail X0,Y0,X1,Y1` | re-render a region sharper, reference-only (grid-free) |
-| inpaint | `--inpaint MASK` | replace a masked region (composing new content) |
+| inpaint | `--inpaint X0,Y0,X1,Y1` | re-denoise a box of `--source` (composing new content) |
 | outpaint | `--outpaint L,T,R,B` / `--reframe` | extend the canvas outward |
 | generate | `--generate` | text-to-image, no reference, large-format |
 | autofix | `--autofix IMAGE` | detect faces and re-render them cleaner |
-| upscale | `--upscale IMAGE` | **WIP / broken** on multi-tile scenes (needs `--allow-wip`); use MLX-DLSS for faithful upscale |
+| upscale | `--upscale IMAGE` | **WIP / broken** on multi-tile scenes (needs `--allow-wip`); use a dedicated upscaler for a faithful result |
 
 Big multi-figure images and region-by-region repairs are a separate tool, **`h3-inpaint`** — see [Canvas builds](#canvas-builds-h3-inpaint). Running on CUDA or a pod instead of Apple Silicon: [next section](#cuda--non-mac---profile-cuda).
 
@@ -53,12 +70,26 @@ The CLI drives two shipped graphs, chosen with `--profile` (or `$H3EDIT_PROFILE`
 H3EDIT_COMFY=http://127.0.0.1:8188 h3edit --profile cuda --generate "a red sailboat on turquoise sea" --mp 12 -o out.png --wait
 h3edit --profile cuda --doctor
 
-# a remote pod (COMFY host is not localhost) auto-switches to /upload/image + /view:
-H3EDIT_COMFY=https://<pod>-8188.proxy.runpod.net h3edit --profile cuda --generate "..." --mp 12 -o out.png --wait
+# a remote server (COMFY host is not localhost) auto-switches to /upload/image + /view:
+H3EDIT_COMFY=https://<pod>-8188.proxy.runpod.net h3edit --profile cuda --generate "..." --mp 12 -o out.png
 ```
 
-Needs the H3 int8_convrot models present (`minimax_h3_fl2va_int8_convrot`, `qwen3vl_32b_minimax_h3_int8_convrot`,
-`minimax_h3_video_vae_fp16`) and a Blackwell card on driver >= 580 (cu130). Verified on an RTX PRO 6000
+File transport follows the host: localhost = shared filesystem (`H3EDIT_INPUT`/`H3EDIT_OUTPUT`), anything
+else = upload/download over HTTP. An SSH tunnel to a server whose files live elsewhere looks like
+localhost, so force it with `H3EDIT_TRANSPORT=upload` (or `=shared` for a remote host on a shared mount).
+
+**CUDA install.** ComfyUI with the MiniMax H3 nodes (ComfyUI >= 0.30 and `comfy-kitchen >= 0.2.26`),
+[ComfyUI-MAINodes](https://github.com/matlowai/ComfyUI-MAINodes) for `--inpaint`/`--outpaint` (`H3V2VInit`), and these models from
+the [Comfy-Org/MiniMax-H3](https://huggingface.co/Comfy-Org/MiniMax-H3) repack:
+
+| file | put at |
+|---|---|
+| `minimax_h3_fl2va_int8_convrot.safetensors` | `diffusion_models/` |
+| `qwen3vl_32b_minimax_h3_int8_convrot.safetensors` | `text_encoders/` |
+| `minimax_h3_video_vae_fp16.safetensors`, `minimax_h3_audio_vae_fp32.safetensors` | `vae/` |
+
+`h3edit --profile cuda --doctor` checks the node contract, the three model files and the nodes. Tested on a
+Blackwell card on driver >= 580 (cu130); other CUDA setups are untested. Verified on an RTX PRO 6000
 and a 5090 (2026-09-13): `--generate`, `--inpaint`, `--outpaint` and `--autofix` render correctly
 end-to-end through this path and `--doctor` passes. `--upscale`'s CUDA plumbing runs (tiles render,
 download and composite) but its OUTPUT is currently broken on multi-tile scenes -- a pre-existing
@@ -71,20 +102,15 @@ one-shot generation at **16.88 MP (5024x3360 at 3:2)** — requesting 20/24/28/3
 same 16.88 MP frame (no error, unlike the HTTP 400 seen on Mac at 24 MP). Warm render times: 8 MP 76s,
 12 MP 109s, 16.88 MP ~150s. Go past 16.88 MP by tiling with `--upscale` / `--outpaint`.
 
-**Platform status.** Apple Silicon / MPS and CUDA are both supported — pick with `--profile` (see below). The CUDA path (shipped int8_convrot edit graph) was verified on an RTX PRO 6000 and a 5090 on 2026-09-13: generate, edit, inpaint, outpaint and autofix render end-to-end and `--doctor` passes. `--upscale`'s compositor is broken on multi-tile scenes (pre-existing, not CUDA-specific) -- WIP.
+## Demos
 
-![mural demo](demos/sheets/gable.png)
-
-*Two references in (a bare wall, a flat artwork), one image out. Brick texture stays visible through the painted area; the design stops at the window opening.*
+The mural at the top of this page:
 
 ```sh
 h3edit "$(cat demos/prompts/gable.txt)" \
-  -r demos/refs/gable_scene-s77.png -r demos/refs/gable_mural-s79.png \
-  --ar 16:9 -o out.png --wait
-h3edit --doctor
+  -r demos/refs/gable_scene-s77.png -r demos/refs/gable_mural-s79.png --ar 16:9 -o out.png
 ```
 
-## Demos
 
 All references are AI-generated (Ideogram 4 for artworks, Krea 2 for scenes). All brands in the demos are fictional. Left: inputs. Right: output.
 
@@ -125,6 +151,9 @@ Required custom node packs:
 - [ComfyUI-GGUF](https://github.com/city96/ComfyUI-GGUF)
 - [ComfyUI-ClipProj](https://github.com/nicolab28/ComfyUI-ClipProj)
 - [comfyui-obvpm](https://github.com/obvpm/comfyui-obvpm) — registers the `beta57` scheduler; without it `--scheduler simple` is untested
+- [ComfyUI-MAINodes](https://github.com/matlowai/ComfyUI-MAINodes) — provides `H3V2VInit`, needed by `--inpaint`, `--outpaint` and `h3-inpaint` (not by plain edit/generate)
+
+This section is the Apple Silicon (`mac` profile) setup. CUDA: see [its own install note](#cuda--non-mac---profile-cuda).
 
 ### 1. Models
 
@@ -165,13 +194,15 @@ h3edit --doctor
 
 `--doctor` checks ComfyUI, the compatibility node in the running server, and the graph's reference inputs.
 
-If ComfyUI is not on `127.0.0.1:8288`, set `H3EDIT_COMFY`. `H3EDIT_INPUT` and `H3EDIT_OUTPUT` point at `input/` and `output/`. Defaults assume `~/ComfyUI-h3/`.
+If ComfyUI is not on `127.0.0.1:8288`, set `H3EDIT_COMFY`. `H3EDIT_INPUT` and `H3EDIT_OUTPUT` point at `input/` and `output/`. Defaults assume `~/ComfyUI-h3/`. Staged images get a content-hash prefix (`h3e_<hash>_name.png`) so references that share a file name never overwrite each other.
+
+The graphs the CLI queues live in `h3edit_graphs/` and ship inside the wheel; a plain `pip install` works, a checkout is only needed for the custom node and the GUI workflow.
 
 ## Basic edit (h3edit)
 
 ```sh
 h3edit "Task: Reference-guided generation. ..." -r scene.png -r artwork.png \
-  --ar 16:9 --seed 42 -o out.png --wait
+  --ar 16:9 --seed 42 -o out.png
 ```
 
 `-r` is a reference image. You can pass up to 5 references. The first reference becomes `<Picture 1>` in the prompt. The second becomes `<Picture 2>`.
@@ -196,13 +227,15 @@ h3edit --generate "..." --mp 4 --n 6 -o scout.png  # scout compositions: 6 seeds
 
 | flag | default | why |
 |---|---|---|
-| `--lora` | `H3-PK-Parasyte-Turbo.safetensors` @ 1.5 | turbo lane; `--lora off` = base, then use `--steps 20 --sampler euler --scheduler simple` |
-| `--steps` | 8 | with turbo LoRA; 20 for base (14–50 is flat) |
-| `--sampler` / `--scheduler` | `er_sde` / `beta57` | LoRA author's recipe; equal to 20-step base at 46 % of the time |
+| `--lora` | `H3-PK-Parasyte-Turbo.safetensors` @ 1.5 | turbo lane; `--lora off` = base model (steps/sampler/scheduler then default to 20 / euler / simple) |
+| `--steps` | 8 | with turbo LoRA; 20 with `--lora off` or `--profile cuda` (14–50 is flat) |
+| `--sampler` / `--scheduler` | `er_sde` / `beta57` | LoRA author's recipe; equal to 20-step base at 46 % of the time. `euler` / `simple` with `--lora off` or `--profile cuda` |
 | `--mp` | 4.0 | reference-resolution and lettering dial; also caps references |
 | `-r` | up to 5 | slots 3–5 added by cloning the exported LoadImage entry |
 | `--ref-size` | `match` | `max`: 72:48 total; `match`: 7:30. No visible gain from `max` |
 | `--ar` | `21:9` | match your scene (all demos are `16:9`) |
+| `--n` / `--seeds` | 1 | seed-select: N variations (or exact seeds) plus a labeled contact sheet |
+| `--dry-run` | off | plan only, for `--autofix` / `--outpaint` / `--reframe` / `--upscale`; other modes refuse it |
 
 ### Megapixels is secretly the reference-resolution dial
 
@@ -251,7 +284,9 @@ Prompt as in `prompts/detail_pass_example.txt`: `<Picture 1>` supplies everythin
 
 ### Inpaint pass (`--inpaint`)
 
-Prefer `--inpaint` when a region is wrong rather than soft. It re-denoises a box of `--source` from an encoded latent. Everything outside the box is frozen. Your `-r` artwork is the only reference.
+Prefer `--inpaint` when a region is wrong rather than soft. It re-denoises a box of `--source` from an encoded latent. Your `-r` artwork is the only reference.
+
+**The boundary is the grown, feathered box, not the box you typed.** The mask is the box grown by `--grow` (32 px), and the paste-back is feathered by `--feather` (48 px), so pixels up to roughly grow + feather beyond your box blend toward the render. Everything past that is pixel-identical to `--source`. Leave that margin around anything that must not change.
 
 ```sh
 h3edit "$(cat benchmark/inputs/sign_inpaint_artref.txt)" \
@@ -308,7 +343,7 @@ h3edit "..." --reframe 3:2 --source in.png -o out.png --dry-run    # plan image,
 > reinterprets its crop as different content, so a multi-tile result comes out as a visible collage
 > rather than a super-resolved image. Reproducible from the raw tiles off-GPU, so it is an algorithmic
 > problem, not platform-specific. The real fix (parked) is geometry-preserving low-denoise V2V tiles.
-> **For a faithful upscale today, use the MLX-DLSS Image Upscale workflow instead.** The flag is gated:
+> **For a faithful upscale today, use a dedicated upscaler instead.** The flag is gated:
 > pass `--allow-wip` if you want to run it anyway (e.g. a single tile).
 
 Intended behaviour: enlarge an image and add *real* H3 detail — the large-format finisher (generate/commit -> upscale -> outpaint). Lanczos scaffold, then saliency-gated 4 MP detail tiles recombined so lighting can't drift.
@@ -322,7 +357,7 @@ h3edit --upscale in.png --scale 2 -o out.png --allow-wip           # run anyway 
 - **Saliency gate**: tiles below `--edge-thresh` (Laplacian variance, default 6) are left as the Lanczos scaffold — skips flat regions, which both avoids the detail-crop hallucination and saves renders. `--dry-run` prints per-tile scores to tune it.
 - **Wavelet recombine**: each tile keeps the scaffold's low frequencies (lighting/colour) and takes only the H3 render's high frequencies (texture), so tiles can't drift tile-to-tile.
 - **Cost is real**: each tile is a 4 MP render (~3.5-12 min on the M5 depending on crop size). A 2x of a 4 MP image is ~28 tiles -> hours locally; use a pod for large jobs.
-- **Not for text/faces**: detail tiles mangle letterforms and can shift a face -- repair those with `--inpaint` / `--autofix` after. For a fast, faithful, light re-detail instead, use the MLX-DLSS Image Upscale workflow (the owning local upscaler); `--upscale` is for heavy generative detail.
+- **Not for text/faces**: detail tiles mangle letterforms and can shift a face -- repair those with `--inpaint` / `--autofix` after. For a fast, faithful, light re-detail instead, use a dedicated upscaler; `--upscale` is for heavy generative detail. Needs the `[upscale]` extra (scipy).
 
 ## Canvas builds (`h3-inpaint`)
 
@@ -330,13 +365,13 @@ Use `h3-inpaint` for an image no single prompt can produce, or for a finished im
 
 Keep one canvas. Paint it in masked passes, one box at a time, back to front.
 
-Locally each pass is `h3edit --inpaint` on a ~4 MP window cut around the box. With `--pod NAME` (a `~/renderpod/h3/podenv.NAME.sh`) the pass runs on the whole canvas through the pod kit's `drive.py` on the shipped edit graph.
+Each pass is `h3edit --inpaint` on a ~4 MP window cut around the box, so it runs wherever `h3edit` does: for a CUDA server set `H3EDIT_PROFILE=cuda H3EDIT_COMFY=http://host:port` before `h3-inpaint run`. (`--pod NAME` is the author's own whole-canvas pod backend; it needs a private render kit that is not in this repo and only runs masked inpaint passes.)
 
-Either way only the box goes back onto the canvas, in pixel space. Nothing outside a box ever moves. Outside SSIM is 1.000, pass after pass.
+Only the grown, feathered box goes back onto the canvas, in pixel space; everything beyond box + grow + ~feather keeps its exact pixels. `h3-inpaint score` reports outside SSIM (a quarter-resolution perceptual check), which read 1.000 pass after pass on the builds below. Projects store paths relative to the project directory, so they open from any working directory; `init` refuses to overwrite an existing project unless you pass `--force`.
 
 ### Worked example: the Nachtwacht build
 
-The [Nachtwacht build](benchmark/nachtwacht/README.md) is a 5440x3072 militia group portrait. It was painted from a blank canvas in 43 masked passes. 15 passes were on a pod. 28 passes were local.
+The [Nachtwacht build](benchmark/nachtwacht/README.md) is a 5440x3072 militia group portrait. It was painted from a blank canvas in 43 masked passes. 15 passes were on a pod. 28 passes were local. It is a documented case study: the persona references it used are not in the repo, so the commands below show the workflow rather than reproduce the image byte for byte.
 
 Every prompt is in `benchmark/nachtwacht/prompts/`. The full pass list with boxes, refs and denoise is in its `build.py` PLAN.
 
@@ -360,7 +395,7 @@ h3-inpaint score .                                       # outside/seam SSIM per
 
 ![nachtwacht](benchmark/nachtwacht/out/final_4k.jpg)
 
-*Outside every box the canvas stayed at SSIM 1.000, pass after pass; the shield names read at 1:1.*
+*Outside every (grown, feathered) box the canvas stayed at SSIM 1.000, pass after pass; the shield names read at 1:1.*
 
 ### Finish every canvas with `--kind detail` tiles
 
@@ -393,7 +428,7 @@ See `benchmark/nachtwacht/prompts/`.
 
 Local turbo lane: 6–7 min per pass on an M5 at 4 MP windows. On a pod the same graph runs at full 16 MP in about 65 s per pass (`h3-inpaint run --pod NAME`).
 
-Second build, photoreal: [Bangkok Chinatown, 24 passes](benchmark/bangkok/README.md).
+Second build, photoreal: [Bangkok Chinatown, 24 passes](benchmark/bangkok/README.md). Third, a failure analysis: [Patong Beach](benchmark/phuket/README.md), where large flat regions (sky, water, sand) broke masked composition.
 
 ## The 16-px grid: cause and fix
 
@@ -465,7 +500,7 @@ Seven candidates against one wrong digit:
 
 ### Stress test
 
-A 16 MP group painting built from a blank canvas by H3 alone in 43 masked passes. 15 passes on a pod, 28 local. Every pass leaves the rest of the canvas at SSIM 1.000. See [`benchmark/nachtwacht/`](benchmark/nachtwacht/README.md).
+A 16 MP group painting built from a blank canvas by H3 alone in 43 masked passes. 15 passes on a pod, 28 local. Outside SSIM (quarter-res) read 1.000 after every pass. See [`benchmark/nachtwacht/`](benchmark/nachtwacht/README.md).
 
 ![nachtwacht](benchmark/nachtwacht/out/final_4k.jpg)
 
@@ -524,6 +559,11 @@ Keep wordmarks near centre if they must survive a cylinder wrap. Only about 40 %
 - Decode with the video VAE, not the image VAE. Bundled graphs already do this (node 119).
 - The notch and deblock in `--inpaint` are on by default and are only a partial mitigation. `--no-notch` turns them off.
 
+### `-o` was ignored / nothing was written
+
+- `-o` implies `--wait`. `--inpaint` and `--detail` require `-o`.
+- Without `-o`, a plain edit only queues; the result lands in ComfyUI's `output/h3_edit/`.
+
 ### The CLI refuses to queue
 
 - It checks for the `ref_images.ref_image_N` keys that ComfyUI's frontend serializes.
@@ -562,7 +602,7 @@ Keep wordmarks near centre if they must survive a cylinder wrap. Only about 40 %
 
 ## The graph
 
-The CLI queues the bundled `api_graph.json`. This is ComfyUI's own `graphToPrompt()` export. H3's references only serialize correctly through the frontend. They appear as dotted `ref_images.ref_image_N` keys. A hand-assembled graph drops them silently. The CLI refuses to queue if those keys are missing.
+The CLI queues `h3edit_graphs/api_graph.json` (mac) or `h3edit_graphs/api_graph.cuda.json` (cuda). Both are ComfyUI's own `graphToPrompt()` exports, used as API templates: the prompt, model names and seed stored in them are placeholders the CLI overwrites at queue time. H3's references only serialize correctly through the frontend. They appear as dotted `ref_images.ref_image_N` keys. A hand-assembled graph drops them silently. The CLI refuses to queue if those keys are missing. The masked modes add three nodes (`VAEEncode`, `LoadImageMask`, `H3V2VInit`) at fixed ids; nothing else is constructed.
 
 To modify wiring:
 
@@ -580,6 +620,14 @@ To modify wiring:
 - MiniMax H3: MiniMax, via [Comfy-Org/MiniMax-H3](https://huggingface.co/Comfy-Org/MiniMax-H3)
 
 This repo's contribution: the Apple Silicon port, the compatibility node, the CLI, and the measured dial table.
+
+## Development
+
+```sh
+pip install -e ".[test]" && pytest -q tests     # CPU only: renders are mocked, no ComfyUI needed
+```
+
+The tests pin every bug from the 2026-09-14 review (batch isolation, reference staging, tone match, small detail boxes, dry-run, CUDA flags, canvas project state). CI runs them plus a wheel install check.
 
 ## License
 

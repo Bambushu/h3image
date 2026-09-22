@@ -1,0 +1,21 @@
+name: test
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -e ".[test]"
+      - run: pytest -q tests
+      # The wheel must carry the graphs: install it outside the checkout and look for them.
+      - run: |
+          pip install build && python -m build --wheel -o /tmp/dist
+          python -m venv /tmp/v && /tmp/v/bin/pip install /tmp/dist/*.whl
+          cd /tmp && /tmp/v/bin/python -c "import h3edit, os; assert os.path.exists(h3edit.GRAPH) and os.path.exists(h3edit.CUDA_GRAPH)"
+          /tmp/v/bin/h3image --help > /dev/null

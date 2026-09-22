@@ -13,10 +13,13 @@ from the established local R2V workflow, so the autogrow reference inputs carry 
 sets values in it, and refuses to queue if those keys have gone missing. Re-export with --export
 after editing the graph in the GUI.
 """
-import argparse, json, math, os, random, shutil, sys, time, urllib.request, urllib.parse
+import argparse, copy, hashlib, json, math, os, random, shutil, sys, tempfile, time, urllib.request, urllib.parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-GRAPH = os.path.join(HERE, "api_graph.json")
+# The graphs ship as package data in h3edit_graphs/, a sibling of this module in both a checkout and
+# an installed wheel.
+GRAPH_DIR = os.path.join(HERE, "h3edit_graphs")
+GRAPH = os.path.join(GRAPH_DIR, "api_graph.json")
 COMFY = os.environ.get("H3EDIT_COMFY", "http://127.0.0.1:8288")
 INPUT_DIR = os.path.expanduser(os.environ.get("H3EDIT_INPUT", "~/ComfyUI-h3/input"))
 OUTPUT_DIR = os.path.expanduser(os.environ.get("H3EDIT_OUTPUT", "~/ComfyUI-h3/output"))
@@ -52,7 +55,7 @@ ASPECTS = {"1:1": "1:1 (Square)", "2:3": "2:3 (Portrait Photo)", "3:2": "3:2 (Ph
 # the graphToPrompt ids of each export (cuda ported from the 5090-validated h3edit_pod.py nodeset).
 # Pick with --profile / $H3EDIT_PROFILE (default mac). Local CUDA box = HTTP + shared filesystem I/O
 # (identical to mac); a REMOTE pod (COMFY host not localhost) switches to /upload/image + /view.
-CUDA_GRAPH = os.path.join(HERE, "api_graph.cuda.json")
+CUDA_GRAPH = os.path.join(GRAPH_DIR, "api_graph.cuda.json")
 _PROFILES = {
     "mac": {"graph": GRAPH, "comfy": COMFY, "prompt_key": "value",
             "nodes": dict(prompt="138", res="115", steps="124", seed="129", r2v="136",
@@ -86,14 +89,34 @@ def apply_profile(name):
 
 
 def _remote():
+    """True = move files over /upload/image + /view; False = share ComfyUI's input/output dirs.
+    Defaults to the host heuristic; set H3EDIT_TRANSPORT=upload for an SSH tunnel to localhost whose
+    server keeps its files elsewhere (or =shared for a remote host on a shared mount)."""
+    t = os.environ.get("H3EDIT_TRANSPORT", "").lower()
+    if t in ("upload", "shared"):
+        return t == "upload"
     from urllib.parse import urlparse
     return (urlparse(COMFY).hostname or "") not in ("127.0.0.1", "localhost", "::1", "")
 
 
-def _upload(path):
+_WORK = None
+
+
+def workdir():
+    """Per-process scratch dir for generated inputs (masks, crops, cards). They reach ComfyUI through
+    stage_ref, so nothing here depends on a local ComfyUI input dir existing."""
+    global _WORK
+    if _WORK is None:
+        import atexit
+        _WORK = tempfile.mkdtemp(prefix="h3edit_")
+        atexit.register(shutil.rmtree, _WORK, True)
+    return _WORK
+
+
+def _upload(path, name=None):
     """POST an image to a remote ComfyUI's /upload/image and return the stored name."""
     import mimetypes, uuid
-    name = os.path.basename(path)
+    name = name or os.path.basename(path)
     bnd = uuid.uuid4().hex
     ct = mimetypes.guess_type(path)[0] or "application/octet-stream"
     body = (f"--{bnd}\r\nContent-Disposition: form-data; name=\"image\"; filename=\"{name}\"\r\n"
@@ -131,16 +154,35 @@ def doctor_cuda():
         print("FAIL ComfyUI not reachable at", COMFY, "--", str(e)[:120]); return False
     if not os.path.exists(GRAPH):
         print("FAIL", GRAPH, "missing -- export it once from a ComfyUI with the H3 edit graph loaded"); return False
-    print("ok   graph:", os.path.basename(GRAPH))
-    for cls in ("MiniMaxH3ReferenceToVideo", "H3V2VInit", "ResolutionSelector"):
+    g = json.load(open(GRAPH))
+    nd = PROF["nodes"]
+    missing = [f"{k}={nid}" for k, nid in nd.items() if nid and nid not in g]
+    if missing:
+        print("FAIL", os.path.basename(GRAPH), "lacks nodes", ", ".join(missing), "-- re-export it"); return False
+    print("ok   graph:", os.path.basename(GRAPH), f"({len(g)} nodes, node contract intact)")
+    # One frame: length must arrive as a LINK from PrimitiveInt(1), same contract as the mac graph.
+    if g[nd["length"]]["inputs"].get("value") != 1 or g[nd["r2v"]]["inputs"].get("length") != [nd["length"], 0]:
+        ok = False; print("FAIL length is not linked from PrimitiveInt(1) -- the graph would render a clip")
+    if PROF["ref_nodes"][0][1] not in g[nd["r2v"]]["inputs"]:
+        ok = False; print("FAIL reference input ref_images.ref_image_0 absent -- renders would ignore your images")
+    for cls, need in (("MiniMaxH3ReferenceToVideo", True), ("ResolutionSelector", True), ("LoadImageMask", True),
+                      ("H3V2VInit", False)):
         if cls in api(f"/api/object_info/{cls}"):
             print(f"ok   {cls} registered")
-        else:
+        elif need:
             ok = False; print(f"FAIL {cls} not registered on the CUDA ComfyUI")
-    unets = combo_options("UNETLoader", "unet_name")
-    want = PROF["models"]["10"][1]
-    print(f"ok   {want} present" if want in unets else f"FAIL {want} not in models/diffusion_models")
-    ok = ok and want in unets
+        else:
+            print(f"warn {cls} missing -- --inpaint/--outpaint unavailable: install ComfyUI-MAINodes and restart")
+    for nid, (widget, want) in PROF["models"].items():
+        cls = g[nid]["class_type"]
+        if want in combo_options(cls, widget):
+            print(f"ok   {want} present ({cls})")
+        else:
+            ok = False; print(f"FAIL {want} not offered by {cls}.{widget} -- download it into the matching models/ dir")
+    if "H3SingleFrameEnabled" in api("/api/object_info/H3SingleFrameEnabled"):
+        print("ok   h3_single_frame node loaded")
+    else:
+        print("info h3_single_frame node not loaded (not required by this check on CUDA; install it if one-frame renders fail)")
     return ok
 
 
@@ -296,7 +338,7 @@ def inpaint_wire(g, args):
         sys.exit(f"--inpaint box {args.inpaint} does not fit {args.source} ({W}x{H})")
     mask = Image.new("L", (W, H), 0)
     ImageDraw.Draw(mask).rectangle((x0 - args.grow, y0 - args.grow, x1 + args.grow, y1 + args.grow), fill=255)
-    mask_path = os.path.join(INPUT_DIR, f"{args.name}_mask.png")
+    mask_path = os.path.join(workdir(), f"{args.name}_mask.png")
     mask.save(mask_path)
     mask_name = stage_ref(mask_path)
     src_name = stage_ref(args.source)
@@ -346,11 +388,7 @@ def build_cuda(args):
     for key, nid in nd.items():
         if nid and nid not in g:
             sys.exit(f"api_graph.cuda.json is missing node {nid} ({key}). Re-export it.")
-    lane = PROF["lane"]      # swap the mac argparse defaults to the cuda base lane unless overridden
-    sampler = lane["sampler"] if args.sampler == "er_sde" else args.sampler
-    scheduler = lane["scheduler"] if args.scheduler == "beta57" else args.scheduler
-    steps = lane["steps"] if args.steps == 8 else args.steps
-    args.steps, args.sampler, args.scheduler = steps, sampler, scheduler   # reflect the base lane in logs
+    steps, sampler, scheduler = args.steps, args.sampler, args.scheduler   # lane defaults resolved in main()
     for nid, (k, v) in PROF["models"].items():
         if nid in g:
             g[nid]["inputs"][k] = v
@@ -389,7 +427,7 @@ def cuda_inpaint_wire(g, args):
         sys.exit(f"--inpaint box {args.inpaint} must fit {args.source} ({W}x{H}), sides multiples of 32")
     m = Image.new("L", (W, H), 0)
     ImageDraw.Draw(m).rectangle((x0 - args.grow, y0 - args.grow, x1 + args.grow, y1 + args.grow), fill=255)
-    mpath = os.path.join(INPUT_DIR, f"{args.name}_mask.png"); m.save(mpath)
+    mpath = os.path.join(workdir(), f"{args.name}_mask.png"); m.save(mpath)
     mask_name = stage_ref(mpath)
     src_name = stage_ref(args.source)
     nd = PROF["nodes"]
@@ -403,12 +441,16 @@ def cuda_inpaint_wire(g, args):
 
 
 def stage_ref(path):
-    """Copy a reference into ComfyUI's input dir and return its basename."""
+    """Put an image where ComfyUI can load it and return the server-side name. The name carries a
+    content hash, so two different files that share a basename (a/ref.png, b/ref.png) or two jobs
+    writing the same crop name can never overwrite each other."""
+    digest = hashlib.sha1(open(path, "rb").read()).hexdigest()[:12]
+    name = f"h3e_{digest}_{os.path.basename(path)}"
     if _remote():
-        return _upload(path)
-    name = os.path.basename(path)
+        return _upload(path, name)
+    os.makedirs(INPUT_DIR, exist_ok=True)
     dst = os.path.join(INPUT_DIR, name)
-    if os.path.abspath(path) != os.path.abspath(dst):
+    if not os.path.exists(dst):
         shutil.copy(path, dst)
     return name
 
@@ -429,7 +471,9 @@ def run(args):
             v = next(iter(h.values()))
             if v["status"]["status_str"] != "success":
                 sys.exit("render failed: " + json.dumps(v["status"])[:600])
-            im = next((i for o in v["outputs"].values() for i in o.get("images", [])), None)
+            save_nid = PROF["nodes"]["save"]      # the graph's SaveImage, not whatever node emitted first
+            outs = [v["outputs"].get(save_nid, {})] + list(v["outputs"].values())
+            im = next((i for o in outs for i in o.get("images", [])), None)
             if im is None:
                 sys.exit("render reported success but produced no image: " + json.dumps(v["status"])[:300])
             if _remote():
@@ -519,12 +563,12 @@ def inpaint_run(args):
     (chaining masked passes without this drifted a 16 MP canvas dark by the 7th pass)."""
     from PIL import Image, ImageDraw, ImageFilter
     out = args.out
-    args.out = None
-    args.wait = True
-    ren = Image.open(run(args)).convert("RGB")
+    a = copy.copy(args)                           # never mutate the caller's args (batch/outpaint reuse them)
+    a.out, a.wait = None, True
+    ren = Image.open(run(a)).convert("RGB")
     src = Image.open(args.source).convert("RGB")
-    if args.decode_crop:                          # the render is the decoded crop: put it in place
-        full = src.copy(); full.paste(ren, args.decode_crop); ren = full
+    if a.decode_crop:                             # the render is the decoded crop: put it in place (offset set by inpaint_wire on `a`)
+        full = src.copy(); full.paste(ren, a.decode_crop); ren = full
     if ren.size != src.size:
         ren = ren.resize(src.size, Image.LANCZOS)
     if not args.no_notch:
@@ -556,22 +600,21 @@ def detail(args):
     w, h = x1 - x0, y1 - y0
     if w < 64 or h < 64 or x1 > full.width or y1 > full.height:
         sys.exit(f"--detail box {args.detail} does not fit {args.source} ({full.width}x{full.height})")
-    crop_path = os.path.join(INPUT_DIR, f"{args.name}_crop.png")
+    crop_path = os.path.join(workdir(), f"{args.name}_crop.png")
     full.crop((x0, y0, x1, y1)).save(crop_path)
-    args.refs = [crop_path] + args.refs
-    args.ar = min(ASPECTS, key=lambda k: abs(int(k.split(":")[0]) / int(k.split(":")[1]) - w / h))
-    out = args.out
-    args.out = None
-    args.wait = True
-    ren = Image.open(run(args)).convert("RGB").resize((w, h), Image.LANCZOS)
-    f = args.feather
+    a = copy.copy(args)                           # never mutate the caller's args: refs must not accumulate across seeds
+    a.refs = [crop_path] + list(args.refs)
+    a.ar = min(ASPECTS, key=lambda k: abs(int(k.split(":")[0]) / int(k.split(":")[1]) - w / h))
+    a.out, a.wait = None, True
+    ren = Image.open(run(a)).convert("RGB").resize((w, h), Image.LANCZOS)
+    f = min(args.feather, min(w, h) // 4)          # a 48 px feather on a 64 px box inverts the mask and pastes nothing
     mask = Image.new("L", (w, h), 0)
     mask.paste(255, (f, f, w - f, h - f))
     mask = mask.filter(ImageFilter.GaussianBlur(f / 2))
     comp = full.copy()
     comp.paste(ren, (x0, y0), mask)
-    comp.save(out)
-    print(f"{out}  (detail box {x0},{y0},{x1},{y1} at {args.ar}, feather {f}px)")
+    comp.save(args.out)
+    print(f"{args.out}  (detail box {x0},{y0},{x1},{y1} at {a.ar}, feather {f}px)")
 
 
 AUTOFIX_MODELS = os.path.expanduser("~/.cache/h3edit/models")
@@ -701,7 +744,7 @@ def _extend_side(args, side, add, palette, seed, base, work):
     """Grow the working file `work` by `add` px on one side: edge-replicate into the new margin, then
     inpaint it (the frozen original conditions the continuation). No --detail finish: a detail crop of
     a blurred, edgeless margin hallucinates (graph-paper, droplets); the notched+tone-matched inpaint
-    strip is the clean result. inpaint_run resets args.out to None on return, so re-point it at `work`."""
+    strip is the clean result."""
     from PIL import Image
     cur = Image.open(work).convert("RGB")
     W, H = cur.size
@@ -769,7 +812,7 @@ def outpaint(args):
         return print(f"dry-run plan: {op}  (green = original, grey = margins to generate; no renders)")
     work = args.out
     src0.save(work)
-    palette = os.path.join(INPUT_DIR, f"{base}_op_palette.png")
+    palette = os.path.join(workdir(), f"{base}_op_palette.png")
     src0.resize((16, 16)).resize((256, 256), Image.NEAREST).filter(ImageFilter.GaussianBlur(20)).save(palette)
     si = 0
     for side, total in plan:
@@ -859,7 +902,7 @@ def upscale(args):
         x0, y0, x1, y1 = b; w, h = x1 - x0, y1 - y0
         print(f"[{i + 1}/{len(keep)}] tile {b} score {sc:.0f}")
         cur = Image.open(out).convert("RGB")
-        crop_path = os.path.join(INPUT_DIR, f"{base}_up{i}_crop.png")
+        crop_path = os.path.join(workdir(), f"{base}_up{i}_crop.png")
         cur.crop(b).save(crop_path)
         args.refs = [crop_path]
         args.ar = min(ASPECTS, key=lambda k: abs(int(k.split(":")[0]) / int(k.split(":")[1]) - w / h))
@@ -917,13 +960,14 @@ def batch(args, seeds):
     print(f"seed-select: {len(seeds)} variations (sequential; ~{len(seeds)}x a single render)")
     items = []
     for i, s in enumerate(seeds):
-        args.seed = s
-        args.name = f"{base_name}_s{s}"          # keep per-seed intermediates from colliding
-        args.out = f"{stem}_s{s}{ext}"
-        args.wait = True
-        print(f"[{i + 1}/{len(seeds)}] seed {s} -> {args.out}")
-        dispatch(args)
-        items.append((args.out, f"seed {s}"))
+        a = copy.copy(args)                      # a fresh request per variation: nothing leaks between seeds
+        a.seed = s
+        a.name = f"{base_name}_s{s}"             # keep per-seed intermediates from colliding
+        a.out = f"{stem}_s{s}{ext}"
+        a.wait = True
+        print(f"[{i + 1}/{len(seeds)}] seed {s} -> {a.out}")
+        dispatch(a)
+        items.append((a.out, f"seed {s}"))
     sheet = make_sheet(items, f"{stem}_sheet{ext}")
     print(f"sheet: {sheet}\nvariations: " + ", ".join(p for p, _ in items))
 
@@ -936,7 +980,7 @@ def main():
     p.add_argument("prompt", nargs="?", help="edit instruction; see prompts/reference_prompts.txt")
     p.add_argument("-r", "--ref", dest="refs", action="append", default=[],
                    help=f"reference image (repeatable, max {MAX_REFS})")
-    p.add_argument("-o", "--out", help="copy the result here")
+    p.add_argument("-o", "--out", help="write the result here (implies --wait)")
     p.add_argument("--ar", default="21:9", choices=sorted(ASPECTS), help="aspect ratio")
     # With ref_size=match the references are scaled DOWN to the generation's pixel area (never up),
     # so megapixels caps the reference resolution too. At 1.0 a decal came back airbrushed; 2.0 was
@@ -951,9 +995,9 @@ def main():
                    help="masked re-denoise of this box of --source; -r images are the references, the rest of the frame is frozen")
     p.add_argument("--denoise", type=float, default=0.85, help="--inpaint: fraction of the schedule to run (0.85 corrects lettering and keeps geometry; 1.0 re-composes the box)")
     p.add_argument("--grow", type=int, default=32, help="--inpaint: dilate the box by this many px")
-    p.add_argument("--steps", type=int, default=8, help="8 with the turbo LoRA; 20 with --lora off")
-    p.add_argument("--sampler", default="er_sde", help="KSamplerSelect sampler_name (euler with --lora off)")
-    p.add_argument("--scheduler", default="beta57", help="BasicScheduler scheduler (simple with --lora off)")
+    p.add_argument("--steps", type=int, default=None, help="default: 8 on the mac turbo lane; 20 with --lora off or --profile cuda")
+    p.add_argument("--sampler", default=None, help="KSamplerSelect sampler_name (default er_sde turbo lane; euler base lane)")
+    p.add_argument("--scheduler", default=None, help="BasicScheduler scheduler (default beta57 turbo lane; simple base lane)")
     p.add_argument("--lora", default=TURBO_LORA, help="LoRA file in models/loras, or 'off' (base model, 20 steps)")
     p.add_argument("--lora-strength", type=float, default=1.5)
     p.add_argument("--dit", default=None, help="override the GGUF DiT (unet_name)")
@@ -984,7 +1028,7 @@ def main():
     p.add_argument("--pad", type=float, default=0.35,
                    help="--autofix: grow each box by this fraction per side (give --detail a real edge)")
     p.add_argument("--dry-run", dest="dry_run", action="store_true",
-                   help="write an overlay/plan of what would run and render nothing (--autofix/--outpaint/--reframe/--upscale)")
+                   help="write an overlay/plan of what would run and render nothing (only --autofix/--outpaint/--reframe/--upscale; other modes refuse it)")
     p.add_argument("--outpaint", metavar="L,T,R,B", type=lambda v: [int(x) for x in v.split(",")],
                    default=None, help="extend the image by these px per side, generating the margins")
     p.add_argument("--reframe", metavar="W:H", default=None,
@@ -998,7 +1042,7 @@ def main():
     p.add_argument("--upscale", metavar="IMAGE",
                    help="[WIP - BROKEN on multi-tile scenes] enlarge + add H3 detail: Lanczos scaffold, then "
                         "saliency-gated 4 MP detail tiles recombined wavelet-style. The tile compositor does not "
-                        "register cleanly yet (collaged output); needs --allow-wip to run. Faithful upscale = MLX-DLSS")
+                        "register cleanly yet (collaged output); needs --allow-wip to run. For a faithful upscale use a dedicated upscaler")
     p.add_argument("--scale", type=float, default=2.0, help="--upscale: enlargement factor (1 = re-detail in place)")
     p.add_argument("--tile-mp", dest="tile_mp", type=float, default=1.2, help="--upscale: crop size in MP (rendered at 4 MP)")
     p.add_argument("--overlap", type=float, default=0.2, help="--upscale: tile overlap fraction")
@@ -1012,9 +1056,31 @@ def main():
                    help="re-export api_graph.json from a ComfyUI tab id on CDP $H3EDIT_CDP")
     args = p.parse_args()
     apply_profile(args.profile)
+    # Lane defaults are applied only to options left unset, so an explicit --steps 8 on cuda is honored.
+    lane = PROF["lane"] if PROFILE == "mac" and args.lora != "off" else _PROFILES["cuda"]["lane"]
+    for k in ("steps", "sampler", "scheduler"):
+        if getattr(args, k) is None:
+            setattr(args, k, lane[k])
 
     if args.doctor:
         sys.exit(0 if doctor() else 1)
+    # Validate once, before anything is staged, saved or queued.
+    if args.detail and args.inpaint:
+        p.error("--inpaint and --detail are different passes; run one at a time")
+    for flag in ("detail", "inpaint"):
+        box = getattr(args, flag)
+        if box is not None and (len(box) != 4 or box[0] < 0 or box[1] < 0 or box[2] <= box[0] or box[3] <= box[1]):
+            p.error(f"--{flag} takes X0,Y0,X1,Y1 with 0 <= X0 < X1 and 0 <= Y0 < Y1")
+    if not 0 < args.denoise <= 1:
+        p.error("--denoise must be in (0, 1]")
+    if args.feather < 0 or args.grow < 0:
+        p.error("--feather and --grow must be >= 0")
+    if args.mp is not None and args.mp <= 0:
+        p.error("--mp must be > 0")
+    if args.n < 1:
+        p.error("--n must be >= 1")
+    if args.outpaint and any(v < 0 for v in args.outpaint):
+        p.error("--outpaint margins must be >= 0 (it only extends; crop separately)")
     if args.export:
         from export_graph import export
         return export(args.export, GRAPH)
@@ -1040,6 +1106,9 @@ def main():
         if args.seed is None:
             args.seed = random.randrange(1, 2**31)
         return outpaint(args)
+    if args.dry_run and not args.upscale:
+        p.error("--dry-run is only supported with --autofix, --outpaint, --reframe and --upscale; "
+                "the other modes have nothing to plan and would render")
     if args.generate:
         if not args.prompt:
             p.error("--generate needs a prompt")
@@ -1050,14 +1119,14 @@ def main():
                     "tiling up with --detail / --outpaint, or use --profile cuda")
         if not args.refs:
             from PIL import Image
-            gray = os.path.join(INPUT_DIR, "generate_neutral.png")
+            gray = os.path.join(workdir(), "generate_neutral.png")
             Image.new("RGB", (512, 512), (128, 128, 128)).save(gray)
             args.refs = [gray]     # cold-start T2I: neutral card, prompt drives (verified 2026-09-12)
     if args.upscale:
         if not args.allow_wip and not args.dry_run:
             p.error("--upscale is WIP and produces broken (collaged) output on multi-tile scenes; the tile "
                     "compositor does not register yet. Re-run with --allow-wip if you want it anyway, or use "
-                    "the MLX-DLSS workflow for a faithful upscale.")
+                    "a dedicated upscaler for a faithful result.")
         if not (args.upscale and args.out):
             p.error("--upscale needs an IMAGE and -o")
         if not os.path.exists(args.upscale):
@@ -1071,10 +1140,8 @@ def main():
         if len(args.refs) > MAX_REFS - 1:
             p.error(f"--detail: max {MAX_REFS - 1} extra references (the crop is <Picture 1>)")
     elif args.inpaint:
-        if not (args.prompt and args.source and args.refs and len(args.inpaint) == 4):
-            p.error("--inpaint needs a prompt, --source, at least one -r (the artwork) and a X0,Y0,X1,Y1 box")
-        if args.detail:
-            p.error("--inpaint and --detail are different passes; run one at a time")
+        if not (args.prompt and args.source and args.out and args.refs and len(args.inpaint) == 4):
+            p.error("--inpaint needs a prompt, --source, -o, at least one -r (the artwork) and a X0,Y0,X1,Y1 box")
     elif not args.prompt or not args.refs:
         p.error("a prompt and at least one --ref are required")
     if len(args.refs) > MAX_REFS:
@@ -1083,9 +1150,12 @@ def main():
         args.mp = 2.0 if args.detail else 4.0
     if args.seed is None:
         args.seed = random.randrange(1, 2**31)
+    if args.out:
+        args.wait = True          # -o means "put the result here", which needs the render to land
     seeds = args.seeds if args.seeds else [args.seed + i for i in range(args.n)]
     if len(seeds) > 1:
         return batch(args, seeds)
+    args.seed = seeds[0]          # a one-element --seeds is an explicit seed
     return dispatch(args)
 
 
