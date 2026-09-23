@@ -1,54 +1,85 @@
-# CivitAI post draft — h3image v0.3.0 (DO NOT POST WITHOUT MIKE'S REVIEW)
+# CivitAI + Reddit posts — h3image v0.3.0
 
-Title: h3image — MiniMax H3 as an image editor + generator (ComfyUI workflows + CLI, Mac & CUDA)
+Live on CivitAI since 2026-09-23 as version v2.0: https://civitai.com/models/2866161
+Title: MiniMax H3 Image Editor: edit + inpaint workflows for Mac and NVIDIA
 
----
+## CivitAI description (as published)
 
-MiniMax H3 is a 33B video model. Run it in reference-to-video mode for exactly **one frame**, decode
-through the video VAE, and it becomes a strong instruction-based image editor — and a large-format
-text-to-image generator (one shot up to ~16 MP). Credit for the technique: Patient_Ratio4177
-(r/StableDiffusion 1vo1ab3). h3image packages it for Apple Silicon and CUDA.
+MiniMax H3 is a video model, but if you ask it for a single frame it turns out to be a really good image editor. Give it a photo plus the thing you want in it (a logo, a label, a poster, a mural) and it puts it in properly: wrapped around a can, painted into brick, glowing on a wall with the reflection in the wet street. It also does plain text-to-image at big sizes, up to about 16 MP in one go.
 
-Repo: https://github.com/Bambushu/h3image (MIT; the models carry their own licenses)
+The trick comes from Patient_Ratio4177 on r/StableDiffusion. I packaged it into ComfyUI workflows for Mac and for NVIDIA.
 
-**What's in it**
+**What you get**
 
-- **4 ComfyUI workflows** — edit and mask-editor inpaint, each for Apple Silicon and CUDA. Laid out
-  in four numbered groups (your inputs / models / engine / output) with a how-to note inside, and
-  they open with a demo preloaded.
-- **A CLI** (`h3edit`, also installed as `h3image`) that drives the same graphs headlessly: edit,
-  generate, masked inpaint, detail re-render, seed-select contact sheets, outpaint/reframe, face
-  auto-fix, and `h3-inpaint` for building a big image one masked pass at a time.
-- A tiny custom node that allows 1-frame H3 renders without patching ComfyUI.
+Four workflows:
+- **Edit (Mac)** and **Edit (CUDA)**: two images in, one edited image out
+- **Inpaint (Mac)** and **Inpaint (CUDA)**: paint over the part you want changed. Everything outside it stays untouched, apart from a soft blend at the edge.
 
-**Two stacks**
+Each one opens with an example already loaded (the demo images are in the zip). The inputs you actually touch are grouped at the top left, and there's a how-to note right there.
 
-- Apple Silicon (MPS): pruned FL2VA GGUF (Q5_K_M) + ClipProj text encoder + Parasyte turbo LoRA,
-  er_sde / beta57, 8 steps. A 4 MP edit takes ~11 min on an M5.
-- CUDA (Blackwell, driver ≥ 580): the int8_convrot models from the Comfy-Org/MiniMax-H3 repack, base
-  model, euler / simple, 20 steps. A 4 MP edit takes ~5 min on an RTX PRO 4500.
+**Getting it running**
 
-Both were run end to end on 2026-09-23: every supported CLI mode and all four workflows.
+1. Copy the images from the zip's `input/` folder into ComfyUI's `input/` folder
+2. Install the small `h3_single_frame` node from the GitHub repo and restart ComfyUI. It's what lets H3 render one frame instead of a video.
+3. Mac: you also need ComfyUI-GGUF, ComfyUI-ClipProj and comfyui-obvpm. For inpainting (Mac or CUDA): ComfyUI-MAINodes.
+4. Grab the models. The repo README lists every file, with links and where it goes.
 
-**What holds up**
+Speed: about 11 minutes for a 4 MP edit on an M5 Mac, about 5 minutes on an RTX PRO 4500. CUDA needs a Blackwell card (RTX 50xx / RTX PRO) on driver 580 or newer.
 
-Type and flat graphic marks transfer letter for letter, and H3 applies real surface physics: a
-label compresses around a can under its condensation, a mural takes on the brick with the mortar
-reading through, a neon sign lights the wall and reflects in wet pavement, a book cover warps to
-the cover's perspective. Masked inpaint pastes the render back in pixel space: in the CLI test,
-nothing beyond the box plus its grown, feathered margin changed by a single pixel.
+**Writing prompts that work**
 
-**What doesn't**
+- Start with `Task: Reference-guided generation.`
+- Refer to your images as `<Picture 1>`, `<Picture 2>` (first loaded image = Picture 1)
+- Say what each picture is for, and what it is NOT for: "<Picture 2> is the label artwork only. It does not supply a background or lighting."
+- Say "exactly one" when you want one of something
+- List what has to stay the same in Picture 1
+- Go to 4 MP if there's small lettering. At 2 MP small text turns to mush.
 
-- A plain edit is a regeneration conditioned on the references, not a masked edit: scene and light
-  carry over, fine detail gets redrawn. Use the inpaint workflow when the rest must stay pixel-exact.
-- A tattoo reads as a sticker (two attempts), and detailed illustration deforms where letterforms don't.
-- Masked passes carry a faint 16-px decoder grid on smooth surfaces; the CLI reduces it with a
-  notch/deblock filter, the GUI workflows don't.
-- Likeness from a reference face is weak at small face sizes.
+**What it's not good at**
 
-It's a workflow toolkit around an existing video model — not a new trained image model and not an
-upscaler (Qwen-Image-Edit 2.1 handles upscaling well). All demo brands are fictional and AI-generated.
+- A normal edit redraws the whole picture, so fine details can shift a little. If the rest has to stay pixel-perfect, use the inpaint workflow.
+- Tattoos look like stickers (last image). Detailed illustrations get distorted, but text and logos hold up.
+- Inpainting can leave a very faint grid on smooth areas like sky or plain walls
+- Faces from a reference photo don't hold a real likeness when they're small in the frame
+- It's not an upscaler. Qwen-Image-Edit 2.1 does that job well.
 
-Attached: the four workflow JSONs (`workflows/`), the demo before/after sheets (`demos/sheets/`),
-and the tattoo failure.
+**Want to script it?**
+
+The repo also has a command-line tool that runs the same workflows: batch edits, several seeds at once with a contact sheet, extending an image past its edges, automatic face fixes, and building huge images one region at a time. `pip install git+https://github.com/Bambushu/h3image`
+
+Repo, full docs and model list: https://github.com/Bambushu/h3image
+
+All brands in the demos are made up and every demo image is AI-generated.
+
+## Reddit post (draft, not posted)
+
+TITLE
+MiniMax H3 as an image editor: ComfyUI workflows for Mac + NVIDIA (edit + mask inpaint), free
+
+BODY
+A while back u/Patient_Ratio4177 showed that MiniMax H3, the 33B video model, makes a great image editor if you render just one frame. I've been building on that. It now runs on both Apple Silicon and NVIDIA, and I cleaned it up into four ComfyUI workflows you can just drag in.
+
+What it's good at is putting a flat asset into a scene *properly*: a label that wraps around a can and sits under the condensation, a mural that takes on the brick texture, a neon sign that lights up the wall and reflects in wet pavement, a book cover that follows the book's perspective. Text and logos come through letter for letter. It also does plain text-to-image, up to about 16 MP in one shot.
+
+**The workflows**
+- Edit (Mac / CUDA): two images in, one edit out
+- Inpaint (Mac / CUDA): paint a mask in ComfyUI's mask editor, only that part changes
+
+They open with a demo loaded and a how-to note next to the inputs.
+
+**Speed:** ~11 min for a 4 MP edit on an M5 Mac, ~5 min on an RTX PRO 4500. CUDA needs Blackwell (50xx / RTX PRO) and driver 580+.
+
+**Prompt tips that made the biggest difference**
+- Start with "Task: Reference-guided generation." and refer to images as <Picture 1>, <Picture 2>
+- Tell it what each picture is NOT for ("<Picture 2> is the label artwork only, it does not supply a background")
+- Say "exactly one" if you want one of something
+- Use 4 MP for small lettering. 2 MP turns it to mush.
+
+**Where it falls short:** a normal edit redraws the whole image, so use inpaint if the rest must stay put. Tattoos look like stickers. Inpainting can leave a faint grid on smooth surfaces. Small faces don't keep the likeness from a reference. It's not an upscaler either (Qwen-Image-Edit 2.1 is better for that).
+
+There's also a CLI for scripting it: batch edits, seed contact sheets, outpainting, auto face fixes, and building huge images one region at a time.
+
+- Workflows + demo images: https://civitai.com/models/2866161
+- Repo, setup and model list: https://github.com/Bambushu/h3image
+
+Happy to answer setup questions. Mac setup in particular has a few gotchas.
