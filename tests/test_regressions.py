@@ -174,6 +174,80 @@ def test_cuda_doctor_fails_without_models(monkeypatch):
     assert h3edit.doctor_cuda() is False
 
 
+@pytest.mark.parametrize("missing", [None, "single_frame", "audio_vae"])
+def test_cuda_doctor_requires_one_frame_and_audio_vae(monkeypatch, missing):
+    h3edit.apply_profile("cuda")
+
+    def api(path, payload=None):
+        cls = path.rsplit("/", 1)[-1]
+        if missing == "single_frame" and cls == "H3SingleFrameEnabled":
+            return {}
+        return {cls: {}}
+
+    def options(cls, widget):
+        models = {
+            "UNETLoader": ["minimax_h3_fl2va_int8_convrot.safetensors"],
+            "CLIPLoader": ["qwen3vl_32b_minimax_h3_int8_convrot.safetensors"],
+            "VAELoader": ["minimax_h3_video_vae_fp16.safetensors"],
+        }
+        if missing != "audio_vae":
+            models["VAELoader"].append("minimax_h3_audio_vae_fp32.safetensors")
+        return models[cls]
+
+    monkeypatch.setattr(h3edit, "api", api)
+    monkeypatch.setattr(h3edit, "combo_options", options)
+    assert h3edit.doctor_cuda() is (missing is None)
+
+
+@pytest.mark.parametrize("mode", ["--detail", "--inpaint"])
+def test_composite_creates_output_parent_before_render(tmp_path, monkeypatch, mode):
+    out = tmp_path / "new" / "nested" / "result.png"
+    calls = []
+    render = fake_run(calls)
+
+    def checked_run(a):
+        assert out.parent.is_dir()
+        return render(a)
+
+    monkeypatch.setattr(h3edit, "run", checked_run)
+    src = img(tmp_path / "source.png")
+    main(monkeypatch, "edit", mode, "128,128,384,384", "--source", src,
+         "-r", src, "-o", str(out))
+    assert len(calls) == 1 and out.is_file()
+
+
+def test_invalid_output_parent_fails_before_render(tmp_path, monkeypatch):
+    parent = tmp_path / "a-file"
+    parent.write_text("keep me")
+    calls = []
+    monkeypatch.setattr(h3edit, "run", fake_run(calls))
+    with pytest.raises(SystemExit) as exc:
+        main(monkeypatch, "edit", "-r", img(tmp_path / "source.png"),
+             "-o", str(parent / "out.png"))
+    assert exc.value.code == 2 and calls == []
+    assert parent.read_text() == "keep me"
+
+
+def test_canvas_imports_preserve_same_named_references(tmp_path, monkeypatch):
+    project = tmp_path / "project"
+    src = img(tmp_path / "start.png")
+    monkeypatch.setattr(sys, "argv", ["h3-inpaint", "init", str(project), "--canvas", src])
+    h3_inpaint.main()
+    originals = []
+    for name, color in [("a", (255, 0, 0)), ("b", (0, 0, 255))]:
+        folder = tmp_path / name
+        folder.mkdir()
+        ref = img(folder / "ref.png", color=color)
+        originals.append(open(ref, "rb").read())
+        monkeypatch.setattr(sys, "argv", ["h3-inpaint", "add", str(project), name,
+                            "--box", "0,0,128,128", "--prompt", "edit", "-r", ref])
+        h3_inpaint.main()
+    p, plan, state = h3_inpaint.load(str(project))
+    refs = [e["refs"][0] for e in plan["passes"]]
+    assert refs[0] != refs[1]
+    assert [(project / "refs" / r).read_bytes() for r in refs] == originals
+
+
 def test_pod_refuses_detail_passes(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     img(tmp_path / "start.png", (640, 384))

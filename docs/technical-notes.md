@@ -81,6 +81,9 @@ Six scripted stress tests with pinned seeds and shipped inputs: [`benchmark/`](.
   Warm times: 8 MP 76 s, 12 MP 109 s, 16.88 MP ~150 s.
 - The Mac-only diagnostic flags (`--te/--dit/--encode-*/--save-latent/--decode-crop/--frames`) are
   rejected under `--profile cuda`.
+- CUDA `--doctor` requires the `H3SingleFrameEnabled` marker from this repo's compatibility node
+  and checks the diffusion model, text encoder, video VAE, and audio VAE. Install the node and restart
+  ComfyUI before checking; a linked length of 1 alone does not verify one-frame execution.
 
 ## How the CLI talks to ComfyUI
 

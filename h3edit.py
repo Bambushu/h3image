@@ -67,11 +67,12 @@ _PROFILES = {
     "cuda": {"graph": CUDA_GRAPH, "comfy": os.environ.get("H3EDIT_COMFY", ""), "prompt_key": "prompt",
              "nodes": dict(prompt="13", res="1", steps="7", seed="12", r2v="13",
                            sampler="6", save="16", ksampler="8", vae="2",
-                           length="20", batch="15", unet="10", lora=None, te=None),
+                           length="20", batch="15", unet="10", lora=None, te=None, audio_vae="3"),
              "ref_nodes": [("17", "ref_images.ref_image_0")],
              "models": {"10": ("unet_name", "minimax_h3_fl2va_int8_convrot.safetensors"),
                         "11": ("clip_name", "qwen3vl_32b_minimax_h3_int8_convrot.safetensors"),
-                        "2": ("vae_name", "minimax_h3_video_vae_fp16.safetensors")},
+                        "2": ("vae_name", "minimax_h3_video_vae_fp16.safetensors"),
+                        "3": ("vae_name", "minimax_h3_audio_vae_fp32.safetensors")},
              "lane": dict(sampler="euler", scheduler="simple", steps=20)},
 }
 PROFILE = "mac"
@@ -182,7 +183,9 @@ def doctor_cuda():
     if "H3SingleFrameEnabled" in api("/api/object_info/H3SingleFrameEnabled"):
         print("ok   h3_single_frame node loaded")
     else:
-        print("info h3_single_frame node not loaded (not required by this check on CUDA; install it if one-frame renders fail)")
+        ok = False
+        print("FAIL one-frame capability is unverified: install the h3_single_frame custom node "
+              "from this repo and RESTART ComfyUI.")
     return ok
 
 
@@ -988,6 +991,13 @@ def _main():
     if args.export:
         from export_graph import export
         return export(args.export, GRAPH)
+    if args.out:
+        try:
+            os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
+            if os.path.isdir(args.out):
+                p.error(f"output path is a directory: {args.out}")
+        except OSError as e:
+            p.error(f"cannot prepare output directory: {e}")
     if args.autofix:
         if not os.path.exists(args.autofix):
             p.error(f"--autofix: image not found: {args.autofix}")

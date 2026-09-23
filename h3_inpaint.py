@@ -16,7 +16,7 @@ Passes run back to front: a later box overwrites whatever it covers.
 
 The proof build (43 passes, 5440x3072) and every rule learned on it: benchmark/nachtwacht/README.md.
 """
-import argparse, json, mimetypes, os, re, subprocess, sys, time, urllib.request, uuid
+import argparse, hashlib, json, mimetypes, os, re, shutil, subprocess, sys, time, urllib.request, uuid
 from PIL import Image, ImageDraw, ImageFilter
 
 WINDOW_MP = 4.0
@@ -301,15 +301,23 @@ def cmd_add(a):
     p, plan, state = load(a.dir)
     if any(e["name"] == a.name for e in plan["passes"]):
         sys.exit(f"pass {a.name} already in the plan")
-    e = {"name": a.name, "box": a.box, "refs": [os.path.basename(r) for r in a.refs], "denoise": a.denoise, "prompt": a.prompt}
+    e = {"name": a.name, "box": a.box, "refs": [], "denoise": a.denoise, "prompt": a.prompt}
     if a.lane:
         e["lane"] = a.lane
     if a.kind == "detail":
         e["kind"] = "detail"
     for r in a.refs:
-        dst = os.path.join(p["refs"], os.path.basename(r))
-        if os.path.abspath(r) != os.path.abspath(dst):
-            Image.open(r).save(dst)
+        # Import an immutable snapshot: another pass may use a different ref.png, or the caller
+        # may replace a source file before importing it again. Preserve the original encoded bytes.
+        with open(r, "rb") as f:
+            digest = hashlib.sha256(f.read()).hexdigest()
+        name = f"{digest}_{os.path.basename(r)}"
+        dst = os.path.join(p["refs"], name)
+        if not os.path.exists(dst):
+            with Image.open(r) as im:
+                im.verify()
+            shutil.copyfile(r, dst)
+        e["refs"].append(name)
     plan["passes"].append(e); save(p, plan)
     print(f"added {a.name} box={a.box} denoise={a.denoise} refs={e['refs']}")
 

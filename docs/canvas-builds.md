@@ -27,7 +27,8 @@ h3-inpaint score  DIR                                     # outside/seam SSIM pe
 ```
 
 No `-r` means the pass gets a palette card sampled from the canvas (colours only). Prompt files live in
-`DIR/prompts/`. Projects store paths relative to the project folder, so they open from anywhere and can
+`DIR/prompts/`. Imported references are stored with content-hash names, so different files named
+`ref.png` cannot overwrite an earlier pass's artwork. Projects store paths relative to the project folder, so they open from anywhere and can
 be moved. `init` refuses to overwrite an existing project unless you pass `--force`. `score` needs the
 `[score]` extra.
 

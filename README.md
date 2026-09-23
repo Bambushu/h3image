@@ -16,8 +16,8 @@ This started as the Mac port and now runs on CUDA too.
 
 Putting a flat asset into a scene *properly*: a label that wraps around a can and sits under the
 condensation, a mural that takes on the brick, a neon sign that lights the wall and reflects in wet
-pavement, a book cover that follows the book's perspective. Text and logos come through letter for
-letter.
+pavement, a book cover that follows the book's perspective. Text and logos transfer well in these
+examples, though small lettering and occasional character substitutions still need checking.
 
 | | |
 |---|---|
@@ -31,10 +31,9 @@ looks like a sticker. All brands are made up and every image is AI-generated.*
 
 ![Nachtwacht, 16 MP](benchmark/nachtwacht/out/final_4k.jpg)
 
-*A 5440x3072 group painting built with `h3-inpaint`. No single prompt can place fifteen specific people,
-two dogs, a cat, a drum and a pigeon at 16 MP, so this was built like a painting: an empty hall first,
-then one masked pass per figure or prop, back to front, 43 passes in all. Each pass only changes its own
-box; everything else stays pixel-identical.*
+*A 5440x3072 group painting built with `h3-inpaint` in 43 controlled passes: an empty hall first,
+then figures and props, back to front. Pixels outside each expanded, feathered edit region are
+preserved.*
 
 ![how it was built](docs/img/nachtwacht_progression.jpg)
 
@@ -113,12 +112,24 @@ Yes, the audio VAE is needed even for stills.
 
 ```sh
 pip install git+https://github.com/Bambushu/h3image      # or from a checkout: uv tool install -e .
-h3edit --doctor                                           # checks ComfyUI, the node, the models
-h3edit --profile cuda --doctor                            # on NVIDIA
+# Use your ComfyUI URL. API transport works even when its input/output folders are elsewhere.
+export H3EDIT_COMFY=http://127.0.0.1:8188
+export H3EDIT_TRANSPORT=upload
+h3edit --doctor                                       # Apple Silicon
+h3edit --profile cuda --doctor                        # NVIDIA Blackwell
 ```
 
-If ComfyUI isn't on `127.0.0.1:8288`, set `H3EDIT_COMFY=http://host:port`. Extras: `[autofix]` for face
-fixing, `[score]` for canvas scoring.
+Set `H3EDIT_COMFY` to the URL your ComfyUI actually uses (the CLI's default is `127.0.0.1:8288`).
+`H3EDIT_TRANSPORT=upload` sends inputs and retrieves outputs through ComfyUI's API, including on
+localhost. To use shared files instead, set `H3EDIT_TRANSPORT=shared` **and** `H3EDIT_INPUT` /
+`H3EDIT_OUTPUT` to that installation's actual input/output folders; their defaults assume
+`~/ComfyUI-h3/`.
+
+The commands above use a Unix shell. In PowerShell, set the variables with
+`$env:H3EDIT_COMFY = "http://127.0.0.1:8188"` and `$env:H3EDIT_TRANSPORT = "upload"`.
+For the one-frame node on Windows, copy `h3image/custom_nodes/h3_single_frame` into your
+ComfyUI `custom_nodes` folder instead of using `ln -s`, then restart ComfyUI.
+Extras: `[autofix]` for face fixing, `[score]` for canvas scoring.
 
 ## Using the ComfyUI workflows
 
