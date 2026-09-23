@@ -8,7 +8,7 @@ MiniMax H3 is an open-weight 33B video model. Run in reference-to-video (R2V) mo
 
 The technique was published by [Patient_Ratio4177](https://www.reddit.com/r/StableDiffusion/comments/1vo1ab3/h3_as_a_singleimage_edit_model/), originally on CUDA. This repo began as the Apple Silicon (MPS) port and ships a ComfyUI workflow, a single-frame compatibility node, and an `h3edit` CLI (also installed as `h3image`). The CLI is host-agnostic: it queues a bundled graph over HTTP against any running ComfyUI (point `H3EDIT_COMFY` at it) and sets widgets by name. The base graphs are the frontend's own exports; the masked modes add a small, fixed set of nodes (`VAEEncode`, `LoadImageMask`, `H3V2VInit`) and the CLI checks the graph's node contract before it queues.
 
-This is a workflow toolkit around an existing video model, not a new trained image model and not a faithful upscaler.
+This is a workflow toolkit around an existing video model, not a new trained image model and not an upscaler (for upscaling, Qwen-Image-Edit 2.1 handles it well).
 
 ![mural demo](demos/sheets/gable.png)
 
@@ -21,7 +21,6 @@ This is a workflow toolkit around an existing video model, not a new trained ima
 | **stable** | edit (`-r` references + instruction), `--generate` |
 | **supported, with limits** | `--inpaint` and `--detail` (single region; see the boundary note under [Modes](#modes-detail-and-inpaint)) |
 | **experimental** | `--autofix`, `--outpaint` / `--reframe`, `h3-inpaint` canvas builds (case studies, not turnkey) |
-| **WIP, gated** | `--upscale` (needs `--allow-wip`; broken on multi-tile scenes) |
 
 ## Quickstart
 
@@ -55,7 +54,6 @@ Prefer ComfyUI's canvas to a CLI? Drag a workflow from [`workflows/`](workflows)
 | outpaint | `--outpaint L,T,R,B` / `--reframe` | extend the canvas outward |
 | generate | `--generate` | text-to-image, no reference, large-format |
 | autofix | `--autofix IMAGE` | detect faces and re-render them cleaner |
-| upscale | `--upscale IMAGE` | **WIP / broken** on multi-tile scenes (needs `--allow-wip`); use a dedicated upscaler for a faithful result |
 
 Big multi-figure images and region-by-region repairs are a separate tool, **`h3-inpaint`** — see [Canvas builds](#canvas-builds-h3-inpaint). Running on CUDA or a pod instead of Apple Silicon: [next section](#cuda--non-mac---profile-cuda).
 
@@ -95,16 +93,13 @@ Blackwell cards on driver >= 580 (cu130): RTX PRO 6000, 5090, and RTX PRO 4500 (
 2026-09-23 — edit, generate, inpaint, detail, 2-seed batches, outpaint, autofix and an `h3-inpaint` canvas pass,
 plus a plain `pip install` of the package). Other CUDA setups are untested. Verified on an RTX PRO 6000
 and a 5090 (2026-09-13): `--generate`, `--inpaint`, `--outpaint` and `--autofix` render correctly
-end-to-end through this path and `--doctor` passes. `--upscale`'s CUDA plumbing runs (tiles render,
-download and composite) but its OUTPUT is currently broken on multi-tile scenes -- a pre-existing
-wavelet-recombine/seam problem in the upscale compositor, reproducible from the raw tiles off-GPU, NOT
-specific to CUDA. Treat `--upscale` as WIP on both platforms until that is fixed. The mac-only diagnostic flags
+end-to-end through this path and `--doctor` passes. The mac-only diagnostic flags
 (`--te/--dit/--encode-*/--save-latent/--decode-crop/--frames`) are rejected under `--profile cuda`.
 
 **One-shot resolution ceiling (measured 2026-09-13, PRO 6000).** The `ResolutionSelector` clamps a
 one-shot generation at **16.88 MP (5024x3360 at 3:2)** — requesting 20/24/28/32 MP silently returns the
 same 16.88 MP frame (no error, unlike the HTTP 400 seen on Mac at 24 MP). Warm render times: 8 MP 76s,
-12 MP 109s, 16.88 MP ~150s. Go past 16.88 MP by tiling with `--upscale` / `--outpaint`.
+12 MP 109s, 16.88 MP ~150s. Go past 16.88 MP by extending with `--outpaint` or building with `h3-inpaint`; for plain upscaling use a dedicated image upscaler (Qwen-Image-Edit 2.1 handles it well).
 
 ## Demos
 
@@ -252,7 +247,7 @@ h3edit --generate "..." --mp 4 --n 6 -o scout.png  # scout compositions: 6 seeds
 | `--ref-size` | `match` | `max`: 72:48 total; `match`: 7:30. No visible gain from `max` |
 | `--ar` | `21:9` | match your scene (all demos are `16:9`) |
 | `--n` / `--seeds` | 1 | seed-select: N variations (or exact seeds) plus a labeled contact sheet |
-| `--dry-run` | off | plan only, for `--autofix` / `--outpaint` / `--reframe` / `--upscale`; other modes refuse it |
+| `--dry-run` | off | plan only, for `--autofix` / `--outpaint` / `--reframe`; other modes refuse it |
 
 ### Megapixels is secretly the reference-resolution dial
 
@@ -353,28 +348,6 @@ h3edit "..." --reframe 3:2 --source in.png -o out.png --dry-run    # plan image,
 - A single strip per side up to ~25% of the current dimension; larger extensions are split into ≤25% chunks and re-encoded between (each new strip then anchors to real pixels). ~25% per anchored edge is the coherence ceiling — beyond ~50% total it drifts (verified 2026-09-12: H3 continues a scene on one anchored edge, but it is not a trained outpaint model).
 - **No `--detail` finish on margins** — a detail crop of a blurred, edgeless margin hallucinates (it invented graph-paper and water drops in testing). The notched, tone-matched inpaint strip is the clean output; the faint quilt on smooth surfaces is the same floor as any `--inpaint`.
 - `--dry-run` writes a plan image (green = original, grey = margins) and renders nothing.
-### Upscale + re-detail (`--upscale`) — WIP / broken
-
-> **Status: broken on multi-tile scenes, disabled behind `--allow-wip`.** The design below is sound in
-> principle, but the tile compositor does not register the H3 renders to the scaffold — each tile
-> reinterprets its crop as different content, so a multi-tile result comes out as a visible collage
-> rather than a super-resolved image. Reproducible from the raw tiles off-GPU, so it is an algorithmic
-> problem, not platform-specific. The real fix (parked) is geometry-preserving low-denoise V2V tiles.
-> **For a faithful upscale today, use a dedicated upscaler instead.** The flag is gated:
-> pass `--allow-wip` if you want to run it anyway (e.g. a single tile).
-
-Intended behaviour: enlarge an image and add *real* H3 detail — the large-format finisher (generate/commit -> upscale -> outpaint). Lanczos scaffold, then saliency-gated 4 MP detail tiles recombined so lighting can't drift.
-
-```sh
-h3edit --upscale in.png --scale 2 -o out.png --dry-run              # tile plan (green=detail, red=skip), no renders
-h3edit --upscale in.png --scale 2 -o out.png --allow-wip           # run anyway (collages on multi-tile scenes)
-```
-
-- **Lanczos enlarge** to `--scale`x (/32), then tile into ~`--tile-mp` (1.2) crops with `--overlap` (0.2), origins/sizes snapped to the 16 px VAE grid.
-- **Saliency gate**: tiles below `--edge-thresh` (Laplacian variance, default 6) are left as the Lanczos scaffold — skips flat regions, which both avoids the detail-crop hallucination and saves renders. `--dry-run` prints per-tile scores to tune it.
-- **Wavelet recombine**: each tile keeps the scaffold's low frequencies (lighting/colour) and takes only the H3 render's high frequencies (texture), so tiles can't drift tile-to-tile.
-- **Cost is real**: each tile is a 4 MP render (~3.5-12 min on the M5 depending on crop size). A 2x of a 4 MP image is ~28 tiles -> hours locally; use a pod for large jobs.
-- **Not for text/faces**: detail tiles mangle letterforms and can shift a face -- repair those with `--inpaint` / `--autofix` after. For a fast, faithful, light re-detail instead, use a dedicated upscaler; `--upscale` is for heavy generative detail. Needs the `[upscale]` extra (scipy).
 
 ## Canvas builds (`h3-inpaint`)
 

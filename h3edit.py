@@ -830,97 +830,6 @@ def outpaint(args):
     print(f"outpaint -> {work} ({final[0]}x{final[1]})")
 
 
-_UP_PROMPT = ("Task: Reference-guided generation. <Picture 1> is a crop of a finished photo. Reproduce "
-              "it exactly -- same content, framing, lighting and colours -- rendered sharper with fine "
-              "natural detail. Continue the style. Paint only inside the frame. No text.")
-
-
-def _up_boxes(W, H, tile_mp, overlap):
-    """Tile the image into ~tile_mp crops, origins+sizes snapped to the 16px VAE grid, with overlap."""
-    tpx = max(256, int(((tile_mp * 1e6) ** 0.5) // 32) * 32)
-    def axis(n):
-        t = min(tpx, (n // 32) * 32) or 32
-        step = max(32, int(t * (1 - overlap)) // 32 * 32)
-        starts = list(range(0, max(1, n - t) + 1, step)) or [0]
-        if n > t and starts[-1] != n - t:
-            starts.append(((n - t) // 32) * 32)
-        return sorted(set(starts)), t
-    xs, tw = axis(W); ys, th = axis(H)
-    return [(x, y, min(x + tw, W), min(y + th, H)) for y in ys for x in xs]
-
-
-def _edge_score(crop):
-    """Laplacian variance of a crop (grey) -- high = real edges/texture, low = flat."""
-    import numpy as np
-    from scipy.ndimage import laplace
-    g = np.asarray(crop.convert("L"), np.float32)
-    return float(laplace(g).var())
-
-
-def _wavelet_recombine(base_crop, rendered, sigma):
-    """Low frequencies from the scaffold (owns lighting), high frequencies from the H3 render
-    (adds texture) -> tile-to-tile lighting drift is impossible by construction."""
-    import numpy as np
-    from scipy.ndimage import gaussian_filter
-    from PIL import Image
-    b = np.asarray(base_crop, np.float32); r = np.asarray(rendered, np.float32)
-    low = np.stack([gaussian_filter(b[..., c], sigma) for c in range(3)], -1)
-    hi = r - np.stack([gaussian_filter(r[..., c], sigma) for c in range(3)], -1)
-    return Image.fromarray(np.clip(low + hi, 0, 255).astype(np.uint8))
-
-
-def upscale(args):
-    """Enlarge (Lanczos scaffold) then add real H3 detail: tile into ~tile_mp crops, skip flat crops
-    (saliency gate -> no hallucination + fewer renders), render each at 4 MP, recombine wavelet-style
-    (base low-pass + H3 high-pass so lighting can't drift), feather-paste. Verified panel design 2026-09-12."""
-    from PIL import Image, ImageFilter, ImageDraw
-    base = args.name
-    src = Image.open(args.upscale).convert("RGB")
-    W0, H0 = src.size
-    W = max(32, int(round(W0 * args.scale)) // 32 * 32)
-    H = max(32, int(round(H0 * args.scale)) // 32 * 32)
-    big = src.resize((W, H), Image.LANCZOS)            # scaffold
-    boxes = _up_boxes(W, H, args.tile_mp, args.overlap)
-    scored = [(b, _edge_score(big.crop(b))) for b in boxes]
-    keep = [(b, sc) for b, sc in scored if sc >= args.edge_thresh]
-    print(f"upscale: {W0}x{H0} -> {W}x{H}  ({len(boxes)} tiles, {len(keep)} above edge-thresh {args.edge_thresh})")
-    if args.dry_run:
-        over = big.copy(); d = ImageDraw.Draw(over)
-        for b, sc in scored:
-            col = (0, 220, 0) if sc >= args.edge_thresh else (200, 60, 60)
-            d.rectangle(b, outline=col, width=4)
-            d.text((b[0] + 6, b[1] + 6), f"{sc:.0f}", fill=col)
-        op = args.out or os.path.join(OUTPUT_DIR, f"{base}_upscale_plan.png")
-        over.save(op)
-        return print(f"dry-run plan: {op}  (green = will detail, red = skipped-flat; no renders). "
-                     f"tune --edge-thresh from the printed scores")
-    out = args.out
-    big.save(out)                                       # working canvas = scaffold; kept tiles overwrite
-    sigma = max(1.0, 0.015 * W)
-    f = args.feather
-    for i, (b, sc) in enumerate(keep):
-        x0, y0, x1, y1 = b; w, h = x1 - x0, y1 - y0
-        print(f"[{i + 1}/{len(keep)}] tile {b} score {sc:.0f}")
-        cur = Image.open(out).convert("RGB")
-        crop_path = os.path.join(workdir(), f"{base}_up{i}_crop.png")
-        cur.crop(b).save(crop_path)
-        args.refs = [crop_path]
-        args.ar = min(ASPECTS, key=lambda k: abs(int(k.split(":")[0]) / int(k.split(":")[1]) - w / h))
-        args.mp = 4.0
-        args.prompt = _UP_PROMPT
-        args.name = f"{base}_up{i}"
-        args.out = None; args.wait = True
-        ren = Image.open(run(args)).convert("RGB").resize((w, h), Image.LANCZOS)
-        args.out = out                                  # run() nulled it
-        recomb = _wavelet_recombine(cur.crop(b), ren, sigma)
-        mask = Image.new("L", (w, h), 0)
-        mask.paste(255, (f, f, max(f + 1, w - f), max(f + 1, h - f)))
-        mask = mask.filter(ImageFilter.GaussianBlur(f / 2))
-        comp = cur.copy(); comp.paste(recomb, (x0, y0), mask); comp.save(out)
-    print(f"upscale -> {out} ({W}x{H}, {len(keep)} tiles detailed)")
-
-
-
 def dispatch(args):
     """Run one variation in whatever mode the args select; the result lands at args.out."""
     if args.detail:
@@ -1034,7 +943,7 @@ def _main():
     p.add_argument("--pad", type=float, default=0.35,
                    help="--autofix: grow each box by this fraction per side (give --detail a real edge)")
     p.add_argument("--dry-run", dest="dry_run", action="store_true",
-                   help="write an overlay/plan of what would run and render nothing (only --autofix/--outpaint/--reframe/--upscale; other modes refuse it)")
+                   help="write an overlay/plan of what would run and render nothing (only --autofix/--outpaint/--reframe; other modes refuse it)")
     p.add_argument("--outpaint", metavar="L,T,R,B", type=lambda v: [int(x) for x in v.split(",")],
                    default=None, help="extend the image by these px per side, generating the margins")
     p.add_argument("--reframe", metavar="W:H", default=None,
@@ -1045,17 +954,6 @@ def _main():
                    help="text-to-image: generate from the prompt alone, no -r needed (auto-injects a "
                         "neutral reference). Up to 16 MP via --mp; pairs with --n for seed-select. "
                         "Ideogram 4 stays sharper for small stills -- use --generate for large-format")
-    p.add_argument("--upscale", metavar="IMAGE",
-                   help="[WIP - BROKEN on multi-tile scenes] enlarge + add H3 detail: Lanczos scaffold, then "
-                        "saliency-gated 4 MP detail tiles recombined wavelet-style. The tile compositor does not "
-                        "register cleanly yet (collaged output); needs --allow-wip to run. For a faithful upscale use a dedicated upscaler")
-    p.add_argument("--scale", type=float, default=2.0, help="--upscale: enlargement factor (1 = re-detail in place)")
-    p.add_argument("--tile-mp", dest="tile_mp", type=float, default=1.2, help="--upscale: crop size in MP (rendered at 4 MP)")
-    p.add_argument("--overlap", type=float, default=0.2, help="--upscale: tile overlap fraction")
-    p.add_argument("--edge-thresh", dest="edge_thresh", type=float, default=6.0,
-                   help="--upscale: skip tiles whose Laplacian variance is below this (flat = no detail needed)")
-    p.add_argument("--allow-wip", dest="allow_wip", action="store_true",
-                   help="opt in to run features flagged WIP/broken (currently: --upscale)")
     p.add_argument("--wait", action="store_true", help="block until the render lands")
     p.add_argument("--doctor", action="store_true", help="check the local install and exit")
     p.add_argument("--export", metavar="TAB",
@@ -1112,8 +1010,8 @@ def _main():
         if args.seed is None:
             args.seed = random.randrange(1, 2**31)
         return outpaint(args)
-    if args.dry_run and not args.upscale:
-        p.error("--dry-run is only supported with --autofix, --outpaint, --reframe and --upscale; "
+    if args.dry_run:
+        p.error("--dry-run is only supported with --autofix, --outpaint and --reframe; "
                 "the other modes have nothing to plan and would render")
     if args.generate:
         if not args.prompt:
@@ -1128,18 +1026,6 @@ def _main():
             gray = os.path.join(workdir(), "generate_neutral.png")
             Image.new("RGB", (512, 512), (128, 128, 128)).save(gray)
             args.refs = [gray]     # cold-start T2I: neutral card, prompt drives (verified 2026-09-12)
-    if args.upscale:
-        if not args.allow_wip and not args.dry_run:
-            p.error("--upscale is WIP and produces broken (collaged) output on multi-tile scenes; the tile "
-                    "compositor does not register yet. Re-run with --allow-wip if you want it anyway, or use "
-                    "a dedicated upscaler for a faithful result.")
-        if not (args.upscale and args.out):
-            p.error("--upscale needs an IMAGE and -o")
-        if not os.path.exists(args.upscale):
-            p.error(f"--upscale: image not found: {args.upscale}")
-        if args.seed is None:
-            args.seed = random.randrange(1, 2**31)
-        return upscale(args)
     if args.detail:
         if not (args.prompt and args.source and args.out and len(args.detail) == 4):
             p.error("--detail needs a prompt, --source, -o and a X0,Y0,X1,Y1 box")

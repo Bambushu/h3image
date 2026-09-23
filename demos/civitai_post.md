@@ -1,4 +1,4 @@
-# CivitAI post draft — h3image v0.2.0 (DO NOT POST WITHOUT MIKE'S REVIEW)
+# CivitAI post draft — h3image v0.3.0 (DO NOT POST WITHOUT MIKE'S REVIEW)
 
 Title: h3image — MiniMax H3 as an image editor + generator (ComfyUI workflows + CLI, Mac & CUDA)
 
@@ -46,10 +46,9 @@ nothing beyond the box plus its grown, feathered margin changed by a single pixe
 - Masked passes carry a faint 16-px decoder grid on smooth surfaces; the CLI reduces it with a
   notch/deblock filter, the GUI workflows don't.
 - Likeness from a reference face is weak at small face sizes.
-- The generative upscaler is unfinished and disabled by default.
 
-It's a workflow toolkit around an existing video model — not a new trained image model and not a
-faithful upscaler. All demo brands are fictional and AI-generated.
+It's a workflow toolkit around an existing video model — not a new trained image model and not an
+upscaler (Qwen-Image-Edit 2.1 handles upscaling well). All demo brands are fictional and AI-generated.
 
 Attached: the four workflow JSONs (`workflows/`), the demo before/after sheets (`demos/sheets/`),
 and the tattoo failure.

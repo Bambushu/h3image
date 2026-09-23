@@ -1,6 +1,6 @@
 [project]
 name = "h3edit"
-version = "0.2.0"
+version = "0.3.0"
 description = "h3image: instruction-based image editing and generation on MiniMax H3 (one-frame R2V) via ComfyUI"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -11,7 +11,6 @@ dependencies = ["websocket-client", "pillow", "numpy"]
 [project.optional-dependencies]
 score = ["scikit-image"]
 autofix = ["opencv-contrib-python>=4.9"]
-upscale = ["scipy"]          # --upscale (WIP, gated behind --allow-wip)
 test = ["pytest"]
 
 [project.scripts]
