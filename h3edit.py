@@ -973,6 +973,12 @@ def batch(args, seeds):
 
 
 def main():
+    """Console entry point. Returns None: the wrapper does sys.exit(main()), and returning the output
+    path from here turned every successful render into exit status 1."""
+    _main()
+
+
+def _main():
     p = argparse.ArgumentParser(description="Instruction-based image editing on MiniMax H3, local.")
     p.add_argument("--profile", default=os.environ.get("H3EDIT_PROFILE", "mac"), choices=["mac", "cuda"],
                    help="mac = MacMax MPS graph (default); cuda = shipped int8_convrot edit graph "

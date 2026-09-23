@@ -43,6 +43,8 @@ h3edit "Task: Reference-guided generation. Put the jacket from <Picture 2> on th
 h3edit --generate "a grand old library interior, sunbeams, checkerboard floor" --mp 8 -o library.png
 ```
 
+Prefer ComfyUI's canvas to a CLI? Drag a workflow from [`workflows/`](workflows) (edit and masked edit, Mac and CUDA) — see [Prefer the GUI?](#prefer-the-gui).
+
 `-o` waits for the render and writes it there. Without `-o` the job is only queued (add `--wait` to block and print the output path).
 
 | mode | flag | what it does |
@@ -88,8 +90,10 @@ the [Comfy-Org/MiniMax-H3](https://huggingface.co/Comfy-Org/MiniMax-H3) repack:
 | `qwen3vl_32b_minimax_h3_int8_convrot.safetensors` | `text_encoders/` |
 | `minimax_h3_video_vae_fp16.safetensors`, `minimax_h3_audio_vae_fp32.safetensors` | `vae/` |
 
-`h3edit --profile cuda --doctor` checks the node contract, the three model files and the nodes. Tested on a
-Blackwell card on driver >= 580 (cu130); other CUDA setups are untested. Verified on an RTX PRO 6000
+`h3edit --profile cuda --doctor` checks the node contract, the three model files and the nodes. Tested on
+Blackwell cards on driver >= 580 (cu130): RTX PRO 6000, 5090, and RTX PRO 4500 (32 GB; full acceptance run
+2026-09-23 — edit, generate, inpaint, detail, 2-seed batches, outpaint, autofix and an `h3-inpaint` canvas pass,
+plus a plain `pip install` of the package). Other CUDA setups are untested. Verified on an RTX PRO 6000
 and a 5090 (2026-09-13): `--generate`, `--inpaint`, `--outpaint` and `--autofix` render correctly
 end-to-end through this path and `--doctor` passes. `--upscale`'s CUDA plumbing runs (tiles render,
 download and composite) but its OUTPUT is currently broken on multi-tile scenes -- a pre-existing
@@ -173,7 +177,20 @@ The audio VAE is required even for stills.
 
 ### Prefer the GUI?
 
-Drag [`h3_image_edit_mac.json`](h3_image_edit_mac.json) into ComfyUI. It has 21 nodes. It is pre-loaded with the mural demo. Copy the two images from `demos/refs/` into `input/` first.
+Four ComfyUI workflows in [`workflows/`](workflows) — drag one onto the canvas:
+
+| workflow | platform | what it does |
+|---|---|---|
+| [`h3image_edit_mac.json`](workflows/h3image_edit_mac.json) | Apple Silicon | instruction edit from 2 references (add more on the H3 node's next `ref_image_N` slot) |
+| [`h3image_inpaint_mac.json`](workflows/h3image_inpaint_mac.json) | Apple Silicon | masked edit: paint the area in the MaskEditor, the rest stays pixel-exact |
+| [`h3image_edit_cuda.json`](workflows/h3image_edit_cuda.json) | CUDA | same edit on the int8_convrot models |
+| [`h3image_inpaint_cuda.json`](workflows/h3image_inpaint_cuda.json) | CUDA | same masked edit on the int8_convrot models |
+
+Each one is laid out in four numbered groups — **1 · Your inputs** (images, instruction, seed, size), **2 · Models** (set once), **3 · Engine** (leave alone) and **4 · Output** — with a *How to use* note inside group 1. They open pre-loaded with the mural / neon-sign demo: copy `demos/refs/gable_scene-s77.png`, `gable_mural-s79.png`, `neon_sign-s42.png` and `inpaint_example.png` (pre-masked) into ComfyUI's `input/` first.
+
+The inpaint workflows do the CLI's pixel paste-back (grown, feathered mask); the Mac one also pulls the render's tone back to the source with core ComfyUI's `ColorTransfer` (the turbo lane leaves the masked area a few levels darker). Neither does the CLI's grid notch, so smooth surfaces can show a faint cell grid that `h3edit --inpaint` removes.
+
+All four were loaded in the ComfyUI frontend (Mac 1.51.9, CUDA pod 1.52.7), passed server validation and rendered on 2026-09-23.
 
 ### 2. Single-frame compatibility node
 
@@ -568,7 +585,7 @@ Keep wordmarks near centre if they must survive a cylinder wrap. Only about 40 %
 
 - It checks for the `ref_images.ref_image_N` keys that ComfyUI's frontend serializes.
 - A hand-assembled graph drops them silently.
-- Edit `h3_image_edit_mac.json` in the GUI.
+- Edit `workflows/h3image_edit_mac.json` (or `_cuda`) in the GUI.
 - Re-export with `H3EDIT_CDP=<port> h3edit --export <tab-id>`.
 
 ### The scheduler complains
@@ -606,7 +623,7 @@ The CLI queues `h3edit_graphs/api_graph.json` (mac) or `h3edit_graphs/api_graph.
 
 To modify wiring:
 
-- Edit `h3_image_edit_mac.json` in the GUI.
+- Edit `workflows/h3image_edit_mac.json` (or `_cuda`) in the GUI.
 - Re-export with `H3EDIT_CDP=<port> h3edit --export <tab-id>`.
 
 ## Credits

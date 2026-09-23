@@ -89,6 +89,11 @@ def test_small_detail_box_still_changes_pixels(tmp_path, monkeypatch):
     assert Image.open(out).getpixel((96, 96)) != Image.open(src).getpixel((96, 96))
 
 
+def test_successful_render_exits_zero(tmp_path, monkeypatch):
+    monkeypatch.setattr(h3edit, "run", lambda a: img(tmp_path / "o.png"))
+    assert main(monkeypatch, "edit", "-r", img(tmp_path / "r.png"), "--seed", "1", "-o", str(tmp_path / "o.png")) is None
+
+
 def test_single_seeds_value_is_used(tmp_path, monkeypatch):
     seen = []
     monkeypatch.setattr(h3edit, "dispatch", lambda a: seen.append(a.seed))
@@ -177,3 +182,17 @@ def test_pod_refuses_detail_passes(tmp_path, monkeypatch):
     e = {"name": "d", "box": [0, 0, 64, 64], "prompt": "x", "kind": "detail"}
     with pytest.raises(SystemExit, match="local-only"):
         h3_inpaint.run_pass(p, plan, state, e, pod_url="http://pod")
+
+
+@pytest.mark.parametrize("wf", sorted(os.listdir(os.path.join(ROOT, "workflows"))))
+def test_gui_workflows_are_complete(wf):
+    w = json.load(open(os.path.join(ROOT, "workflows", wf)))
+    nodes = {n["id"]: n for n in w["nodes"]}
+    assert [g["title"][0] for g in w["groups"]] == ["1", "2", "3", "4"]
+    assert any(n["type"] == "MarkdownNote" for n in nodes.values())
+    length = [n for n in nodes.values() if n["type"] == "PrimitiveInt" and n.get("title", "").startswith("length")]
+    assert length and length[0]["widgets_values"][0] == 1
+    r2v = next(n for n in nodes.values() if n["type"] == "MiniMaxH3ReferenceToVideo")
+    assert any(i["name"] == "ref_images.ref_image_0" and i.get("link") is not None for i in r2v["inputs"])
+    if "inpaint" in wf:
+        assert {"H3V2VInit", "ImageCompositeMasked", "GetImageSize"} <= {n["type"] for n in nodes.values()}

@@ -1,18 +1,18 @@
 {
- "id": "00000000-0000-0000-0000-000000000000",
+ "id": "593d82b2-8429-4299-b10f-6ca9b5d80275",
  "revision": 0,
- "last_node_id": 666,
+ "last_node_id": 667,
  "last_link_id": 48,
  "nodes": [
   {
    "id": 115,
    "type": "ResolutionSelector",
    "pos": [
-    100,
-    130
+    560,
+    256
    ],
    "size": [
-    270,
+    330,
     126
    ],
    "flags": {},
@@ -65,7 +65,7 @@
      ]
     }
    ],
-   "title": "Output size",
+   "title": "Output size (aspect + megapixels)",
    "properties": {
     "Node name for S&R": "ResolutionSelector"
    },
@@ -73,17 +73,22 @@
     "16:9 (Widescreen)",
     4,
     32
-   ]
+   ],
+   "widgets_values_named": {
+    "aspect_ratio": "16:9 (Widescreen)",
+    "megapixels": 4,
+    "multiple": 32
+   }
   },
   {
    "id": 119,
    "type": "VAELoader",
    "pos": [
-    100,
-    386
+    1000,
+    576
    ],
    "size": [
-    270,
+    380,
     58
    ],
    "flags": {},
@@ -111,22 +116,26 @@
      ]
     }
    ],
+   "title": "Video VAE — decodes the image",
    "properties": {
     "Node name for S&R": "VAELoader"
    },
    "widgets_values": [
     "_h3/vae/minimax_h3_video_vae_fp16.safetensors"
-   ]
+   ],
+   "widgets_values_named": {
+    "vae_name": "_h3/vae/minimax_h3_video_vae_fp16.safetensors"
+   }
   },
   {
    "id": 120,
    "type": "VAELoader",
    "pos": [
-    100,
-    574
+    1000,
+    688
    ],
    "size": [
-    270,
+    380,
     58
    ],
    "flags": {},
@@ -154,22 +163,26 @@
      ]
     }
    ],
+   "title": "Audio VAE — required by the node, unused",
    "properties": {
     "Node name for S&R": "VAELoader"
    },
    "widgets_values": [
     "_h3/vae/minimax_h3_audio_vae_fp32.safetensors"
-   ]
+   ],
+   "widgets_values_named": {
+    "vae_name": "_h3/vae/minimax_h3_audio_vae_fp32.safetensors"
+   }
   },
   {
    "id": 121,
    "type": "VAEDecodeAudio",
    "pos": [
-    1782.3638671875,
-    130
+    2000,
+    600
    ],
    "size": [
-    164.2388671875,
+    260,
     266
    ],
    "flags": {},
@@ -199,18 +212,17 @@
    ],
    "properties": {
     "Node name for S&R": "VAEDecodeAudio"
-   },
-   "widgets_values": []
+   }
   },
   {
    "id": 122,
    "type": "VAEDecode",
    "pos": [
-    1782.3638671875,
-    306
+    2000,
+    280
    ],
    "size": [
-    140,
+    260,
     266
    ],
    "flags": {},
@@ -242,18 +254,17 @@
    ],
    "properties": {
     "Node name for S&R": "VAEDecode"
-   },
-   "widgets_values": []
+   }
   },
   {
    "id": 123,
    "type": "KSamplerSelect",
    "pos": [
-    100,
-    762
+    1480,
+    756
    ],
    "size": [
-    270,
+    420,
     58
    ],
    "flags": {},
@@ -280,22 +291,26 @@
      ]
     }
    ],
+   "title": "Sampler: er_sde",
    "properties": {
     "Node name for S&R": "KSamplerSelect"
    },
    "widgets_values": [
     "er_sde"
-   ]
+   ],
+   "widgets_values_named": {
+    "sampler_name": "er_sde"
+   }
   },
   {
    "id": 124,
    "type": "BasicScheduler",
    "pos": [
-    1100,
-    130
+    1480,
+    868
    ],
    "size": [
-    270,
+    420,
     106
    ],
    "flags": {},
@@ -346,7 +361,7 @@
      ]
     }
    ],
-   "title": "Sampler settings (8 steps)",
+   "title": "Scheduler: beta57, 8 steps",
    "properties": {
     "Node name for S&R": "BasicScheduler"
    },
@@ -354,17 +369,22 @@
     "beta57",
     8,
     1
-   ]
+   ],
+   "widgets_values_named": {
+    "scheduler": "beta57",
+    "steps": 8,
+    "denoise": 1
+   }
   },
   {
    "id": 125,
    "type": "SamplerCustomAdvanced",
    "pos": [
-    1470,
-    130
+    2000,
+    120
    ],
    "size": [
-    212.3638671875,
+    260,
     106
    ],
    "flags": {},
@@ -427,11 +447,11 @@
    "id": 126,
    "type": "BasicGuider",
    "pos": [
-    1100,
-    366
+    1480,
+    1028
    ],
    "size": [
-    159.568359375,
+    420,
     46
    ],
    "flags": {},
@@ -469,11 +489,11 @@
    "id": 129,
    "type": "RandomNoise",
    "pos": [
-    100,
-    950
+    560,
+    120
    ],
    "size": [
-    270,
+    330,
     82
    ],
    "flags": {},
@@ -507,17 +527,21 @@
    "widgets_values": [
     123494846,
     "fixed"
-   ]
+   ],
+   "widgets_values_named": {
+    "noise_seed": 123494846,
+    "control_after_generate": "fixed"
+   }
   },
   {
    "id": 131,
    "type": "PrimitiveInt",
    "pos": [
-    100,
-    1162
+    1480,
+    620
    ],
    "size": [
-    270,
+    420,
     82
    ],
    "flags": {},
@@ -551,59 +575,22 @@
    "widgets_values": [
     1,
     "fixed"
-   ]
-  },
-  {
-   "id": 132,
-   "type": "PrimitiveFloat",
-   "pos": [
-    100,
-    1374
    ],
-   "size": [
-    270,
-    58
-   ],
-   "flags": {},
-   "order": 6,
-   "mode": 0,
-   "inputs": [
-    {
-     "localized_name": "value",
-     "name": "value",
-     "type": "FLOAT",
-     "widget": {
-      "name": "value"
-     },
-     "link": null
-    }
-   ],
-   "outputs": [
-    {
-     "localized_name": "FLOAT",
-     "name": "FLOAT",
-     "type": "FLOAT",
-     "links": null
-    }
-   ],
-   "title": "Video Duration",
-   "properties": {
-    "Node name for S&R": "PrimitiveFloat"
-   },
-   "widgets_values": [
-    3
-   ]
+   "widgets_values_named": {
+    "value": 1,
+    "fixed": "fixed"
+   }
   },
   {
    "id": 136,
    "type": "MiniMaxH3ReferenceToVideo",
    "pos": [
-    600,
-    130
+    1480,
+    120
    ],
    "size": [
-    400,
-    344
+    420,
+    364
    ],
    "flags": {},
    "order": 12,
@@ -629,23 +616,21 @@
     },
     {
      "label": "ref_image_0",
-     "localized_name": "ref_images.ref_image_0",
+     "localized_name": "ref_image_0",
      "name": "ref_images.ref_image_0",
      "shape": 7,
      "type": "IMAGE",
      "link": 44
     },
     {
-     "label": "ref_image_1",
-     "localized_name": "ref_images.ref_image_1",
+     "localized_name": "ref_image_1",
      "name": "ref_images.ref_image_1",
      "shape": 7,
      "type": "IMAGE",
      "link": 45
     },
     {
-     "label": "ref_image_2",
-     "localized_name": "ref_images.ref_image_2",
+     "localized_name": "ref_image_2",
      "name": "ref_images.ref_image_2",
      "shape": 7,
      "type": "IMAGE",
@@ -653,7 +638,7 @@
     },
     {
      "label": "ref_video_0",
-     "localized_name": "ref_videos.ref_video_0",
+     "localized_name": "ref_video_0",
      "name": "ref_videos.ref_video_0",
      "shape": 7,
      "type": "IMAGE",
@@ -661,7 +646,7 @@
     },
     {
      "label": "ref_video_audio_0",
-     "localized_name": "ref_video_audios.ref_video_audio_0",
+     "localized_name": "ref_video_audio_0",
      "name": "ref_video_audios.ref_video_audio_0",
      "shape": 7,
      "type": "AUDIO",
@@ -669,7 +654,7 @@
     },
     {
      "label": "ref_audio_0",
-     "localized_name": "ref_audios.ref_audio_0",
+     "localized_name": "ref_audio_0",
      "name": "ref_audios.ref_audio_0",
      "shape": 7,
      "type": "AUDIO",
@@ -739,6 +724,7 @@
      ]
     }
    ],
+   "title": "MiniMax H3 Reference to Video (one frame)",
    "properties": {
     "Node name for S&R": "MiniMaxH3ReferenceToVideo"
    },
@@ -748,21 +734,28 @@
     768,
     124,
     "match"
-   ]
+   ],
+   "widgets_values_named": {
+    "prompt": "",
+    "width": 1344,
+    "height": 768,
+    "length": 124,
+    "ref_image_size": "match"
+   }
   },
   {
    "id": 137,
    "type": "LoadImage",
    "pos": [
-    100,
-    1562
+    0,
+    434
    ],
    "size": [
-    282.798828125,
-    314
+    520,
+    326
    ],
    "flags": {},
-   "order": 7,
+   "order": 6,
    "mode": 0,
    "inputs": [
     {
@@ -800,28 +793,32 @@
      "links": null
     }
    ],
-   "title": "Reference 1 \u2014 the scene to edit",
+   "title": "Reference 1 → <Picture 1> (the scene to edit)",
    "properties": {
     "Node name for S&R": "LoadImage"
    },
    "widgets_values": [
     "gable_scene-s77.png",
     "image"
-   ]
+   ],
+   "widgets_values_named": {
+    "image": "gable_scene-s77.png",
+    "upload": "image"
+   }
   },
   {
    "id": 138,
    "type": "PrimitiveStringMultiline",
    "pos": [
-    100,
-    1794
+    0,
+    120
    ],
    "size": [
-    400,
-    200
+    520,
+    260
    ],
    "flags": {},
-   "order": 8,
+   "order": 7,
    "mode": 0,
    "inputs": [
     {
@@ -844,27 +841,30 @@
      ]
     }
    ],
-   "title": "Edit instruction",
+   "title": "Edit instruction (cite images as <Picture 1>, <Picture 2>)",
    "properties": {
     "Node name for S&R": "PrimitiveStringMultiline"
    },
    "widgets_values": [
     "Task: Reference-guided generation.\n\n<Picture 1> supplies the entire scene: the building, the brickwork, the window, the pavement, the sky, the lighting and the photograph's look. <Picture 2> is the mural artwork reference and supplies nothing else. It does not supply a location, a background, a texture, a sky, or lighting.\n\nPaint <Picture 2> onto the bare brick wall in <Picture 1> as exactly one mural filling the brickwork between the stone plinth course at the base and the roof coping above, and stopping at the window reveal. The mural behaves like paint on brick: every brick course and mortar joint remains legible through the colour, the relief of the wall modulates its edges, and the window and its stone sill cut the design exactly as they cut the wall surface. It reads as absorbed pigment on masonry, not a pasted poster and not a projected image.\n\nPreserve from <Picture 1>: the camera position and framing; the wall's geometry, its corner edge and roof line; the tall window, its dark frame, its deep reveal and its stone sill; the stone plinth course and the pavement below; brick colour, mortar tone and surface wear outside the mural; the sky; the direction and warmth of the sunlight and all cast shadows; the exposure and photographic grain.\n\nA single coherent photograph shows the same brick wall on the same street, with the <Picture 2> artwork painted across the brickwork as one mural."
-   ]
+   ],
+   "widgets_values_named": {
+    "value": "Task: Reference-guided generation.\n\n<Picture 1> supplies the entire scene: the building, the brickwork, the window, the pavement, the sky, the lighting and the photograph's look. <Picture 2> is the mural artwork reference and supplies nothing else. It does not supply a location, a background, a texture, a sky, or lighting.\n\nPaint <Picture 2> onto the bare brick wall in <Picture 1> as exactly one mural filling the brickwork between the stone plinth course at the base and the roof coping above, and stopping at the window reveal. The mural behaves like paint on brick: every brick course and mortar joint remains legible through the colour, the relief of the wall modulates its edges, and the window and its stone sill cut the design exactly as they cut the wall surface. It reads as absorbed pigment on masonry, not a pasted poster and not a projected image.\n\nPreserve from <Picture 1>: the camera position and framing; the wall's geometry, its corner edge and roof line; the tall window, its dark frame, its deep reveal and its stone sill; the stone plinth course and the pavement below; brick colour, mortar tone and surface wear outside the mural; the sky; the direction and warmth of the sunlight and all cast shadows; the exposure and photographic grain.\n\nA single coherent photograph shows the same brick wall on the same street, with the <Picture 2> artwork painted across the brickwork as one mural."
+   }
   },
   {
    "id": 139,
    "type": "LoadImage",
    "pos": [
-    100,
-    2124
+    0,
+    814
    ],
    "size": [
-    282.798828125,
-    102
+    520,
+    326
    ],
    "flags": {},
-   "order": 9,
+   "order": 8,
    "mode": 0,
    "inputs": [
     {
@@ -902,28 +902,32 @@
      "links": null
     }
    ],
-   "title": "Reference 2 \u2014 the asset to apply",
+   "title": "Reference 2 → <Picture 2> (the asset to apply)",
    "properties": {
     "Node name for S&R": "LoadImage"
    },
    "widgets_values": [
     "gable_mural-s79.png",
     "image"
-   ]
+   ],
+   "widgets_values_named": {
+    "image": "gable_mural-s79.png",
+    "upload": "image"
+   }
   },
   {
    "id": 661,
    "type": "ClipProjLoader",
    "pos": [
-    100,
-    2356
+    1000,
+    368
    ],
    "size": [
-    279.5005859375,
+    380,
     154
    ],
    "flags": {},
-   "order": 10,
+   "order": 9,
    "mode": 0,
    "inputs": [
     {
@@ -982,7 +986,7 @@
      ]
     }
    ],
-   "title": "ClipProj text encoder",
+   "title": "Text encoder (ClipProj)",
    "properties": {
     "Node name for S&R": "ClipProjLoader"
    },
@@ -992,17 +996,24 @@
     "mmh3-8b-ClipProj-celeb-mlp.safetensors",
     "cpu",
     "dynamic"
-   ]
+   ],
+   "widgets_values_named": {
+    "clip_name": "_h3/qwen3vl_8b_fp8_scaled.safetensors",
+    "type": "minimax",
+    "projection": "mmh3-8b-ClipProj-celeb-mlp.safetensors",
+    "device": "cpu",
+    "mode": "dynamic"
+   }
   },
   {
    "id": 663,
    "type": "ImageFromBatch",
    "pos": [
-    2046.6027343750002,
-    130
+    2000,
+    920
    ],
    "size": [
-    270,
+    260,
     82
    ],
    "flags": {},
@@ -1050,18 +1061,22 @@
    "widgets_values": [
     0,
     1
-   ]
+   ],
+   "widgets_values_named": {
+    "batch_index": 0,
+    "length": 1
+   }
   },
   {
    "id": 664,
    "type": "SaveImage",
    "pos": [
-    2416.602734375,
-    130
+    2360,
+    120
    ],
    "size": [
-    270,
-    58
+    700,
+    560
    ],
    "flags": {},
    "order": 20,
@@ -1091,27 +1106,30 @@
      "links": null
     }
    ],
-   "title": "Save image",
+   "title": "Save image (output/h3_edit/)",
    "properties": {
     "Node name for S&R": "SaveImage"
    },
    "widgets_values": [
-    "h3_edit/gui_check"
-   ]
+    "h3_edit/h3image"
+   ],
+   "widgets_values_named": {
+    "filename_prefix": "h3_edit/h3image"
+   }
   },
   {
    "id": 665,
    "type": "UnetLoaderGGUF",
    "pos": [
-    100,
-    2640
+    1000,
+    120
    ],
    "size": [
-    270,
+    380,
     58
    ],
    "flags": {},
-   "order": 11,
+   "order": 10,
    "mode": 0,
    "inputs": [
     {
@@ -1134,23 +1152,26 @@
      ]
     }
    ],
-   "title": "H3 Ref2VA DiT (GGUF)",
+   "title": "H3 DiT (GGUF)",
    "properties": {
     "Node name for S&R": "UnetLoaderGGUF"
    },
    "widgets_values": [
     "_h3/MiniMax-H3-FL2VA-Pruned-Q5_K_M.gguf"
-   ]
+   ],
+   "widgets_values_named": {
+    "unet_name": "_h3/MiniMax-H3-FL2VA-Pruned-Q5_K_M.gguf"
+   }
   },
   {
    "id": 666,
    "type": "LoraLoaderModelOnly",
    "pos": [
-    600,
-    604
+    1000,
+    232
    ],
    "size": [
-    270,
+    380,
     82
    ],
    "flags": {},
@@ -1193,14 +1214,45 @@
      ]
     }
    ],
-   "title": "Turbo 8-step LoRA",
+   "title": "Parasyte turbo LoRA (8 steps)",
    "properties": {
     "Node name for S&R": "LoraLoaderModelOnly"
    },
    "widgets_values": [
     "H3-PK-Parasyte-Turbo.safetensors",
     1.5
-   ]
+   ],
+   "widgets_values_named": {
+    "lora_name": "H3-PK-Parasyte-Turbo.safetensors",
+    "strength_model": 1.5
+   }
+  },
+  {
+   "id": 667,
+   "type": "MarkdownNote",
+   "pos": [
+    560,
+    560
+   ],
+   "size": [
+    330,
+    620
+   ],
+   "flags": {},
+   "order": 11,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "title": "How to use",
+   "properties": {},
+   "widgets_values": [
+    "## H3 image edit — Apple Silicon (MPS)\n\n1. **Load your images** in Reference 1 (the scene) and Reference 2 (the asset). Add more references by connecting a LoadImage to the next free `ref_image_N` slot on the H3 node (up to 5).\n2. **Write the instruction.** Refer to images as `<Picture 1>`, `<Picture 2>`. Shape: `Task: Reference-guided generation.` → what each picture supplies (and does NOT supply) → the edit, with \"exactly one\" → what must stay.\n3. **Output size**: match the scene's aspect. 4 MP makes small lettering legible; 2 MP is faster.\n4. **Queue.** ~7–13 min at 4 MP on an M5. Result lands in `output/h3_edit/`.\n\nNeeds: the `h3_single_frame` custom node from this repo (restart ComfyUI after linking), ComfyUI-GGUF, ComfyUI-ClipProj, comfyui-obvpm (beta57). Models: see the repo README.\n\nLeave group 3 alone. `length` must stay 1 — that is what makes the video model render a still."
+   ],
+   "widgets_values_named": {
+    "text": "## H3 image edit — Apple Silicon (MPS)\n\n1. **Load your images** in Reference 1 (the scene) and Reference 2 (the asset). Add more references by connecting a LoadImage to the next free `ref_image_N` slot on the H3 node (up to 5).\n2. **Write the instruction.** Refer to images as `<Picture 1>`, `<Picture 2>`. Shape: `Task: Reference-guided generation.` → what each picture supplies (and does NOT supply) → the edit, with \"exactly one\" → what must stay.\n3. **Output size**: match the scene's aspect. 4 MP makes small lettering legible; 2 MP is faster.\n4. **Queue.** ~7–13 min at 4 MP on an M5. Result lands in `output/h3_edit/`.\n\nNeeds: the `h3_single_frame` custom node from this repo (restart ComfyUI after linking), ComfyUI-GGUF, ComfyUI-ClipProj, comfyui-obvpm (beta57). Models: see the repo README.\n\nLeave group 3 alone. `length` must stay 1 — that is what makes the video model render a still."
+   },
+   "color": "#432",
+   "bgcolor": "#653"
   }
  ],
  "links": [
@@ -1397,14 +1449,63 @@
    "MODEL"
   ]
  ],
- "groups": [],
+ "groups": [
+  {
+   "id": 1,
+   "title": "1 · Your inputs",
+   "bounding": [
+    -30,
+    20,
+    950,
+    1190
+   ],
+   "color": "#3f789e",
+   "flags": {}
+  },
+  {
+   "id": 2,
+   "title": "2 · Models (set once)",
+   "bounding": [
+    970,
+    20,
+    440,
+    756
+   ],
+   "color": "#a1309b",
+   "flags": {}
+  },
+  {
+   "id": 3,
+   "title": "3 · Engine (leave as is)",
+   "bounding": [
+    1450,
+    20,
+    840,
+    1084
+   ],
+   "color": "#444",
+   "flags": {}
+  },
+  {
+   "id": 4,
+   "title": "4 · Output",
+   "bounding": [
+    2330,
+    20,
+    760,
+    690
+   ],
+   "color": "#3f8f4f",
+   "flags": {}
+  }
+ ],
  "config": {},
  "extra": {
   "ds": {
-   "scale": 0.14210526315789473,
+   "scale": 0.45,
    "offset": [
-    675,
-    1155.9259259259259
+    40,
+    40
    ]
   }
  },
