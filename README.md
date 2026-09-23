@@ -27,6 +27,20 @@ letter.
 *Left of each pair: the inputs. Right: the result. The tattoo (bottom right) is the honest failure: it
 looks like a sticker. All brands are made up and every image is AI-generated.*
 
+## Big images, one region at a time
+
+![Nachtwacht, 16 MP](benchmark/nachtwacht/out/final_4k.jpg)
+
+*A 5440x3072 group painting built with `h3-inpaint`. No single prompt can place fifteen specific people,
+two dogs, a cat, a drum and a pigeon at 16 MP, so this was built like a painting: an empty hall first,
+then one masked pass per figure or prop, back to front, 43 passes in all. Each pass only changes its own
+box; everything else stays pixel-identical.*
+
+![how it was built](docs/img/nachtwacht_progression.jpg)
+
+About a minute per pass on a rented GPU, 6–7 minutes on an M5. The full walkthrough, with commands,
+rules and everything that went wrong, is in [Building big images](docs/canvas-builds.md).
+
 ## What you can do
 
 | | how | status |
