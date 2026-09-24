@@ -33,7 +33,8 @@ N = {"prompt": ("138", "PrimitiveStringMultiline"), "res": ("115", "ResolutionSe
      "vae": ("119", "VAELoader")}
 REF_NODES = [("137", "ref_images.ref_image_0"), ("139", "ref_images.ref_image_1")]
 # Slots 2..4 are added at queue time by cloning the exported LoadImage entry (node 139) and
-# linking it under the next dotted key -- the same pattern the pod driver (H3_ADDNODES/H3_APISET) validated on a 5090. Nothing is typed by hand.
+# linking it under the next dotted key -- the same pattern the pod driver
+# (H3_ADDNODES/H3_APISET) validated on a 5090. Nothing is typed by hand.
 MAX_REFS = 5
 # Default lane (bench 2026-09-09, truck-cab plate, seed 1001, 5 refs): PlagueKind Parasyte turbo at
 # 8 steps / er_sde / beta57 / strength 1.5 held the 20-step base model's detail at 4 MP in 13 min

@@ -19,7 +19,7 @@ INP, OUT = os.path.join(HERE, "inputs"), os.path.join(HERE, "out")
 DEMOS = os.path.join(HERE, "..", "demos")
 LAYOUT = json.load(open(os.path.join(INP, "sign_layout.json")))
 SEEDS = [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008]
-POD_DRIVER = os.path.expanduser(os.environ.get("H3EDIT_POD_DRIVER", "~/pod-driver/h3edit_pod.py"))  # the pod driver (not in this repo)
+POD_DRIVER = os.path.expanduser(os.environ.get("H3EDIT_POD_DRIVER", ""))  # the pod driver (not in this repo)
 
 
 def jobs():
@@ -67,6 +67,8 @@ def detail_job(scores):
 def cmd(j, a):
     out = os.path.join(OUT, j["name"] + ".png")
     if a.backend == "pod":
+        if not POD_DRIVER:
+            sys.exit("set H3EDIT_POD_DRIVER to the pod driver script (not in this repo)")
         c = [sys.executable, POD_DRIVER, j["prompt"], "--source", j["source"], "--ar", "16:9",
              "--seed", str(j["seed"]), "--name", "bench_" + j["name"], "-o", out, "--pod", a.pod]
         for r in j["refs"]:
