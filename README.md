@@ -27,6 +27,20 @@ examples, though small lettering and occasional character substitutions still ne
 *Left of each pair: the inputs. Right: the result. The tattoo (bottom right) is the honest failure: it
 looks like a sticker. All brands are made up and every image is AI-generated.*
 
+## 16 MP images
+
+![Palm house, 16 MP](docs/img/palmhouse_16mp.jpg)
+
+*5440x3072 from one prompt: rendered at 4 MP, upscaled 2x in latent space with the
+[H3 latent upscaler](https://github.com/LBH-123-AI/Comfyui_Minimax_h3_latent_Upscaler), then refined
+for 16 steps at full size.*
+
+H3 will render 16 MP in one go, but it only looks right from a distance. Zoomed in, glass and ironwork
+melt, and more steps barely help (tried 20 and 40). It's sharp at 4 MP, so render there and let
+the latent upscaler plus a short refine take it to 16 MP. The `*_16mp` workflows do exactly that.
+
+![one shot vs latent upscale, 1:1](docs/img/16mp_oneshot_vs_latup.jpg)
+
 ## Big images, one region at a time
 
 ![Nachtwacht, 16 MP](benchmark/nachtwacht/out/final_4k.jpg)
@@ -45,7 +59,8 @@ rules and everything that went wrong, is in [Building big images](docs/canvas-bu
 | | how | status |
 |---|---|---|
 | **Edit** an image with an instruction and 1–5 reference images | workflow or CLI | solid |
-| **Generate** from text alone, up to ~16 MP in one shot | CLI `--generate` | solid |
+| **Generate** from text alone (sharpest at 4 MP) | CLI `--generate` | solid |
+| **Go to 16 MP**: 4 MP render, 2x latent upscale, 16-step refine | workflow (`*_16mp`) | works; tested on NVIDIA |
 | **Inpaint**: change one region, leave the rest untouched | workflow or CLI | works, see limits |
 | **Detail**: re-render a soft region sharper | CLI `--detail` | works, see limits |
 | **Fix faces** automatically | CLI `--autofix` | experimental |
@@ -78,6 +93,7 @@ Restart ComfyUI afterwards.
 | [ComfyUI-GGUF](https://github.com/city96/ComfyUI-GGUF) | Mac |
 | [ComfyUI-ClipProj](https://github.com/nicolab28/ComfyUI-ClipProj) | Mac |
 | [comfyui-obvpm](https://github.com/obvpm/comfyui-obvpm) | Mac (the `beta57` scheduler) |
+| [Comfyui_Minimax_h3_latent_Upscaler](https://github.com/LBH-123-AI/Comfyui_Minimax_h3_latent_Upscaler) | the 16 MP workflows (both platforms) |
 
 On CUDA you also need ComfyUI 0.30 or newer with the MiniMax H3 nodes, and `comfy-kitchen` 0.2.26 or newer.
 
@@ -107,6 +123,10 @@ before commercial use.
 | `minimax_h3_video_vae_fp16.safetensors`, `minimax_h3_audio_vae_fp32.safetensors` | `vae/` |
 
 Yes, the audio VAE is needed even for stills.
+
+**For the 16 MP workflows** (both platforms): `minimax_h3_latent_upscaler_3d_bf16.safetensors` (0.7 GB)
+in `latent_upscale_models/`, from
+[LBH-123-AI/Minimax_h3_latent_Upscaler](https://huggingface.co/LBH-123-AI/Minimax_h3_latent_Upscaler).
 
 ### 4. (Optional) Install the CLI
 
@@ -139,6 +159,7 @@ Drag one of these into ComfyUI:
 |---|---|
 | [`h3image_edit_mac.json`](workflows/h3image_edit_mac.json) / [`h3image_edit_cuda.json`](workflows/h3image_edit_cuda.json) | two images in, one edited image out |
 | [`h3image_inpaint_mac.json`](workflows/h3image_inpaint_mac.json) / [`h3image_inpaint_cuda.json`](workflows/h3image_inpaint_cuda.json) | paint over the part to change in the MaskEditor; the rest stays untouched |
+| [`h3image_edit_16mp_mac.json`](workflows/h3image_edit_16mp_mac.json) / [`h3image_edit_16mp_cuda.json`](workflows/h3image_edit_16mp_cuda.json) | the edit workflow at 4 MP, then 2x latent upscale and a 16-step refine: ~16 MP out. For text-to-image, use a flat gray image as the only reference |
 
 They open with a demo loaded. Copy `gable_scene-s77.png`, `gable_mural-s79.png`, `neon_sign-s42.png`
 and `inpaint_example.png` from [`demos/refs/`](demos/refs) into ComfyUI's `input/` folder and hit Queue
@@ -234,7 +255,7 @@ about 40% of a full-width label shows.
 |---|---|---|
 | 4 MP edit, 2 refs | ~11 min | ~5 min |
 | 4 MP generate | ~3.5 min | |
-| 16 MP generate | ~43 min | ~2.5 min on an RTX PRO 6000 |
+| 16 MP via the `*_16mp` workflow (40 + 16 steps) | not measured yet | ~10 min |
 
 ## Troubleshooting
 

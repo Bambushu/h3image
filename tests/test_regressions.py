@@ -262,7 +262,7 @@ def test_pod_refuses_detail_passes(tmp_path, monkeypatch):
 def test_gui_workflows_are_complete(wf):
     w = json.load(open(os.path.join(ROOT, "workflows", wf)))
     nodes = {n["id"]: n for n in w["nodes"]}
-    assert [g["title"][0] for g in w["groups"]] == ["1", "2", "3", "4"]
+    assert [g["title"][0] for g in w["groups"]] == ["1", "2", "3", "4"] + (["5"] if "16mp" in wf else [])
     assert any(n["type"] == "MarkdownNote" for n in nodes.values())
     length = [n for n in nodes.values() if n["type"] == "PrimitiveInt" and n.get("title", "").startswith("length")]
     assert length and length[0]["widgets_values"][0] == 1
@@ -270,3 +270,11 @@ def test_gui_workflows_are_complete(wf):
     assert any(i["name"] == "ref_images.ref_image_0" and i.get("link") is not None for i in r2v["inputs"])
     if "inpaint" in wf:
         assert {"H3V2VInit", "ImageCompositeMasked", "GetImageSize"} <= {n["type"] for n in nodes.values()}
+    if "16mp" in wf:                            # the decoder must read the refined 2x latent, not the base pass
+        up = next(n for n in nodes.values() if n["type"] == "MinimaxH3LatentUpscaler3D")
+        assert up["widgets_values"][1:3] == ["scale by multiplier", 2]
+        links = {l[0]: l for l in w["links"]}
+        dec = next(n for n in nodes.values() if n["type"] == "VAEDecode")
+        refine = nodes[links[dec["inputs"][0]["link"]][1]]
+        assert refine["type"] == "SamplerCustomAdvanced"
+        assert nodes[links[refine["inputs"][4]["link"]][1]]["type"] == "LTXVConcatAVLatent"

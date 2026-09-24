@@ -79,6 +79,14 @@ Six scripted stress tests with pinned seeds and shipped inputs: [`benchmark/`](.
 - **One-shot resolution ceiling** (PRO 6000, 2026-09-13): the `ResolutionSelector` clamps at **16.88 MP**
   (5024x3360 at 3:2). Asking for 20–32 MP silently returns the same frame (on Mac, 24 MP is an HTTP 400).
   Warm times: 8 MP 76 s, 12 MP 109 s, 16.88 MP ~150 s.
+- **One-shot 16 MP is soft at 1:1** (RTX PRO 4500 and M5, 2026-09-24, same prompt and seed): 4 MP is
+  sharp, 8 MP already softer, 16 MP melts glass and ironwork on both the turbo lane and the base model;
+  40 base steps instead of 20 barely changes it. The fix is the `*_16mp` workflows: 4 MP base, LBH 3D
+  latent upscaler 2x, then an er_sde refine on ManualSigmas starting at 0.9035. Measured on the PRO 4500
+  (seconds, including load): base 20 / refine 4 = 194, 8 = 258, 16 = 353; base 40 / refine 4 = 244,
+  8 = 447, 16 = 607. Refine 4 → 8 is a clear gain, 8 → 16 a small one; base 40 + refine 16 is the
+  shipped default. Re-rendering the soft one-shot with `--detail` tiles does not fix it: the tiles copy
+  the softness of their reference.
 - The Mac-only diagnostic flags (`--te/--dit/--encode-*/--save-latent/--decode-crop/--frames`) are
   rejected under `--profile cuda`.
 - CUDA `--doctor` requires the `H3SingleFrameEnabled` marker from this repo's compatibility node
