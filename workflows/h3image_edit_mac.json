@@ -1,7 +1,7 @@
 {
  "id": "593d82b2-8429-4299-b10f-6ca9b5d80275",
  "revision": 0,
- "last_node_id": 667,
+ "last_node_id": 668,
  "last_link_id": 48,
  "nodes": [
   {
@@ -1253,6 +1253,30 @@
    },
    "color": "#432",
    "bgcolor": "#653"
+  },
+  {
+   "id": 668,
+   "type": "H3SingleFrameEnabled",
+   "pos": [
+    560,
+    450
+   ],
+   "size": [
+    330,
+    60
+   ],
+   "flags": {},
+   "order": 21,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "title": "REQUIRED: the h3_single_frame node. Copy custom_nodes/h3_single_frame (in the CivitAI zip or the GitHub repo) into ComfyUI/custom_nodes and restart ComfyUI",
+   "properties": {
+    "Node name for S&R": "H3SingleFrameEnabled"
+   },
+   "widgets_values": [],
+   "color": "#232",
+   "bgcolor": "#353"
   }
  ],
  "links": [

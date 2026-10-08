@@ -264,6 +264,8 @@ def test_gui_workflows_are_complete(wf):
     nodes = {n["id"]: n for n in w["nodes"]}
     assert [g["title"][0] for g in w["groups"]] == ["1", "2", "3", "4"] + (["5"] if "16mp" in wf else [])
     assert any(n["type"] == "MarkdownNote" for n in nodes.values())
+    # without h3_single_frame, length 1 snaps to 5 frames; the marker makes ComfyUI list it as missing on load
+    assert any(n["type"] == "H3SingleFrameEnabled" and n["mode"] == 0 for n in nodes.values())
     length = [n for n in nodes.values() if n["type"] == "PrimitiveInt" and n.get("title", "").startswith("length")]
     assert length and length[0]["widgets_values"][0] == 1
     r2v = next(n for n in nodes.values() if n["type"] == "MiniMaxH3ReferenceToVideo")
